@@ -2,6 +2,7 @@ import { redis } from "../lib/redis.js";
 import User from "../models/user.model.js";
 import jwt from "jsonwebtoken";
 
+//Geração de tokens/cookies
 const gerarTokens = (userId) => {
     const tokenAcesso = jwt.sign({userId}, process.env.ACCESS_TOKEN_SECRET, {expiresIn: "15m",});
 
@@ -32,6 +33,9 @@ const setCookies = (res, tokenAcesso, tokenRefresh) => {
     });
 };
 
+//-----------------------------------------------
+
+//Criação de conta
 export const signup = async (req, res) => {
     const {email, password, nome} = req.body
     try {
@@ -60,12 +64,12 @@ export const signup = async (req, res) => {
     }
 }
 
-
+//Fazer o Login
 export const login = async (req, res) => {
     res.send("Login route called")
 }
 
-
+//Fazer o logout
 export const logout = async (req, res) => {
     res.send("Logout route called")
 }

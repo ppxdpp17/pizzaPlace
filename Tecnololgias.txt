@@ -1,7 +1,0 @@
-react.js
-stripe
-node.js
-redis
-mongodb
-
-https://www.youtube.com/watch?v=sX57TLIPNx8&ab_channel=Codesistency
