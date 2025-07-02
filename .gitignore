@@ -1,1 +1,5 @@
-*.env
+#pastas de dependências
+node_modules/
+
+#variáveis de ambiente (chaves e segredos)
+**/.env
