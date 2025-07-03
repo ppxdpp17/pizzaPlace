@@ -8,6 +8,7 @@ import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.route.js";
 import produtosRoutes from "./routes/produtos.route.js";
 import carrinhoRoutes from "./routes/carrinho.route.js";
+import cupoesRoutes from "./routes/cupoes.route.js";
 
 
 dotenv.config();
@@ -21,6 +22,7 @@ app.use(cookieParser());
 app.use("/api/auth", authRoutes)    //Rotas de autenticação 
 app.use("/api/produtos", produtosRoutes)    //Rotas de produtos 
 app.use("/api/carrinho", carrinhoRoutes)    //Rotas do carrinho 
+app.use("/api/cupoes", cupoesRoutes)    //Rotas do carrinho 
 
 app.listen(PORT, () => {
     console.log("Servidor a correr na porta http://localhost:" + PORT)
