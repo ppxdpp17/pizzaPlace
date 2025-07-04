@@ -152,4 +152,10 @@ export const tokenRefresh = async (req, res) => {
 
 
 //Parte do perfil do user
-//export const getPerfil = async (req, res) => {} 
+export const getPerfil = async (req, res) => {
+    try {
+        res.json(req.user);
+    } catch (error) {
+        res.status(500).json({msg: "Erro no servidor", error: error.message});
+    }
+} 

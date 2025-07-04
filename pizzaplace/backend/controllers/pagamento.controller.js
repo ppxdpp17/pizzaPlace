@@ -1,6 +1,6 @@
 import { stripe } from "../lib/stripe.js";
 import Cupao from "../models/cupao.model.js";
-import Pedido from "../models/pedido.model.js";
+import Pedido from "../models/pedidos.model.js";
 
 export const criarSessaoCheckout = async (req, res) => {
     try {

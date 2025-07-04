@@ -1,6 +1,6 @@
 import express from "express";
 import { adicionarAoCarrinho, getProdutosCarrinho, removerTodosDoCarrinho, atualizarQuantidade } from "../controllers/carrinho.controller.js";
-import { protectRoute } from "../middleware/auth.middleware";
+import { protectRoute } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 

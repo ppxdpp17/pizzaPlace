@@ -10,6 +10,7 @@ import produtosRoutes from "./routes/produtos.route.js";
 import carrinhoRoutes from "./routes/carrinho.route.js";
 import cupoesRoutes from "./routes/cupoes.route.js";
 import pagamentosRoutes from "./routes/pagamentos.route.js";
+import analisesRoutes from "./routes/analises.route.js";
 
 
 dotenv.config();
@@ -25,6 +26,7 @@ app.use("/api/produtos", produtosRoutes)    //Rotas de produtos
 app.use("/api/carrinho", carrinhoRoutes)    //Rotas do carrinho 
 app.use("/api/cupoes", cupoesRoutes)    //Rotas do carrinho 
 app.use("/api/pagamentos", pagamentosRoutes)    //Rotas do carrinho 
+app.use("/api/analises", analisesRoutes)    //Rotas do carrinho 
 
 app.listen(PORT, () => {
     console.log("Servidor a correr na porta http://localhost:" + PORT)
