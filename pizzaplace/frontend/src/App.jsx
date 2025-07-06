@@ -7,6 +7,7 @@ import SignUpPage from "./pages/SignUpPage.jsx";
 
 //Componentes
 import Navbar from "./components/Navbar.jsx";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   return(
@@ -28,6 +29,7 @@ function App() {
           <Route path="/login" element={<LoginPage/>}/>
         </Routes>
       </div>
+      <Toaster />
     </div>
   ); 
 }
