@@ -50,13 +50,13 @@ export const criarProduto = async (req, res) => {
 
         if(imagem)
         {
-            await cloudinary.uploader.upload(imagem,{folder: "produtos"});
+            respostaCloudinary = await cloudinary.uploader.upload(imagem,{folder: "produtos"});
         }
 
         const produto = await Produto.create({
             nome, 
             descricao, 
-            preco, 
+            preco,
             imagem: respostaCloudinary?.secure_url ? respostaCloudinary.secure_url : "", 
             categoria
         });

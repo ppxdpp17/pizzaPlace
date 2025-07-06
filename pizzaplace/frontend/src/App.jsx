@@ -4,6 +4,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import HomePage from "./pages/HomePage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import SignUpPage from "./pages/SignUpPage.jsx";
+import AdminPage from "./pages/AdminPage.jsx";
 
 //Componentes
 import Navbar from "./components/Navbar.jsx";
@@ -38,6 +39,7 @@ function App() {
           <Route path="/" element={<HomePage/>}/>
           <Route path="/signup" element={ !user ? <SignUpPage/> : <Navigate to="/"/>}/>
           <Route path="/login" element={ !user ? <LoginPage/> : <Navigate to="/"/>}/>
+          <Route path="/dashboard-secreta" element={ user?.cargo === "admin" ? <AdminPage/> : <Navigate to="/login"/>}/>
         </Routes>
       </div>
       <Toaster />
