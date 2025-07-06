@@ -7,9 +7,8 @@ import { useUserStore } from "../stores/useUserStore.js"
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const loading = false;
 
-  const {login} = useUserStore();
+  const {login, loading} = useUserStore();
 
   const gerirSubmissao = (e) => {
     e.preventDefault();
