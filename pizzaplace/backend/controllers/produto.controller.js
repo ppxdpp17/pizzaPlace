@@ -6,7 +6,7 @@ import Produto  from "../models/produto.model.js";
 export const getAllProdutos = async (req, res) => {
     try {
         //Get todos os produtos
-        const produtos = await Produto.find();
+        const produtos = await Produto.find({});
         res.json({produtos});
     } catch (error) {
         console.log("Erro no controller de produtos", error.message);
@@ -24,7 +24,7 @@ export const getProdutosDisponiveis = async (req, res) => {
         }
 
         //Se não estiver no redis, vamos buscar ao mongodb
-        produtosDisponiveis = await Produto.find({disponivel: true}).lean();    //.lean() vai retornar um objeto javascript
+        produtosDisponiveis = await Produto.find({estaDisponivel: true}).lean();    //.lean() vai retornar um objeto javascript
         if(!produtosDisponiveis)                                                //em vez de um documento mongodb, o que é 
                                                                                 //melhor para performance
         {
@@ -155,7 +155,7 @@ export const disponibilizarProduto = async (req, res) => {
 //Atualizar a cache dos produtos disponíveis
 async function atualizarCacheProdutosDisponiveis() {
     try {
-        const produtosDisponiveis = await Produto.find({disponivel: true}).lean();
+        const produtosDisponiveis = await Produto.find({estaDisponivel: true}).lean();
         await redis.set("produtos_disponiveis", JSON.stringify(produtosDisponiveis));
     } catch (error) {
         console.log("Erro ao atualizar cache de produtos disponíveis", error.message);

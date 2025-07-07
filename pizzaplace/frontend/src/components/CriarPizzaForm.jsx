@@ -14,12 +14,12 @@ const CriarPizzaForm = () => {
     imagem: "",
   });
 
-  const {createProduct, loading} = useProductStore();
+  const {criarProduto, loading} = useProductStore();
 
   const gerirSubmissao = async(e) => {
         e.preventDefault()
         try {
-            await createProduct(novoProduto);
+            await criarProduto(novoProduto);
             setNovoProduto({ nome: "", descricao: "", preco: "", categoria: "", imagem: "" });
         } catch (error) {
             console.log("Erro ao criar o produto", error);
