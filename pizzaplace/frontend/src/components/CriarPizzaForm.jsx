@@ -3,7 +3,7 @@ import { motion } from "framer-motion"
 import { PlusCircle, Upload, Loader } from "lucide-react"
 import { useProductStore } from "../stores/useProductStore"
 
-const categorias = ["calca", "tshirt", "sapato", "oculos", "casaco", "fato", "mala"]
+const categorias = ["calcas", "tshirt", "sapatos", "oculos", "casaco", "fato", "mala"]
 
 const CriarPizzaForm = () => {
   const [novoProduto, setNovoProduto] = useState({

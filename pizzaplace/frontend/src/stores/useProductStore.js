@@ -59,4 +59,14 @@ export const useProductStore = create((set) => ({
 			toast.error(error.response.data.error || "Falha ao atualizar o produto");
 		}
 	},
+	getProdutosCategoria: async (categoria) => {
+		set({ loading: true });
+		try {
+			const response = await axios.get(`/produtos/categoria/${categoria}`);
+			set({ products: response.data.produtos, loading: false });
+		} catch (error) {
+			set({ error: "Falha a ir buscar os produtos desta categoria", loading: false });
+			toast.error(error.response.data.error || "Falha a ir buscar os produtos desta categoria");
+		}
+	},
 }));

@@ -5,6 +5,7 @@ import HomePage from "./pages/HomePage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import SignUpPage from "./pages/SignUpPage.jsx";
 import AdminPage from "./pages/AdminPage.jsx";
+import CategoriaPage from "./pages/CategoriaPage.jsx";
 
 //Componentes
 import Navbar from "./components/Navbar.jsx";
@@ -40,6 +41,7 @@ function App() {
           <Route path="/signup" element={ !user ? <SignUpPage/> : <Navigate to="/"/>}/>
           <Route path="/login" element={ !user ? <LoginPage/> : <Navigate to="/"/>}/>
           <Route path="/dashboard-secreta" element={ user?.cargo === "admin" ? <AdminPage/> : <Navigate to="/login"/>}/>
+          <Route path="/categoria/:categoria" element={ <CategoriaPage/> }/>
         </Routes>
       </div>
       <Toaster />
