@@ -19,26 +19,22 @@ export const getProdutosCarrinho = async (req, res) => {
 
 export const adicionarAoCarrinho = async (req, res) => {
     try {
-        const {produtoID} = req.body;
-        const user = req.user;
+		const { productId } = req.body;
+		const user = req.user;
 
-        const itemExiste = user.itensCarrinho.find(item => item.id === produtoID);
-        if(itemExiste)
-        {
-            itemExiste.quantidade += 1;
-        }
-        else
-        {
-            user.itensCarrinho.push(produtoID);
-        }
+		const existingItem = user.itensCarrinho.find((item) => item.id === productId);
+		if (existingItem) {
+			existingItem.quantidade += 1;
+		} else {
+			user.itensCarrinho.push(productId);
+		}
 
-        await user.save();
-        
-        res.json(user.itensCarrinho);
-    } catch (error) {
-        console.log("Erro ao adicionar ao carrinho", error.message);
-        res.status(500).json({msg: "Erro no servidor", error: error.message});
-    }
+		await user.save();
+		res.json(user.itensCarrinho);
+	} catch (error) {
+		console.log("Erro no controller de adicionarAoCarrinho", error.message);
+		res.status(500).json({ message: "Server error", error: error.message });
+	}
 };
 
 export const removerTodosDoCarrinho = async (req, res) => {

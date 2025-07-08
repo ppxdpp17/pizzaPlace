@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema({
         required: [true, "O campo da password é obrigatório."],
         minlength: [6, "A password deve ter no mínimo 6 caracteres"] 
     },
-    itensCarro:[
+    itensCarrinho:[
         {
             quantidade:{
                 type: Number,
