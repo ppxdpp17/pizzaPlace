@@ -48,5 +48,23 @@ export const useCarrinhoStore = create((set, get) => ({
         }
 
         set({subTotal, total});
+    },
+    apagarDoCarrinho: async (productId) => {
+        await axios.delete(`/carrinho`, {data: { productId }});
+        set((prevState) => ({ carrinho: prevState.carrinho.filter(item => item._id !== productId) }));
+        get().calcularTotal();
+    },
+    atualizarQuantidade: async (productId, quantidade) => {
+        if(quantidade === 0) 
+        {
+            get().apagarDoCarrinho(productId);
+            return
+        }
+        
+        await axios.put(`/carrinho/${productId}`, { quantidade });
+        set((prevState) => ({
+            carrinho: prevState.carrinho.map((item) => (item._id === productId ? { ...item, quantidade } : item)),
+        }));
+        get().calcularTotal();
     }
 }));

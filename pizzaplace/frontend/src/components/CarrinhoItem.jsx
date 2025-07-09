@@ -16,16 +16,16 @@ const CarrinhoItem = ({item}) => {
                 <div className="flex items-center gap-2">
                     <button className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border
                         border-gray-600 bg-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                        onClick={() => atualizarQuantidade(item.id, item.quantidade - 1)}
+                        onClick={() => atualizarQuantidade(item._id, item.quantidade - 1)}
                         >
                             <Minus className="text-gray-300" />
                         </button>
                         <p>{item.quantidade}</p>
                         <button className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border
                             border-gray-600 bg-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                            onClick={() => atualizarQuantidade(item._id, item.quantidade + 1)}
                         >
-                            <Plus className="text-gray-300" 
-                                onClick={() => atualizarQuantidade(item.id, item.quantidade + 1)}/>
+                            <Plus className="text-gray-300"/>
                     </button>
                 </div>
                 <div className="text-end md:order-4 md:w-32">
@@ -39,7 +39,7 @@ const CarrinhoItem = ({item}) => {
                 <p className="text-sm text-gray-400">{item.descricao}</p>
                 <div className="flex items-center gap-4">
                     <button className="inline-flex items-center text-sm font-medium text-red-400 hover:text-red-300 hover:underline"
-                        onClick={() => apagarDoCarrinho(item.id)}>
+                        onClick={() => apagarDoCarrinho(item._id)}>
                             <Trash />
                     </button>
                 </div>

@@ -21,7 +21,7 @@ const CarrinhoPage = () => {
               ) : (
                 <div className="space-y-6">
                   {carrinho.map((item) => (
-                    <CarrinhoItem key={item.id} item={item} />
+                    <CarrinhoItem key={item._id} item={item} />
                   ))}
                 </div>
               )}
