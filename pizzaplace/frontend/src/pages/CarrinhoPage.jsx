@@ -4,6 +4,8 @@ import { ShoppingCart } from "lucide-react";
 import { Link } from "react-router-dom";
 import Recomendacoes from "../components/Recomendacoes.jsx";
 import CarrinhoItem from "../components/CarrinhoItem.jsx";
+import SumarioPedido from "../components/SumarioPedido.jsx";
+import CartaoCupao from "../components/CartaoCupao.jsx";
 
 const CarrinhoPage = () => {
   const {carrinho} = useCarrinhoStore();
@@ -27,6 +29,16 @@ const CarrinhoPage = () => {
               )}
             {carrinho.length > 0 && <Recomendacoes />}
           </motion.div>
+          {carrinho.length > 0 && (
+            <motion.div
+              className="mx-auto mt-6 max-w-4xl flex-1 lg:mt-0 space-y-6 lg:w-full"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}>
+                <SumarioPedido />
+                <CartaoCupao />
+              </motion.div>
+          )}
         </div>
       </div>
     </div>

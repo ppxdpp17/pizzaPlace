@@ -69,4 +69,5 @@ export const useProductStore = create((set) => ({
 			toast.error(error.response.data.error || "Falha a ir buscar os produtos desta categoria");
 		}
 	},
+	
 }));

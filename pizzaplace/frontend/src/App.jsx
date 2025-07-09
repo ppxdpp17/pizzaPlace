@@ -27,8 +27,10 @@ function App() {
   }, [verificarAutenticacao]);
 
   useEffect(() => {
+    if(!user) return;
+    
     getItensCarrinho()
-  }, [getItensCarrinho])
+  }, [getItensCarrinho, user])
 
   if(checkingAuth) return <LoadingSpinner/>;
 

@@ -7,6 +7,7 @@ export const useCarrinhoStore = create((set, get) => ({
     cupao: null,
     total: 0,
     subTotal: 0,
+    cupaoAplicado: false,
 
     getItensCarrinho: async() => {
         try {
