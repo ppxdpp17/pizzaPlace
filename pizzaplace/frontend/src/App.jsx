@@ -6,6 +6,10 @@ import LoginPage from "./pages/LoginPage.jsx";
 import SignUpPage from "./pages/SignUpPage.jsx";
 import AdminPage from "./pages/AdminPage.jsx";
 import CategoriaPage from "./pages/CategoriaPage.jsx";
+import CarrinhoPage from "./pages/CarrinhoPage.jsx";
+
+//Hooks
+import { useCarrinhoStore } from "./stores/useCarrinhoStore.js";
 
 //Componentes
 import Navbar from "./components/Navbar.jsx";
@@ -16,10 +20,15 @@ import { useEffect } from "react";
 
 function App() {
   const { user, verificarAutenticacao, checkingAuth } = useUserStore();
+  const { getItensCarrinho } = useCarrinhoStore();
 
   useEffect(() => {
     verificarAutenticacao();
   }, [verificarAutenticacao]);
+
+  useEffect(() => {
+    getItensCarrinho()
+  }, [getItensCarrinho])
 
   if(checkingAuth) return <LoadingSpinner/>;
 
@@ -42,6 +51,7 @@ function App() {
           <Route path="/login" element={ !user ? <LoginPage/> : <Navigate to="/"/>}/>
           <Route path="/dashboard-secreta" element={ user?.cargo === "admin" ? <AdminPage/> : <Navigate to="/login"/>}/>
           <Route path="/categoria/:categoria" element={ <CategoriaPage/> }/>
+          <Route path="/carrinho" element={ user ?  <CarrinhoPage/> : <Navigate to="/login" /> }/>
         </Routes>
       </div>
       <Toaster />

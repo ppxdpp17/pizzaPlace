@@ -2,19 +2,19 @@ import Produto from "../models/produto.model.js";
 
 export const getProdutosCarrinho = async (req, res) => {
     try {
-        const produtos = await Produto.find({_id:{$in: req.user.itensCarrinho}});
+		const produtos = await Produto.find({ _id: { $in: req.user.itensCarrinho } });
 
-        //Adicionar quantidade para cada produto
-        const itensCarrinho = produtos.map(produto => {
-            const item = req.user.itensCarrinho.find(item => item.id === produto._id);
-            return {...produto.toJSON(), quantidade: item.quantidade};
-        })
+		// add quantity for each product
+		const itensCarrinho = produtos.map((produto) => {
+			const item = req.user.itensCarrinho.find((itemCarrinho) => itemCarrinho.id === produto.id);
+			return { ...produto.toJSON(), quantidade: item.quantidade };
+		});
 
-        res.json(itensCarrinho);
-    } catch (error) {
-        console.log("Erro ao obter produtos do carrinho", error.message);
-        res.status(500).json({msg: "Erro no servidor", error: error.message});
-    }
+		res.json(itensCarrinho);
+	} catch (error) {
+		console.log("Error in getCartProducts controller", error.message);
+		res.status(500).json({ message: "Server error", error: error.message });
+	}
 }
 
 export const adicionarAoCarrinho = async (req, res) => {
