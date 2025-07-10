@@ -46,7 +46,7 @@ export const criarSessaoCheckout = async (req, res) => {
             payment_method_types: ["card"],
             line_items: linhaItems,
             mode: "payment",
-            success_url: `${process.env.CLIENT_URL}/purchase.success?session_id={CHECKOUT_SESSION_ID}`,
+            success_url: `${process.env.CLIENT_URL}/purchase-success?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${process.env.CLIENT_URL}/purchase-cancel`,
             discounts: cupao ? [{coupon: await criarCupaoStripe(cupao.percentagemDesconto)}] : [],
             metadata: {
@@ -100,8 +100,8 @@ async function criarNovoCupao(userId) {
 
 export const sucessoCheckout = async(req, res) => {
     try {
-        const {sessaoID} = req.body;
-        const sessao = await stripe.checkout.sessions.retrieve(sessaoID);
+        const {sessaoId} = req.body;
+        const sessao = await stripe.checkout.sessions.retrieve(sessaoId);
         
         if(sessao.payment_status === "paid")
         {
@@ -122,9 +122,9 @@ export const sucessoCheckout = async(req, res) => {
                     quantidade: produto.quantidade,
                     preco: produto.preco
                 })),
-                precoTotal: sessao.amount_total / 100,
-                stripeSessionId: sessaoID
-            })
+                total: sessao.amount_total / 100,
+                stripeSessionId: sessaoId
+            });
 
             await novoPedido.save();
 

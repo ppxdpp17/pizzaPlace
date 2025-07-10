@@ -15,8 +15,8 @@ const PaginaSucessoCompra = () => {
         const gerirSucessoCheckout = async (sessaoId) => {
             try {
                 await axios.post("/pagamentos/sucesso-checkout", {
-                    sessaoId
-                })
+                    sessaoId,
+                });
                 limparCarrinho();
             } catch (error) {
                 console.log("Erro ao processar o pagamento", error);
@@ -25,7 +25,7 @@ const PaginaSucessoCompra = () => {
             }
         }
 
-        const sessaoId = new URLSearchParams(window.location.search).get("sessao_id");
+        const sessaoId = new URLSearchParams(window.location.search).get("session_id");
         if(sessaoId) {
             gerirSucessoCheckout(sessaoId);
         }
@@ -35,8 +35,8 @@ const PaginaSucessoCompra = () => {
             setErro("Nenhum ID de sessão encontrado no URL");
         }
 
-    }, [apagarDoCarrinho]);
-  
+    }, [limparCarrinho]);
+
 
     if(aProcessar) return "A processar...";
 
