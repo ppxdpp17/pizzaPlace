@@ -1,9 +1,55 @@
 import { ArrowRight, CheckCircle, HandHeart } from 'lucide-react'
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useCarrinhoStore } from '../stores/useCarrinhoStore';
+import axios from '../lib/axios';
+import Confetti from 'react-confetti';
 
 const PaginaSucessoCompra = () => {
-  return (
+    
+    const [aProcessar, setEstaProcessar] = useState(true);
+    const { limparCarrinho } = useCarrinhoStore();
+    const [error, setErro] = useState(null);
+
+    useEffect(() => {
+        const gerirSucessoCheckout = async (sessaoId) => {
+            try {
+                await axios.post("/pagamentos/sucesso-checkout", {
+                    sessaoId
+                })
+                limparCarrinho();
+            } catch (error) {
+                console.log("Erro ao processar o pagamento", error);
+            } finally {
+                setEstaProcessar(false);
+            }
+        }
+
+        const sessaoId = new URLSearchParams(window.location.search).get("sessao_id");
+        if(sessaoId) {
+            gerirSucessoCheckout(sessaoId);
+        }
+        else
+        {
+            setEstaProcessar(false);
+            setErro("Nenhum ID de sessão encontrado no URL");
+        }
+
+    }, [apagarDoCarrinho]);
+  
+
+    if(aProcessar) return "A processar...";
+
+    if(error) return `Erro: ${error}`;
+
+    return (
     <div className='h-screen flex items-center justify-center px-4'>
-        {/* <Confetti /> */}
+        <Confetti width={window.innerWidth} 
+            height={window.innerHeight}
+            gravity={0.1}
+            style={{ zIndex: 99 }}
+            numberOfPieces={700} 
+            recycle={false}/>
         <div className='max-w-md w-full bg-grey-800 rounded-lg shadow-xl overflow-hidden relative z-10'>
             <div className='p-6 sm:p-8'>
                 <div className='flex justify-center'>
@@ -34,11 +80,11 @@ const PaginaSucessoCompra = () => {
                             <HandHeart className='mr-2' size={18} />
                             Obrigado pela sua confiança!
                     </button>
-                    <button className='w-full bg-gray-700 hover:bg-gray-600 text-emerald-400 font-bold py-2 px-4 rounded-lg
+                    <Link to='/' className='w-full bg-gray-700 hover:bg-gray-600 text-emerald-400 font-bold py-2 px-4 rounded-lg
                         transition duration-300 flex items-center justify-center'>
                             Continuar a comprar
                             <ArrowRight className='ml-2' size={18} />
-                    </button>
+                    </Link>
                 </div>
             </div>
         </div>

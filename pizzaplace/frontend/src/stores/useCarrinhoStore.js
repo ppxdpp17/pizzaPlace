@@ -67,5 +67,8 @@ export const useCarrinhoStore = create((set, get) => ({
             carrinho: prevState.carrinho.map((item) => (item._id === productId ? { ...item, quantidade } : item)),
         }));
         get().calcularTotal();
+    },
+    limparCarrinho: async () => {
+        set({ carrinho: [], cupao: null, total: 0, subTotal: 0 });
     }
 }));
