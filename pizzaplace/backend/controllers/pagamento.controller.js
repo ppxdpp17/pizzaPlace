@@ -63,7 +63,7 @@ export const criarSessaoCheckout = async (req, res) => {
         });
 
         //Se ele gastar 100 euros ou + numa só compra, oferecemos um cupão de desconto de 10%
-        if(precoTotal >= 100000)
+        if(precoTotal >= 10000)
         {
             await criarNovoCupao(req.user._id);
         }

@@ -22,7 +22,15 @@ const SumarioPedido = () => {
             cupao: cupao ? cupao.codigo : null });
 
             const sessao = res.data;
-            console.log("sessão está aqui", sessao);
+            
+            const resultado = await stripe.redirectToCheckout({
+                sessionId: sessao.id,
+            })
+
+            if(resultado.error)
+            {
+                console.error("Erro", resultado.error);
+            }
     };
 
   return (
