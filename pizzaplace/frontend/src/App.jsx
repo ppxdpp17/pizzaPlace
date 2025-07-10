@@ -7,6 +7,7 @@ import SignUpPage from "./pages/SignUpPage.jsx";
 import AdminPage from "./pages/AdminPage.jsx";
 import CategoriaPage from "./pages/CategoriaPage.jsx";
 import CarrinhoPage from "./pages/CarrinhoPage.jsx";
+import PaginaSucessoCompra from "./pages/PaginaSucessoCompra.jsx";
 
 //Hooks
 import { useCarrinhoStore } from "./stores/useCarrinhoStore.js";
@@ -54,6 +55,7 @@ function App() {
           <Route path="/dashboard-secreta" element={ user?.cargo === "admin" ? <AdminPage/> : <Navigate to="/login"/>}/>
           <Route path="/categoria/:categoria" element={ <CategoriaPage/> }/>
           <Route path="/carrinho" element={ user ?  <CarrinhoPage/> : <Navigate to="/login" /> }/>
+          <Route path="/purchase-success" element={ user ?  <PaginaSucessoCompra/> : <Navigate to="/login" /> }/>
         </Routes>
       </div>
       <Toaster />
