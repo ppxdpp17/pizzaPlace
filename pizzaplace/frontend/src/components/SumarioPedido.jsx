@@ -3,15 +3,27 @@ import { useCarrinhoStore } from "../stores/useCarrinhoStore"
 import { Link } from "react-router-dom"
 import { MoveRight } from "lucide-react"
 import { loadStripe } from "@stripe/stripe-js";
+import axios from "../lib/axios";
 
+const stripePromise = loadStripe("pk_test_51RhA5gPaffH1WIPMMjsLlLdSSDrJ5MRtISziKg7BHOZZSlZhVl2KywHaco90UMR4QXD8fXFcNT5eeUbL70JlhhDF005veqHo7y");
 
 const SumarioPedido = () => {
     
-    const { total, subTotal, cupao, cupaoAplicado } = useCarrinhoStore();
+    const { total, subTotal, cupao, cupaoAplicado, carrinho } = useCarrinhoStore();
     const poupancas = subTotal - total;
     const subtotalFormatado = subTotal.toFixed(2); 
     const totalFormatado = total.toFixed(2);
     const poupancasFormatado = poupancas.toFixed(2);
+
+    const gerirPagamento = async () => {
+        const stripe = await stripePromise;
+        const res = await axios.post("/pagamentos/criar-sessao-checkout", { 
+            produtos: carrinho, 
+            cupao: cupao ? cupao.codigo : null });
+
+            const sessao = res.data;
+            console.log("sessão está aqui", sessao);
+    };
 
   return (
     <motion.div className="space-y-4 rounded-lg border border-gray-700 bg-gray-800 p-4 shadow-sm sm:p-6"
@@ -48,6 +60,7 @@ const SumarioPedido = () => {
                     text-white hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-300"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
+                    onClick={gerirPagamento}
                     >
                         Continuar para o Checkout
                 </motion.button>

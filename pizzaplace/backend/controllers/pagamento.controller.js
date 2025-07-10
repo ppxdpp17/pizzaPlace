@@ -6,31 +6,33 @@ export const criarSessaoCheckout = async (req, res) => {
     try {
         const {produtos, codigoCupao} = req.body;
 
-        if(!Array.isArray(produtos) || !produtos.length === 0)
+        if(!Array.isArray(produtos) || produtos.length === 0)
         {
             return res.status(400).json({msg: "Conjunto de produtos vazio ou inválido"});
         }
 
         let precoTotal = 0;
 
-        const linhaItems = produtos.map(produto => {
+        const linhaItems = produtos.map((produto) => {
             const precoInicial = Math.round(produto.preco * 100); //Porque o valor é em cêntimos no stripe
             precoTotal += precoInicial * produto.quantidade;
 
+
             return {
-                dados_preco: {
+                price_data: {
                     currency: "eur",
                     product_data: {
-                        nome: produto.nome,
-                        imagens: [produto.imagem],
+                        name: produto.nome,
+                        images: [produto.imagem],
                     },
-                    precoUnitario: precoInicial
-                }
-            }
+                    unit_amount: precoInicial
+                },
+                quantity: produto.quantidade || 1
+
+            };
         });
 
         let cupao = null;
-
         if(codigoCupao)
         {
             cupao = await Cupao.findOne({codigo: codigoCupao, userId: req.user._id, ativo: true });
@@ -44,8 +46,8 @@ export const criarSessaoCheckout = async (req, res) => {
             payment_method_types: ["card"],
             line_items: linhaItems,
             mode: "payment",
-            success_url: `${process.env.CLIENT_URL}/sucesso-compra?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${process.env.CLIENT_URL}/cancelar-compra`,
+            success_url: `${process.env.CLIENT_URL}/purchase.success?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${process.env.CLIENT_URL}/purchase-cancel`,
             discounts: cupao ? [{coupon: await criarCupaoStripe(cupao.percentagemDesconto)}] : [],
             metadata: {
                 userId: req.user._id.toString(),
