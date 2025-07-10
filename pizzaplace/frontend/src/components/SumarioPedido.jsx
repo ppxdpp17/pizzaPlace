@@ -2,6 +2,8 @@ import  { motion } from "framer-motion"
 import { useCarrinhoStore } from "../stores/useCarrinhoStore"
 import { Link } from "react-router-dom"
 import { MoveRight } from "lucide-react"
+import { loadStripe } from "@stripe/stripe-js";
+
 
 const SumarioPedido = () => {
     
