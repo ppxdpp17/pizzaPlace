@@ -1,17 +1,27 @@
 import { motion } from "framer-motion"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useCarrinhoStore } from "../stores/useCarrinhoStore"
 
 const CartaoCupao = () => {
   const [codigoInputUser, setCodigoInputUser] = useState('');
-  const {cupao, cupaoAplicado} = useCarrinhoStore(); 
+  const {cupao, cupaoAplicado, aplicarCupao, removerCupao, getMeuCupao} = useCarrinhoStore(); 
+
+  useEffect(()=> {
+    getMeuCupao();
+  }, [getMeuCupao])
+
+  useEffect(() => {
+    if (cupao) setCodigoInputUser(cupao.codigo);
+  }, [cupao]);
 
   const gerirAplicarCupao = () => {
-    console.log(codigoInputUser)
+    if(!codigoInputUser) return;
+    aplicarCupao(codigoInputUser);
   }
 
-  const gerirCupaoRemovido = () => {
-    console.log("remover cupao")
+  const gerirCupaoRemovido = async () => {
+    await removerCupao();
+    setCodigoInputUser('');
   }
 
   return (

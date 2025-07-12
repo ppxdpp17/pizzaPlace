@@ -5,6 +5,6 @@ import { getCupao, validarCupao } from "../controllers/cupao.controller.js";
 const router = express.Router();
 
 router.get("/", protectRoute, getCupao);
-router.get("/validar", protectRoute, validarCupao);
+router.post("/validar", protectRoute, validarCupao);
 
 export default router

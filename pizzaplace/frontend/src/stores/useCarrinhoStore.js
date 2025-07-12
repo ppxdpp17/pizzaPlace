@@ -89,5 +89,11 @@ export const useCarrinhoStore = create((set, get) => ({
         } catch (error) {
             toast.error(error.response?.data?.msg || "Um erro ocorreu, tente novamente mais tarde.");
         }
+    },
+    removerCupao: () => {
+        set({cupao: null, cupaoAplicado: false});
+        get().calcularTotal();
+        toast.success("Cupão removido");
     }
+
 }));
