@@ -13,7 +13,7 @@ export const getCupao = async (req, res) => {
 
 export const validarCupao = async (req, res) => {
     try {
-        const {codigo} = reqq.body;
+        const {codigo} = req.body;
         const cupao = await Cupao.findOne({codigo: codigo, userId: req.user._id, ativo: true});
     
         if(!cupao)
@@ -30,7 +30,7 @@ export const validarCupao = async (req, res) => {
 
         res.json({
             message: "Cupao valido",
-            codio: cupao.codigo,
+            codigo: cupao.codigo,
             percentagemDesconto: cupao.percentagemDesconto
         })
     } catch (error) {

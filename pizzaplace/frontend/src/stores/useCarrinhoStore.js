@@ -93,7 +93,7 @@ export const useCarrinhoStore = create((set, get) => ({
     removerCupao: () => {
         set({cupao: null, cupaoAplicado: false});
         get().calcularTotal();
-        toast.success("Cupão removido");
+        toast.success("Cupão removido!");
     }
 
 }));

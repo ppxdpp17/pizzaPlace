@@ -19,7 +19,7 @@ const SumarioPedido = () => {
         const stripe = await stripePromise;
         const res = await axios.post("/pagamentos/criar-sessao-checkout", { 
             produtos: carrinho, 
-            cupao: cupao ? cupao.codigo : null });
+            codigoCupao: cupao ? cupao.codigo : null });
 
             const sessao = res.data;
             

@@ -86,6 +86,7 @@ async function criarCupaoStripe(percentagemDesconto) {
 }
 
 async function criarNovoCupao(userId) {
+    await Cupao.findOneAndDelete({userId});
     const novoCupao = new Cupao({
         codigo: "GIFT" + Math.random().toString(36).substring(2, 8).toUpperCase(),
         percentagemDesconto: 10,
