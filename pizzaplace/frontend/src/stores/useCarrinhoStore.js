@@ -8,6 +8,7 @@ export const useCarrinhoStore = create((set, get) => ({
     total: 0,
     subTotal: 0,
     cupaoAplicado: false,
+    
 
     getItensCarrinho: async() => {
         try {
@@ -70,5 +71,23 @@ export const useCarrinhoStore = create((set, get) => ({
     },
     limparCarrinho: async () => {
         set({ carrinho: [], cupao: null, total: 0, subTotal: 0 });
+    },
+    getMeuCupao: async () => {
+        try {
+            const response = await axios.get("/cupoes");
+            set({cupao: response.data});
+        } catch (error) {
+            console.log("Erro ao utilizar o cupão", error.message);
+        }
+    },
+    aplicarCupao: async (codigo) => {
+        try {
+            const response = await axios.post("/cupoes/validar", {codigo});
+            set({cupao: response.data, cupaoAplicado: true});
+            get().calcularTotal();
+            toast.success("Cupão aplicado com sucesso!");
+        } catch (error) {
+            toast.error(error.response?.data?.msg || "Um erro ocorreu, tente novamente mais tarde.");
+        }
     }
 }));
