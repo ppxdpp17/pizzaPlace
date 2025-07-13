@@ -1,6 +1,6 @@
 import Produto from "../models/produto.model.js";
 import User from "../models/user.model.js";
-import Pedidos from "../models/pedido.model.js";
+import Pedidos from "../models/pedidos.model.js";
 
 export const getDadosAnalise = async () => {
     const totalUsers = await User.countDocuments();
@@ -10,7 +10,7 @@ export const getDadosAnalise = async () => {
         $group: {
             _id: null,  //Agrupa todos os documents
             totalVendas: {$sum: 1},
-            lucroTotal: {$sum: "$precoTotal"}
+            lucroTotal: {$sum: "$total"}
         }
     }]);
 
@@ -27,7 +27,7 @@ export const getDadosAnalise = async () => {
 
 function getDatasPeriodo(dataInicio, dataFim) {
     const datas = [];
-    let dataAtual = newDate(dataInicio);
+    let dataAtual = new Date(dataInicio);
 
     while(dataAtual <= dataFim) {
         datas.push(dataAtual.toISOString().split("T")[0]);
@@ -73,7 +73,7 @@ export const getDadosVendasDiarias = async (dataInicio, dataFim) => {
 
         return {
             data,
-            venda: dadosEncontrados?.venda || 0,
+            venda: dadosEncontrados?.totalVendas || 0,
             lucro: dadosEncontrados?.lucroTotal || 0
         }
     })

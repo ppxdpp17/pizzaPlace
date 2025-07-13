@@ -8,7 +8,7 @@ const Estatisticas = () => {
       users: 0,
       produtos: 0,
       totalVendas: 0,
-      totalLucro: 0,
+      lucroTotal: 0,
     });
 
     const [isLoading, setIsLoading] = useState(true);
@@ -18,7 +18,8 @@ const Estatisticas = () => {
       const fetchEstatisticas = async () => {
         try {
           const response = await axios.get("/analises");
-          setAnalisesEstatisticas(response.data.analisesEstatisticas);
+          console.log("Analyses payload:", response.data);
+          setAnalisesEstatisticas(response.data.dadosAnalise);
           setDadosVendasDiarias(response.data.dadosVendasDiarias);
         } catch (error) {
           console.error("Erro ao obter estatísticas:", error);
@@ -51,8 +52,8 @@ const Estatisticas = () => {
           icon={ShoppingCart}
           cor="from-emerald-500 to-cyan-700"/>
         <CartaoEstatisticas
-          titulo="Quantidade de Luvcro"
-          valor={analisesEstatisticas.totalLucro.toLocaleString()}
+          titulo="Quantidade de Lucro"
+          valor={`€${analisesEstatisticas.lucroTotal.toLocaleString()}`}
           icon={DollarSign}
           cor="from-emerald-500 to-lime-700"/>
       </div>
