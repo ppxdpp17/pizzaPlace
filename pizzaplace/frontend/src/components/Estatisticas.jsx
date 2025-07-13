@@ -2,6 +2,7 @@ import { motion } from "framer-motion"
 import { useState, useEffect } from "react"
 import axios from "../lib/axios"
 import { Users, Package, ShoppingCart, DollarSign } from "lucide-react"
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const Estatisticas = () => {
     const [analisesEstatisticas, setAnalisesEstatisticas] = useState({
@@ -57,6 +58,34 @@ const Estatisticas = () => {
           icon={DollarSign}
           cor="from-emerald-500 to-lime-700"/>
       </div>
+
+      <motion.div className="bg-gray-800/60 rounded-lg p-6 shadow-lg"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.25 }}>
+          <ResponsiveContainer width="100%" height={400}>
+            <LineChart data={dadosVendasDiarias}>
+              <CartesianGrid strokeDasharray="3 3"/>
+              <XAxis dataKey="data" stroke="#D1D5DB" />
+              <YAxis yAxisId="left" stroke="#D1D5DB" />
+              <YAxis yAxisId="right" orientation="right" stroke="#D1D5DB" />
+              <Tooltip />
+              <Legend />
+              <Line yAxisId="left" 
+                type="monotone" 
+                dataKey="venda" 
+                stroke="#108981"
+                activeDot={{ r: 8 }}
+                name="Vendas" /> 
+              <Line yAxisId="right" 
+                type="monotone" 
+                dataKey="lucro" 
+                stroke="#3B82F6"
+                activeDot={{ r: 8 }}
+                name="Lucro" />
+            </LineChart>
+          </ResponsiveContainer>
+      </motion.div>
     </div>
   )
 }

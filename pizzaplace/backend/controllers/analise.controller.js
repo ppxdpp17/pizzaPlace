@@ -48,9 +48,9 @@ export const getDadosVendasDiarias = async (dataInicio, dataFim) => {
         },
         {
         $group: {
-            _id: {$dateToString: {format: "%d-%m-%Y", date: "$createdAt"}},
+            _id: {$dateToString: {format: "%Y-%m-%d", date: "$createdAt"}},
             totalVendas: {$sum: 1},
-            lucroTotal: {$sum: "$precoTotal"}
+            lucroTotal: {$sum: "$total"}
         },
     },
     {
