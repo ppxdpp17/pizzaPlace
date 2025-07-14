@@ -1,4 +1,7 @@
+import { useEffect } from "react";
 import CategoryItem from "../components/CategoryItem";
+import { useProductStore } from "../stores/useProductStore";
+import ProdutosRecomendados from "../components/ProdutosRecomendados";
 
 const categorias = [
   { href: "/calcas", nome: "Calças", imageUrl: "calcas.avif" },
@@ -11,6 +14,13 @@ const categorias = [
 ]
 
 const HomePage = () => {
+
+  const { fetchProdutosRecomendados, products, isLoading } = useProductStore();
+
+  useEffect(() => {
+    fetchProdutosRecomendados()
+  }, [fetchProdutosRecomendados]);
+
   return (
   <div className="relative min-h-screen text-white overflow-hidden">
     <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -28,6 +38,7 @@ const HomePage = () => {
           />
         )))}
       </div>
+      {!isLoading && products.length > 0 && <ProdutosRecomendados produtosRecomendados={products} />}
     </div>
   </div>
   )

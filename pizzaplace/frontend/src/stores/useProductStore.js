@@ -69,5 +69,14 @@ export const useProductStore = create((set) => ({
 			toast.error(error.response.data.error || "Falha a ir buscar os produtos desta categoria");
 		}
 	},
-	
+	fetchProdutosRecomendados: async () => {
+		set ({ loading: true });
+		try {
+			const response = await axios.get("/produtos/recomendacoes");
+			set({ products: response.data, loading: false });
+		} catch (error) {
+			set ({ error: "Falha a ir buscar os produtos recomendados", loading: false });
+			console.log("Erro a ir buscar os produtos recomendados: ", error);
+		}
+	}
 }));
