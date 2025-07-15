@@ -1,6 +1,7 @@
 import  { create } from "zustand";
 import axios from "../lib/axios";
 import { toast } from "react-hot-toast";
+import { response } from "express";
 
 export const useUserStore = create((set, get) => ({
     user: null,
@@ -53,5 +54,39 @@ export const useUserStore = create((set, get) => ({
             set({checkingAuth: false, user: null});
         }
     },
-    
-}))
+}));
+
+let refreshPromise = null;
+
+axios.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+        const pedidoOriginal = error.config;
+        if(error.response?.status === 401 && !pedidoOriginal._retry) {
+            pedidoOriginal._retry = true;
+
+            try {
+                //Se um refresh do token já está a acontecer, esperamos até que acabe
+                if(refreshPromise)
+                {
+                    await refreshPromise;
+                    return axios(pedidoOriginal);
+                }
+                
+                //Começar um novo processo de refresh
+                refreshPromise = useUserStore.getState().refreshToken();
+                await refreshPromise;
+                refreshPromise = null;
+
+                return axios(pedidoOriginal);   
+            } catch (error) {
+
+                //No caso do refresh falhar, redirecionar para login
+                useUserStore.getState().logout();
+                return Promise.reject(error);
+            }
+        }
+
+        return Promise.reject(error);
+    }
+)
