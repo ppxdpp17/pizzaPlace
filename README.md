@@ -35,7 +35,7 @@ Este projeto consiste numa aplicação de e-commerce desenvolvida com o stack ME
 ## ⚙️ Como Executar Localmente
 ### 1.Clonar o repositório
 ```
-git clone [https://github.com/seu-usuario/nome-do-projeto.git](https://github.com/ppxdpp17/pizzaPlace)
+git clone https://github.com/ppxdpp17/pizzaPlace.git
 cd pizzaPlace
 ```
 
