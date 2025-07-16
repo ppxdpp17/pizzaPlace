@@ -86,7 +86,7 @@ export const login = async (req, res) => {
         }
         else
         {
-            res.status(401).json({msg: "Credenciais inválidas."});
+            res.status(400).json({msg: "Credenciais inválidas."});
         }
     } catch (error) {
         console.log("Erro no controller de login", error.message);
