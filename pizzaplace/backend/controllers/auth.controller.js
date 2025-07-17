@@ -1,6 +1,8 @@
 import { redis } from "../lib/redis.js";
 import User from "../models/user.model.js";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
+import crypto from "crypto";
 
 //Geração de tokens/cookies
 const gerarTokens = (userId) => {

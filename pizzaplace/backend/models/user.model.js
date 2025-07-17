@@ -34,7 +34,19 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: ["cliente", "admin"],
         default: "cliente"
-    }
+    },
+    lastLogin: {
+        type: Date,
+        default: Date.now
+    },
+    verificado: {
+        type: Boolean,
+        default: false
+    },
+    resetPasswordToken: String,
+    resetPasswordExpire: Date,
+    verificationToken: String,
+    verificationTokenExpire: Date
 }, {
     timestamps: true
 });
