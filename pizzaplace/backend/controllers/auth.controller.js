@@ -1,8 +1,6 @@
 import { redis } from "../lib/redis.js";
 import User from "../models/user.model.js";
 import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
-import crypto from "crypto";
 
 //Geração de tokens/cookies
 const gerarTokens = (userId) => {
@@ -54,11 +52,15 @@ export const signup = async (req, res) => {
 
         setCookies(res, tokenAcesso, tokenRefresh);
 
+        const verificationToken = Math.floor(100000 + Math.random() * 9000000).toString();
+
         res.status(201).json({user:{
             _id: user._id,
             nome: user.nome,
             email: user.email,
-            cargo: user.cargo
+            cargo: user.cargo,
+            //verificationToken: verificationToken,
+            //verificationTokenExpires: Date.now() + 24 * 60 * 60 * 1000 //24 horas
         }});
 
     } catch (error) {
