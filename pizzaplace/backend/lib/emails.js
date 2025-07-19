@@ -19,3 +19,28 @@ export const sendVerificationEmail = async (email, verificationToken) => {
         throw new Error(`Erro ao enviar email de verificação: ${error}`);
     }
 }
+
+export const enviarEmailWelcome = async (email, nome) => {
+    const recipient = [{email}];
+
+    try {
+        const response = await mailTrapClient.send({
+            from: sender,
+            to: recipient,
+            template_uuid: "707f6f2e-9c2f-4146-84f3-0a6eb59296ea",
+            template_variables: {
+                "company_info_name": "Big Boss'",
+                "name": nome,
+                "company_info_address": "Rua Dr. Manuel Cardona,2 B",
+                "company_info_city": "Vila Real",
+                "company_info_zip_code": "5000-558",
+                "company_info_country": "Portugal"
+            }
+        })
+
+        console.log("Email de Bem-Vindo enviado com sucesso", response);
+    } catch (error) {
+        console.error("Erro ao enviar email de bem-vindo", error);
+        throw new Error(`Erro ao enviar email de bem-vindo: ${error}`);
+    }
+}

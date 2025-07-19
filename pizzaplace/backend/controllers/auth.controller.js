@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { generateTokenAndSetCookie } from "../utils/generateTokenAndSetCookie.js";
 import {sendVerificationEmail } from "../lib/emails.js";
+import { enviarEmailWelcome } from "../lib/emails.js";
 
 //Geração de tokens/cookies
 const gerarTokens = (userId) => {
@@ -74,7 +75,6 @@ export const signup = async (req, res) => {
     setCookies(res, tokenAcesso, tokenRefresh);
 
     await sendVerificationEmail(user.email, verificationToken);
-
     //Retornar o user sem password
     return res.status(201).json({
       user: {
@@ -91,6 +91,34 @@ export const signup = async (req, res) => {
   }
 };
 
+//Função para verificar o email
+export const verificarEmail = async (req, res) => {
+    const { code } = req.body;
+    
+    try {
+        const user = await User.findOne({
+            verificationToken: code,
+            verificationTokenExpire: { $gt: Date.now() }
+        });
+
+        if(!user)
+        {
+            return res.status(400).json({success: false, msg: "Código de verificação inválido."});
+        }
+
+        user.verificado = true;
+        user.verificationToken = undefined;
+        user.verificationTokenExpire = undefined;
+
+        await user.save();
+
+        await enviarEmailWelcome(user.email, user.nome);
+
+        res.status(200).json({success: true, msg: "Email verificado com sucesso!", user: {...user._doc, password: undefined}});
+    } catch (error) {
+        
+    }
+}
 
 //Fazer o Login (semelhante ao signup - gerar cookies)
 export const login = async (req, res) => {
