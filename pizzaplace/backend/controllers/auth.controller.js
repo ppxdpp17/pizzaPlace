@@ -3,6 +3,7 @@ import User from "../models/user.model.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { generateTokenAndSetCookie } from "../utils/generateTokenAndSetCookie.js";
+import {sendVerificationEmail } from "../lib/emails.js";
 
 //Geração de tokens/cookies
 const gerarTokens = (userId) => {
@@ -41,36 +42,40 @@ const setCookies = (res, tokenAcesso, tokenRefresh) => {
 export const signup = async (req, res) => {
   const { nome, email, password } = req.body;
 
-  // 1) Validação simples
+  //Validação de campos
   if (!nome || !email || !password) {
     return res.status(400).json({ msg: "Nome, email e password são obrigatórios." });
   }
 
   try {
-    // 2) Verifica se já existe
+    //Verifica se user já existe
     if (await User.findOne({ email })) {
       return res.status(400).json({ msg: "O utilizador já existe." });
     }
 
-    // 3) Gera token de verificação
+    //Gerar token de verificação
     const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
-    const verificationTokenExpire = Date.now() + 24 * 60 * 60 * 1000; // 24h
+    const verificationTokenExpire = Date.now() + 24 * 60 * 60 * 1000; //24h
 
-    // 4) Cria o utilizador (pre-save do schema vai hash‑ar a password)
+
+
+    //Cria o user (pre-save do schema vai hashar a password)
     const user = await User.create({
       nome,
       email,
-      password: password.toString(),            // força string
+      password: password.toString(),            //forçar string
       verificationToken,
       verificationTokenExpire
     });
 
-    // 5) Gera tokens JWT e cookies
+    //Gerar tokens JWT e cookies
     const { tokenAcesso, tokenRefresh } = gerarTokens(user._id);
     await guardarTokenRefresh(user._id, tokenRefresh);
     setCookies(res, tokenAcesso, tokenRefresh);
 
-    // 6) Retorna o user sem password
+    await sendVerificationEmail(user.email, verificationToken);
+
+    //Retornar o user sem password
     return res.status(201).json({
       user: {
         _id: user._id,
