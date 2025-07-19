@@ -116,7 +116,8 @@ export const verificarEmail = async (req, res) => {
 
         res.status(200).json({success: true, msg: "Email verificado com sucesso!", user: {...user._doc, password: undefined}});
     } catch (error) {
-        
+        console.log("Erro na funcao verificarEmail", error);
+        res.status(500).json({success:false, message: "Erro no Servidor"});   
     }
 }
 
