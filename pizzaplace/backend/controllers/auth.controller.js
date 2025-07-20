@@ -1,10 +1,12 @@
 import { redis } from "../lib/redis.js";
 import User from "../models/user.model.js";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import { generateTokenAndSetCookie } from "../utils/generateTokenAndSetCookie.js";
-import {sendVerificationEmail } from "../lib/emails.js";
-import { enviarEmailWelcome } from "../lib/emails.js";
+import {sendVerificationEmail, enviarEmailWelcome, enviarPasswordResetEmail } from "../lib/emails.js";
+
+
 
 //Geração de tokens/cookies
 const gerarTokens = (userId) => {
@@ -215,3 +217,33 @@ export const getPerfil = async (req, res) => {
         res.status(500).json({msg: "Erro no servidor", error: error.message});
     }
 } 
+
+export const esqueceuPassword = async (req, res) => {
+    const {email} = req.body;
+
+    try {
+        const user = await User.findOne({email});
+
+        if(!user)
+        {
+            return res.status(404).json({success: false, msg: "Email nao encontrado."});
+        }
+
+        //Gerar token de repor password
+        const resetToken = crypto.randomBytes(20).toString("hex");
+        const resetTokenExpiresAt = Date.now() + 1 * 60 * 60 * 1000; //1h
+
+        user.resetPasswordToken = resetToken;
+        user.resetPasswordExpire = resetTokenExpiresAt;
+        await user.save();
+
+        await enviarPasswordResetEmail(user.email, `${process.env.CLIENT_URL}/reset-password/${resetToken}`);
+
+        res.status(200).json({success: true, msg: "Email enviado com sucesso!"});
+
+    } catch (error) {
+        console.log("Erro ao esquecer password", error);
+        res.status(400).json({success: false, msg: error.message});
+    }
+}
+
