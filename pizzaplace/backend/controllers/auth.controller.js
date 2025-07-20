@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import { generateTokenAndSetCookie } from "../utils/generateTokenAndSetCookie.js";
-import {sendVerificationEmail, enviarEmailWelcome, enviarPasswordResetEmail } from "../lib/emails.js";
+import {sendVerificationEmail, enviarEmailWelcome, enviarPasswordResetEmail, enviarEmailResetSucesso } from "../lib/emails.js";
 
 
 
@@ -247,3 +247,31 @@ export const esqueceuPassword = async (req, res) => {
     }
 }
 
+export const reporPassword = async (req, res) => {
+    try {
+        const {token} = req.params;
+        const {password} = req.body;
+
+        const user = await User.findOne({resetPasswordToken: token, resetPasswordExpire: {$gt: Date.now()}});
+
+        if(!user)
+        {
+            return res.status(400).json({success: false, msg: "Token nao valido ou expirado."});
+        }
+
+        //Atualizar Password
+        const passHashada = await bcrypt.hash(password, 10);
+        user.password = passHashada;
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpire = undefined;
+
+        await user.save();
+
+        await enviarEmailResetSucesso(user.email);
+
+        res.status(200).json({success: true, msg: "Password atualizada com sucesso!"});
+    } catch (error) {
+        console.log("Erro ao repor password", error);
+        res.status(400).json({success: false, msg: error.message});
+    }
+}
