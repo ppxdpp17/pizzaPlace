@@ -45,10 +45,10 @@ const MedidorForcaPassword = ({ password }) => {
 	};
 
 	const getForcaText = (forca) => {
-		if (forca === 0) return "Very Weak";
-		if (forca === 1) return "Weak";
-		if (forca === 2) return "Fair";
-		if (forca === 3) return "Good";
+		if (forca === 0) return "Muito Fraca";
+		if (forca === 1) return "Fraca";
+		if (forca === 2) return "Forte";
+		if (forca === 3) return "Muito Forte";
 		return "Strong";
 	};
 
