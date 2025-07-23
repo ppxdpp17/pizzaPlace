@@ -4,7 +4,7 @@ import { Loader, Lock, Mail, User } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import MedidorForcaPassword from "../components/MedidorForcaPassword";
-//import { useAuthStore } from "../store/authStore";
+import { useAuthStore } from "../stores/useAuthStore.js";
 
 const SignUpPage = () => {
   const [name, setName] = useState("");
