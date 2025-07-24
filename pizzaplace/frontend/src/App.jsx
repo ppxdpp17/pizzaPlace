@@ -9,6 +9,7 @@ import CategoriaPage from "./pages/CategoriaPage.jsx";
 import CarrinhoPage from "./pages/CarrinhoPage.jsx";
 import PaginaSucessoCompra from "./pages/PaginaSucessoCompra.jsx";
 import PaginaCancelarCompra from "./pages/PaginaCancelarCompra.jsx";
+import PaginaVerificarEmail from "./pages/PaginaVerificarEmail.jsx";
 
 //Hooks
 import { useCarrinhoStore } from "./stores/useCarrinhoStore.js";
@@ -58,6 +59,7 @@ function App() {
           <Route path="/carrinho" element={ user ?  <CarrinhoPage/> : <Navigate to="/login" /> }/>
           <Route path="/purchase-success" element={ user ?  <PaginaSucessoCompra/> : <Navigate to="/login" /> }/>
           <Route path="/purchase-cancel" element={ user ?  <PaginaCancelarCompra/> : <Navigate to="/login" /> }/>
+          <Route path="/verificar-email" element={<PaginaVerificarEmail/>}/>
         </Routes>
       </div>
       <Toaster />
