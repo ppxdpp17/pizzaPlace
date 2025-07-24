@@ -12,7 +12,7 @@ const SignUpPage = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   
-  const [localError, setLocalError] = useState("");  // Para erro de confirmação
+  const [localError, setLocalError] = useState("");  //Para erro de confirmação
 
   const navigate = useNavigate();
   const { signup, error, isLoading } = useAuthStore();
@@ -21,7 +21,7 @@ const SignUpPage = () => {
     e.preventDefault();
     setLocalError("");
 
-    // Validação de confirmação de password
+    //Validação de confirmação de password
     if (password !== confirmPassword) {
       setLocalError("As passwords não coincidem.");
       return;
@@ -29,7 +29,7 @@ const SignUpPage = () => {
 
     try {
       await signup(email, password, name);
-      navigate("/verify-email");
+      navigate("/verificar-email");
     } catch (error) {
       console.log(error);
     }
@@ -96,7 +96,7 @@ const SignUpPage = () => {
               type='submit'
               disabled={isLoading}
             >
-              {isLoading ? <Loader className=' animate-spin mx-auto' size={24} /> : "Sign Up"}
+              {isLoading ? <Loader className=' animate-spin mx-auto' size={24} /> : "Criar Conta"}
             </motion.button>
           </form>
         </div>

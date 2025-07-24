@@ -52,7 +52,7 @@ export const useAuthStore = create((set) => ({
 	verifyEmail: async (code) => {
 		set({ isLoading: true, error: null });
 		try {
-			const response = await axios.post(`${API_URL}/verify-email`, { code });
+			const response = await axios.post(`${API_URL}/verificar-email`, { code });
 			set({ user: response.data.user, isAuthenticated: true, isLoading: false });
 			return response.data;
 		} catch (error) {
@@ -72,7 +72,7 @@ export const useAuthStore = create((set) => ({
 	forgotPassword: async (email) => {
 		set({ isLoading: true, error: null });
 		try {
-			const response = await axios.post(`${API_URL}/forgot-password`, { email });
+			const response = await axios.post(`${API_URL}/esqueceu-password`, { email });
 			set({ message: response.data.message, isLoading: false });
 		} catch (error) {
 			set({
