@@ -3,10 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuthStore } from "../stores/useAuthStore.js";
 import toast from "react-hot-toast";
+import { useUserStore } from "../stores/useUserStore.js";
 
 const PaginaVerificarEmail = () => {
 	const [codigo, setCode] = useState(["", "", "", "", "", ""]);
 	const inputRefs = useRef([]);
+  	const { verificarAutenticacao } = useUserStore();
 	const navigate = useNavigate();
 
 	const { error, isLoading, verifyEmail } = useAuthStore();
@@ -48,6 +50,7 @@ const PaginaVerificarEmail = () => {
 		const verificationCode = codigo.join("");
 		try {
 			await verifyEmail(verificationCode);
+			await verificarAutenticacao();
 			navigate("/");
 			toast.success("Email verificado com sucesso!");
 		} catch (error) {

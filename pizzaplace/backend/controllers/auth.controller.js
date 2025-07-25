@@ -114,6 +114,10 @@ export const verificarEmail = async (req, res) => {
 
         await user.save();
 
+        const { tokenAcesso, tokenRefresh } = gerarTokens(user._id);
+        await guardarTokenRefresh(user._id, tokenRefresh);
+        setCookies(res, tokenAcesso, tokenRefresh);
+
         await enviarEmailWelcome(user.email, user.nome);
 
         res.status(200).json({success: true, msg: "Email verificado com sucesso!", user: {...user._doc, password: undefined}});
