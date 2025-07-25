@@ -13,12 +13,14 @@ export const useAuthStore = create((set) => ({
 	isCheckingAuth: true,
 	message: null,
 
-	signup: async (email, password, name) => {
+	signup: async (email, password, nome) => {
 		set({ isLoading: true, error: null });
 		try {
-			const response = await axios.post(`${API_URL}/signup`, { email, password, name });
+			const response = await axios.post(`${API_URL}/signup`, { email, password, nome });
 			set({ user: response.data.user, isAuthenticated: true, isLoading: false });
 		} catch (error) {
+			console.error("Resposta completa do erro:", error.response);
+  			console.error("Mensagem do servidor:", error.response?.data);
 			set({ error: error.response.data.message || "Erro ao criar conta", isLoading: false });
 			throw error;
 		}
