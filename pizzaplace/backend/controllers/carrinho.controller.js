@@ -4,7 +4,7 @@ export const getProdutosCarrinho = async (req, res) => {
     try {
 		const produtos = await Produto.find({ _id: { $in: req.user.itensCarrinho } });
 
-		// add quantity for each product
+		//Adicionar quantidade para cada produto
 		const itensCarrinho = produtos.map((produto) => {
 			const item = req.user.itensCarrinho.find((itemCarrinho) => itemCarrinho.id === produto.id);
 			return { ...produto.toJSON(), quantidade: item.quantidade };

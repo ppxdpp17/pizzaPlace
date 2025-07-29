@@ -1,6 +1,7 @@
 import { stripe } from "../lib/stripe.js";
 import Cupao from "../models/cupao.model.js";
 import Pedido from "../models/pedidos.model.js";
+import User from "../models/user.model.js";
 
 export const criarSessaoCheckout = async (req, res) => {
     try {
@@ -46,6 +47,10 @@ export const criarSessaoCheckout = async (req, res) => {
             payment_method_types: ["card"],
             line_items: linhaItems,
             mode: "payment",
+            billing_address_collection: "required",
+            shipping_address_collection: {
+                allowed_countries: ["PT"]  
+            },
             success_url: `${process.env.CLIENT_URL}/purchase-success?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${process.env.CLIENT_URL}/purchase-cancel`,
             discounts: cupao ? [{coupon: await criarCupaoStripe(cupao.percentagemDesconto)}] : [],
@@ -114,6 +119,20 @@ export const sucessoCheckout = async(req, res) => {
                     })
                 }
 
+            const ship = sessao.collected_information?.shipping_details;
+            if (!ship) {
+                return res.status(400).json({ msg: "Não foi possível ler a morada do cliente." });
+            }
+            
+            const shippingAddress = {
+                name:        ship.name,
+                line1:       ship.address.line1,
+                line2:       ship.address.line2,
+                city:        ship.address.city,
+                postal_code: ship.address.postal_code,
+                country:     ship.address.country
+            };
+
             //Criar um novo pedido
             const produtos = JSON.parse(sessao.metadata.produtos);
             const novoPedido = new Pedido({
@@ -124,8 +143,15 @@ export const sucessoCheckout = async(req, res) => {
                     preco: produto.preco
                 })),
                 total: sessao.amount_total / 100,
-                stripeSessionId: sessaoId
+                stripeSessionId: sessaoId,
+                shippingAddress
             });
+
+            //Limpar carrinho depois de compra
+            const user = await User.findById(sessao.metadata.userId);
+            user.itensCarrinho = [];
+            await user.save();
+
 
             await novoPedido.save();
 
