@@ -11,7 +11,7 @@ const CartaoProduto = ({product}) => {
    const gerirAdicionarCarrinho = () =>{
         if(!user)
         {
-            toast.error("Por favor, faca login para adicionar produtos ao carrinho.", {id: "login"});
+            toast.error("Por favor, faça login para adicionar produtos ao carrinho.", {id: "login"});
             return;
         }
         else

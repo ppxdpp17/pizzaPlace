@@ -57,7 +57,7 @@ export const criarSessaoCheckout = async (req, res) => {
             metadata: {
                 userId: req.user._id.toString(),
                 codigoCupao: codigoCupao || "",
-                tipoEntrega: req.body.isDelivery ? "delivery" : "takeaway",
+                tipoEntrega: req.body.tipoEntrega ? "delivery" : "takeaway",
                 produtos: JSON.stringify(
                     produtos.map((p) => ({
                         id: p._id,
