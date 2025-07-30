@@ -143,7 +143,7 @@ export const sucessoCheckout = async(req, res) => {
                     preco: produto.preco
                 })),
                 total: sessao.amount_total / 100,
-                //stripeSessionID: sessaoId,
+                stripeSessionID: sessaoId,
                 shippingAddress
             });
 
