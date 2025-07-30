@@ -1,10 +1,9 @@
 import { motion } from "framer-motion";
-import { House, Bike } from "lucide-react";
+import { Utensils, Bike } from "lucide-react";
 
 export default function TipoEntrega({ isOpen, onClose, onSelect }) {
   if (!isOpen) return null;
   return (
-    // Overlay
     <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
       <motion.div
         className="bg-gray-800 rounded-2xl p-6 space-y-4 max-w-sm w-full"
@@ -22,7 +21,7 @@ export default function TipoEntrega({ isOpen, onClose, onSelect }) {
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
           >
-            <House size={32} className="text-emerald-400 mb-2" />
+            <Utensils size={32} className="text-emerald-400 mb-2" />
             <span className="text-sm text-white">Take‑Away</span>
           </motion.button>
           <motion.button
@@ -37,7 +36,7 @@ export default function TipoEntrega({ isOpen, onClose, onSelect }) {
         </div>
         <button
           onClick={onClose}
-          className="mt-4 block text-center text-sm text-gray-400 hover:text-gray-200"
+          className="w-full mt-4 block text-center text-sm text-red-400 hover:text-gray-200 font-bold"
         >
           Cancelar
         </button>
