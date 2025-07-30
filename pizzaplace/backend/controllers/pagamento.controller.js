@@ -57,6 +57,7 @@ export const criarSessaoCheckout = async (req, res) => {
             metadata: {
                 userId: req.user._id.toString(),
                 codigoCupao: codigoCupao || "",
+                tipoEntrega,
                 produtos: JSON.stringify(
                     produtos.map((p) => ({
                         id: p._id,
@@ -142,6 +143,7 @@ export const sucessoCheckout = async(req, res) => {
                     quantidade: produto.quantidade,
                     preco: produto.preco
                 })),
+                tipoEntrega,
                 total: sessao.amount_total / 100,
                 stripeSessionID: sessaoId,
                 shippingAddress

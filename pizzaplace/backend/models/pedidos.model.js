@@ -48,6 +48,11 @@ const pedidoSchema = new mongoose.Schema({
     shippingAddress: {
         type: addressSchema,
         required: [true, "A morada é obrigatória."],
+    },
+    tipoEntrega: {
+        type: String,
+        required: [true, "O tipo de entrega é obrigatório."],
+        enum: ["takeaway", "delivery"]
     }
     },
     { timestamps: true }
