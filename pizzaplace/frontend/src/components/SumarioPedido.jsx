@@ -6,6 +6,7 @@ import { loadStripe } from "@stripe/stripe-js";
 import axios from "../lib/axios";
 import TipoEntrega from "./TipoEntrega";
 import { useState } from "react";
+import MoradaForm from "./MoradaForm";
 
 const stripePromise = loadStripe("pk_test_51RhA5gPaffH1WIPMMjsLlLdSSDrJ5MRtISziKg7BHOZZSlZhVl2KywHaco90UMR4QXD8fXFcNT5eeUbL70JlhhDF005veqHo7y");
 
@@ -21,18 +22,15 @@ const SumarioPedido = () => {
     const abrirModal = () => setModalOpen(true);
     const fecharModal = () => setModalOpen(false);
 
+    const [showAddressForm, setShowAddressForm] = useState(false);
+    const [pendingCash, setPendingCash] = useState(null);
+
     const handleSelectEntrega = async ({ tipoEntrega, paymentMethod }) => {
         fecharModal();
 
-        if (paymentMethod === "dinheiro") {
-            const shippingAddress = await abreFormMorada();
-            await axios.post("/pagamentos/cash", {
-            produtos: carrinho,
-            tipoEntrega,
-            shippingAddress
-            });
-            limparCarrinho();
-            navigate("/purchase-success?method=cash");
+        if(paymentMethod === "dinheiro") {
+            setPendingCash({ tipoEntrega });
+            setShowAddressForm(true);
             return;
         }
 
@@ -47,7 +45,19 @@ const SumarioPedido = () => {
 
         const { error } = await stripe.redirectToCheckout({ sessionId });
         if (error) console.error(error);
-        };
+    };
+
+    const handleAddressSubmit = async (shippingAddress) => {
+        setShowAddressForm(false);
+        const { tipoEntrega } = pendingCash;
+        await axios.post("/pagamentos/cash", {
+            produtos: carrinho,
+            tipoEntrega,
+            shippingAddress
+        });
+        limparCarrinho();
+        navigate("/purchase-success?method=cash");
+    };
 
     return (
     <motion.div className="space-y-4 rounded-lg border border-gray-700 bg-gray-800 p-4 shadow-sm sm:p-6"
@@ -93,6 +103,13 @@ const SumarioPedido = () => {
                     onClose  = {fecharModal}
                     onSelect = {handleSelectEntrega}
                 />
+                {showAddressForm && (
+                    <MoradaForm
+                        isOpen   = {showAddressForm}
+                        onCancel = {() => setShowAddressForm(false)}
+                        onSubmit = {handleAddressSubmit}
+                    />
+                    )}
                 <div className="flex items-center justify-center gap-2">
                     <span className="text-sm font-normal text-gray-400">ou</span>
                     <Link to='/' className="inline-flex items-center gap-2 text-sm font-medium text-emerald-400*

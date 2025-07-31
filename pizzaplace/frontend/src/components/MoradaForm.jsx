@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 
-export default function MoradaModal({ isOpen, onCancel, onSubmit }) {
+export default function MoradaForm({ isOpen, onCancel, onSubmit }) {
   const [form, setForm] = useState({
     name: "",
     line1: "",
@@ -30,7 +30,7 @@ export default function MoradaModal({ isOpen, onCancel, onSubmit }) {
         animate={{ scale: 1, opacity: 1 }}
       >
         <h3 className="text-lg font-semibold text-white text-center">
-          Preencha a sua morada
+          Preencha com os dados da sua morada
         </h3>
         {["name","line1","line2","city","postal_code","country"].map((field) => (
           <input
