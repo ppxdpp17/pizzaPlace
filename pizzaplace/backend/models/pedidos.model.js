@@ -43,6 +43,7 @@ const pedidoSchema = new mongoose.Schema({
     },
     stripeSessionID: {
         type: String,
+        unique: true
     },
     shippingAddress: {
         type: addressSchema,

@@ -113,6 +113,15 @@ export const sucessoCheckout = async(req, res) => {
         
         if(sessao.payment_status === "paid")
         {
+            const pedidoExistente = await Pedido.findOne({ stripeSessionID: sessaoId });
+            if (pedidoExistente) {
+                return res.status(200).json({
+                    success: true,
+                    msg: "Pedido já foi criado anteriormente.",
+                    pedidoId: pedidoExistente._id
+                });
+            }
+
             if(sessao.metadata.codigoCupao) {
                 await Cupao.findOneAndUpdate({
                     codigo: sessao.metadata.codigoCupao, userId: sessao.metadata.userId
@@ -135,7 +144,18 @@ export const sucessoCheckout = async(req, res) => {
                 country:     ship.address.country
             };
 
-            //Criar um novo pedido
+            //Verificar se já existe um pedido com esta session ID
+            let pedidoExistente2 = await Pedido.findOne({ stripeSessionID: sessaoId });
+
+            if (pedidoExistente2) {
+                return res.status(200).json({
+                    success: true,
+                    msg: "Pedido já existente",
+                    pedidoId: pedidoExistente2._id
+                });
+            }
+
+            //Criar novo pedido se não existir
             const produtos = JSON.parse(sessao.metadata.produtos);
             const novoPedido = new Pedido({
                 user: sessao.metadata.userId,
@@ -151,11 +171,10 @@ export const sucessoCheckout = async(req, res) => {
                 shippingAddress
             });
 
-            //Limpar carrinho depois de compra
+            //Limpar carrinho
             const user = await User.findById(sessao.metadata.userId);
             user.itensCarrinho = [];
             await user.save();
-
 
             await novoPedido.save();
 
