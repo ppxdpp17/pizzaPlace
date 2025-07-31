@@ -40,7 +40,7 @@ const SumarioPedido = () => {
             produtos: carrinho,
             codigoCupao: cupao?.codigo || "",
             tipoEntrega,
-            paymentMethod: "card"
+            paymentMethod: "cartao"
         })).data;
 
         const { error } = await stripe.redirectToCheckout({ sessionId });
@@ -50,13 +50,13 @@ const SumarioPedido = () => {
     const handleAddressSubmit = async (shippingAddress) => {
         setShowAddressForm(false);
         const { tipoEntrega } = pendingCash;
-        await axios.post("/pagamentos/cash", {
+        await axios.post("/pagamentos/dinheiro", {
             produtos: carrinho,
             tipoEntrega,
             shippingAddress
         });
         limparCarrinho();
-        navigate("/purchase-success?method=cash");
+        navigate("/purchase-success?method=dinheiro");
     };
 
     return (

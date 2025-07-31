@@ -55,9 +55,9 @@ export default function TipoEntrega({ isOpen, onClose, onSelect }) {
         </h3>
         <div className="flex justify-between gap-4">
           <motion.button
-            onClick={() => setPaymentType("cash")}
+            onClick={() => setPaymentType("dinheiro")}
             className={`flex-1 flex flex-col items-center p-4 rounded-xl hover:bg-gray-600 ${
-              paymentType === "cash" ? "bg-emerald-600" : "bg-gray-700"
+              paymentType === "dinheiro" ? "bg-emerald-600" : "bg-gray-700"
             }`}
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
@@ -66,9 +66,9 @@ export default function TipoEntrega({ isOpen, onClose, onSelect }) {
             <span className="text-sm text-white">Dinheiro</span>
           </motion.button>
           <motion.button
-            onClick={() => setPaymentType("card")}
+            onClick={() => setPaymentType("cartao")}
             className={`flex-1 flex flex-col items-center p-4 rounded-xl hover:bg-gray-600 ${
-              paymentType === "card" ? "bg-emerald-600" : "bg-gray-700"
+              paymentType === "cartao" ? "bg-emerald-600" : "bg-gray-700"
             }`}
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}

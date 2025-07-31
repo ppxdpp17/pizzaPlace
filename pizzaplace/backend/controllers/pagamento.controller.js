@@ -147,6 +147,7 @@ export const sucessoCheckout = async(req, res) => {
                 tipoEntrega: sessao.metadata.tipoEntrega,
                 total: sessao.amount_total / 100,
                 stripeSessionID: sessaoId,
+                metodoPagamento: sessao.metadata.metodoPagamento,
                 shippingAddress
             });
 

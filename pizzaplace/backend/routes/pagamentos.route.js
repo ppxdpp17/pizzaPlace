@@ -6,6 +6,6 @@ const router = express.Router();
 
 router.post("/criar-sessao-checkout", protectRoute, criarSessaoCheckout);
 router.post("/sucesso-checkout", protectRoute, sucessoCheckout);
-router.post("/cash", protectRoute, cashPayment);
+router.post("/dinheiro", protectRoute, cashPayment);
 
 export default router
