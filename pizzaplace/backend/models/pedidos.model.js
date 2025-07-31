@@ -53,7 +53,7 @@ const pedidoSchema = new mongoose.Schema({
         type: String,
         required: [true, "O tipo de entrega é obrigatório."],
         enum: ["takeaway", "delivery"]
-    }
+    },
     },
     { timestamps: true }
 );

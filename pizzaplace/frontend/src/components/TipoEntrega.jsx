@@ -24,9 +24,9 @@ export default function TipoEntrega({ isOpen, onClose, onSelect }) {
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.3 }}
       >
-        {/*Tipo de entrega*/}
+        {/* Passo 1: escolha de entrega */}
         <h3 className="text-lg font-semibold text-white text-center">
-          Escolha a forma de entrega
+          Escolha uma forma de entrega
         </h3>
         <div className="flex justify-between gap-4">
           <motion.button
@@ -49,7 +49,7 @@ export default function TipoEntrega({ isOpen, onClose, onSelect }) {
           </motion.button>
         </div>
 
-        {/*Tipo de pagamento*/}
+        {/* Escolha do tipo de pagamento*/}
         {deliveryType && (
           <>
             <h3 className="text-lg font-semibold text-white text-center mt-4">
