@@ -1,6 +1,6 @@
 import  { motion } from "framer-motion"
 import { useCarrinhoStore } from "../stores/useCarrinhoStore"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { MoveRight } from "lucide-react"
 import { loadStripe } from "@stripe/stripe-js";
 import axios from "../lib/axios";
@@ -12,7 +12,7 @@ const stripePromise = loadStripe("pk_test_51RhA5gPaffH1WIPMMjsLlLdSSDrJ5MRtISziK
 
 const SumarioPedido = () => {
     
-    const { total, subTotal, cupao, cupaoAplicado, carrinho } = useCarrinhoStore();
+    const { total, subTotal, cupao, cupaoAplicado, carrinho, limparCarrinho } = useCarrinhoStore();
     const poupancas = subTotal - total;
     const subtotalFormatado = subTotal.toFixed(2); 
     const totalFormatado = total.toFixed(2);
@@ -24,6 +24,9 @@ const SumarioPedido = () => {
 
     const [showAddressForm, setShowAddressForm] = useState(false);
     const [pendingCash, setPendingCash] = useState(null);
+
+    const navigate = useNavigate();
+
 
     const handleSelectEntrega = async ({ tipoEntrega, paymentMethod }) => {
         fecharModal();

@@ -183,7 +183,7 @@ export const cashPayment = async (req, res) => {
     }
 
     const items = produtos.map(p => ({
-      produto:   p.id,
+      produto:   p._id,
       quantidade:p.quantidade,
       preco:     p.preco
     }));

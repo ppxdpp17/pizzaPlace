@@ -38,7 +38,13 @@ export default function MoradaForm({ isOpen, onCancel, onSubmit }) {
             name={field}
             value={form[field]}
             onChange={handleChange}
-            placeholder={field.replace("_"," ").toUpperCase()}
+            placeholder={field === "line2"
+                ? "Linha 2 (opcional)"
+                : field
+                .split("_")
+                .map(w => w[0].toUpperCase() + w.slice(1))
+                .join(" ")
+            }
             className="w-full p-2 rounded bg-gray-700 text-white"
             required={field !== "line2"}
           />
