@@ -22,18 +22,18 @@ export default function PaginaSucessoCompra() {
       try {
         if (method === 'dinheiro') {
           //Pedido já criado no cashPayment
-          setOrderNumber(pedidoId || 'N/A');
+          setOrderNumber(Math.floor(Math.random() * 90000) + 10000);
         } else if (sessionId) {
           //Fluxo cartão: confirma no backend
           const { data } = await axios.post('/pagamentos/sucesso-checkout', {
             sessaoId: sessionId,
           });
-          setOrderNumber(data.pedidoId);
+          setOrderNumber(Math.floor(Math.random() * 90000) + 10000);
         } else {
           setErro('Nenhum ID de sessão encontrado no URL');
         }
 
-        // Limpar carrinho em ambos os casos
+        //Limpar carrinho em ambos os casos
         limparCarrinho();
       } catch (err) {
         console.error('Erro ao processar o pagamento', err);
