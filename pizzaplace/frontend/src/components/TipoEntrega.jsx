@@ -50,33 +50,33 @@ export default function TipoEntrega({ isOpen, onClose, onSelect }) {
         </div>
 
         {/* Escolha do tipo de pagamento*/}
-        {deliveryType && (
-          <>
-            <h3 className="text-lg font-semibold text-white text-center mt-4">
-              Selecione um método de pagamento
-            </h3>
-            <div className="flex justify-between gap-4">
-              <motion.button
-                onClick={() => setPaymentType("cash")}
-                className={`flex-1 flex flex-col items-center p-4 rounded-xl hover:bg-gray-600 ${paymentType === "cash" ? "bg-emerald-600" : "bg-gray-700"}`}
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-              >
-                <Coins size={32} className="text-white mb-2" />
-                <span className="text-sm text-white">Dinheiro</span>
-              </motion.button>
-              <motion.button
-                onClick={() => setPaymentType("card")}
-                className={`flex-1 flex flex-col items-center p-4 rounded-xl hover:bg-gray-600 ${paymentType === "card" ? "bg-emerald-600" : "bg-gray-700"}`}
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-              >
-                <CreditCard size={32} className="text-white mb-2" />
-                <span className="text-sm text-white">Cartão</span>
-              </motion.button>
-            </div>
-          </>
-        )}
+        <h3 className="text-lg font-semibold text-white text-center mt-4">
+          Selecione um método de pagamento
+        </h3>
+        <div className="flex justify-between gap-4">
+          <motion.button
+            onClick={() => setPaymentType("cash")}
+            className={`flex-1 flex flex-col items-center p-4 rounded-xl hover:bg-gray-600 ${
+              paymentType === "cash" ? "bg-emerald-600" : "bg-gray-700"
+            }`}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+          >
+            <Coins size={32} className="text-white mb-2" />
+            <span className="text-sm text-white">Dinheiro</span>
+          </motion.button>
+          <motion.button
+            onClick={() => setPaymentType("card")}
+            className={`flex-1 flex flex-col items-center p-4 rounded-xl hover:bg-gray-600 ${
+              paymentType === "card" ? "bg-emerald-600" : "bg-gray-700"
+            }`}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+          >
+            <CreditCard size={32} className="text-white mb-2" />
+            <span className="text-sm text-white">Cartão</span>
+          </motion.button>
+        </div>
 
         <button
           onClick={() => {
