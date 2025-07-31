@@ -8,7 +8,7 @@ export default function MoradaForm({ isOpen, onCancel, onSubmit }) {
     line2: "",
     city: "",
     postal_code: "",
-    country: ""
+    country: "Portugal"
   });
 
   if (!isOpen) return null;
@@ -32,23 +32,52 @@ export default function MoradaForm({ isOpen, onCancel, onSubmit }) {
         <h3 className="text-lg font-semibold text-white text-center">
           Preencha com os dados da sua morada
         </h3>
-        {["name","line1","line2","city","postal_code","country"].map((field) => (
-          <input
-            key={field}
-            name={field}
-            value={form[field]}
-            onChange={handleChange}
-            placeholder={field === "line2"
-                ? "Linha 2 (opcional)"
-                : field
-                .split("_")
-                .map(w => w[0].toUpperCase() + w.slice(1))
-                .join(" ")
-            }
-            className="w-full p-2 rounded bg-gray-700 text-white"
-            required={field !== "line2"}
-          />
-        ))}
+        <input
+          name="name"
+          value={form.name}
+          onChange={handleChange}
+          placeholder="Nome"
+          className="w-full p-2 rounded bg-gray-700 text-white"
+          required
+        />
+        <input
+          name="line1"
+          value={form.line1}
+          onChange={handleChange}
+          placeholder="Endereço, Linha 1"
+          className="w-full p-2 rounded bg-gray-700 text-white"
+          required
+        />
+        <input
+          name="line2"
+          value={form.line2}
+          onChange={handleChange}
+          placeholder="Endereço, Linha 2 (opcional)"
+          className="w-full p-2 rounded bg-gray-700 text-white"
+        />
+        <input
+          name="city"
+          value={form.city}
+          onChange={handleChange}
+          placeholder="Cidade"
+          className="w-full p-2 rounded bg-gray-700 text-white"
+          required
+        />
+        <input
+          name="postal_code"
+          value={form.postal_code}
+          onChange={handleChange}
+          placeholder="Código Postal"
+          className="w-full p-2 rounded bg-gray-700 text-white"
+          required
+        />
+        <input
+          name="country"
+          value="Portugal"
+          readOnly
+          disabled
+          className="w-full p-2 rounded bg-gray-600 text-white opacity-70 cursor-not-allowed"
+        />
         <div className="flex justify-between mt-4">
           <button
             type="button"
