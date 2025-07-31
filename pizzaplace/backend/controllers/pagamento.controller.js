@@ -58,6 +58,7 @@ export const criarSessaoCheckout = async (req, res) => {
                 userId: req.user._id.toString(),
                 codigoCupao: codigoCupao || "",
                 tipoEntrega: req.body.tipoEntrega ? "delivery" : "takeaway",
+                metodoPagamento: "cartao",
                 produtos: JSON.stringify(
                     produtos.map((p) => ({
                         id: p._id,
@@ -168,3 +169,41 @@ export const sucessoCheckout = async(req, res) => {
         res.status(500).json({msg: "Erro no servidor", error: error.message});
     }
 }
+
+export const cashPayment = async (req, res) => {
+  try {
+    const { produtos, tipoEntrega, shippingAddress } = req.body;
+
+    if (!Array.isArray(produtos) || produtos.length === 0) {
+      return res.status(400).json({ msg: "Carrinho vazio" });
+    }
+    if (!shippingAddress || !shippingAddress.line1) {
+      return res.status(400).json({ msg: "Morada obrigatória" });
+    }
+
+    const items = produtos.map(p => ({
+      produto:   p.id,
+      quantidade:p.quantidade,
+      preco:     p.preco
+    }));
+    const total = items.reduce((sum,i) => sum + i.preco * i.quantidade, 0);
+
+    const pedido = await Pedido.create({
+      user:            req.user._id,
+      produtos:        items,
+      total,
+      tipoEntrega,
+      metodoPagamento: "dinheiro",
+      shippingAddress
+    });
+
+    const user = await User.findById(req.user._id);
+    user.itensCarrinho = [];
+    await user.save();
+
+    return res.status(201).json({ success: true, pedidoId: pedido._id });
+  } catch (err) {
+    console.error("Erro cashPayment:", err);
+    return res.status(500).json({ msg: "Erro no servidor", error: err.message });
+  }
+};

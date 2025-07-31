@@ -21,20 +21,35 @@ const SumarioPedido = () => {
     const abrirModal = () => setModalOpen(true);
     const fecharModal = () => setModalOpen(false);
 
-    const handleSelectEntrega = async (isDelivery) => {
+    const handleSelectEntrega = async ({ tipoEntrega, paymentMethod }) => {
         fecharModal();
+
+        if (paymentMethod === "dinheiro") {
+            const shippingAddress = await abreFormMorada();
+            await axios.post("/pagamentos/cash", {
+            produtos: carrinho,
+            tipoEntrega,
+            shippingAddress
+            });
+            limparCarrinho();
+            navigate("/purchase-success?method=cash");
+            return;
+        }
+
+        //Pagaemento com cartão: fluxo Stripe normal
         const stripe = await stripePromise;
         const { id: sessionId } = (await axios.post("/pagamentos/criar-sessao-checkout", {
             produtos: carrinho,
-            codigoCupao: cupao?.codigo || null,
-            tipoEntrega: isDelivery ? "delivery" : "takeaway"
+            codigoCupao: cupao?.codigo || "",
+            tipoEntrega,
+            paymentMethod: "card"
         })).data;
 
         const { error } = await stripe.redirectToCheckout({ sessionId });
-        if (error) console.error("Stripe redirect error:", error);
-  };
+        if (error) console.error(error);
+        };
 
-  return (
+    return (
     <motion.div className="space-y-4 rounded-lg border border-gray-700 bg-gray-800 p-4 shadow-sm sm:p-6"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

@@ -54,6 +54,11 @@ const pedidoSchema = new mongoose.Schema({
         required: [true, "O tipo de entrega é obrigatório."],
         enum: ["takeaway", "delivery"]
     },
+    metodoPagamento: {
+        type: String,
+        required: [true, "O metodo de pagamento é obrigatório."],
+        enum: ["dinheiro", "cartao"]
+    }
     },
     { timestamps: true }
 );
