@@ -1,4 +1,4 @@
-import { BarChart, PlusCircle, ShoppingBasket } from "lucide-react"
+import { BarChart, PlusCircle, ShoppingBasket, Pizza } from "lucide-react"
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useEffect } from "react";
@@ -7,11 +7,13 @@ import { useProductStore } from "../stores/useProductStore";
 import CriarPizzaForm from "../components/CriarPizzaForm.jsx";
 import Estatisticas from "../components/Estatisticas.jsx";
 import ListaProdutos from "../components/ListaProdutos.jsx";
+import Pedidos from "../components/Pedidos.jsx";
 
 const janelas = [
     { id: "criar", label: "Adicionar Pizza", icon: PlusCircle},
     { id: "produtos", label: "Produtos", icon: ShoppingBasket},
     { id: "analises", label: "Estatísticas", icon: BarChart},
+    { id: "pedidos", label: "Pedidos", icon: Pizza},
 ];
 
 const AdminPage = () => {
@@ -54,6 +56,7 @@ const AdminPage = () => {
                 {tabAtiva === "criar" && <CriarPizzaForm />}
                 {tabAtiva === "produtos" && <ListaProdutos />}
                 {tabAtiva === "analises" && <Estatisticas />}
+                {tabAtiva === "pedidos" && <Pedidos />}
             </div>
         </div>
     )
