@@ -13,7 +13,7 @@ import carrinhoRoutes from "./routes/carrinho.route.js";
 import cupoesRoutes from "./routes/cupoes.route.js";
 import pagamentosRoutes from "./routes/pagamentos.route.js";
 import analisesRoutes from "./routes/analises.route.js";
-
+import pedidosRoutes from "./routes/pedidos.route.js";
 
 dotenv.config();
 
@@ -36,6 +36,7 @@ app.use("/api/carrinho", carrinhoRoutes)    //Rotas do carrinho
 app.use("/api/cupoes", cupoesRoutes)    //Rotas do carrinho 
 app.use("/api/pagamentos", pagamentosRoutes)    //Rotas do carrinho 
 app.use("/api/analises", analisesRoutes)    //Rotas do carrinho 
+app.use("/api/pedidos", pedidosRoutes)    //Rotas dos pedidos
 
 if(process.env.NODE_ENV === "production")
 {
