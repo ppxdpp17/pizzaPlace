@@ -10,6 +10,52 @@ function calcularEstado(createdAt) {
   return "Entregue!";
 }
 
+function ImagemCollage({ imagens = [], altBase = "Produto" }) {
+  // Mostra até 4 imagens; se houver mais, o último mostra +N
+  const count = imagens.length;
+  if (count === 0) {
+    return (
+      <div className="w-24 h-24 rounded-md bg-gray-700 flex items-center justify-center text-sm text-gray-400">
+        Sem imagem
+      </div>
+    );
+  }
+  if (count === 1) {
+    return (
+      <img
+        src={imagens[0]}
+        alt={`${altBase} 1`}
+        className="w-24 h-24 rounded-md object-cover bg-gray-700 flex-shrink-0"
+      />
+    );
+  }
+  if (count === 2) {
+    return (
+      <div className="grid grid-cols-2 gap-1 w-24 h-24">
+        <img src={imagens[0]} alt={`${altBase} 1`} className="object-cover w-full h-full rounded-l-md" />
+        <img src={imagens[1]} alt={`${altBase} 2`} className="object-cover w-full h-full rounded-r-md" />
+      </div>
+    );
+  }
+  // 3 ou mais -> grid 2x2, último mostra overlay +N se houver mais de 3
+  const extra = count - 3;
+  return (
+    <div className="grid grid-cols-2 grid-rows-2 gap-1 w-24 h-24">
+      <img src={imagens[0]} alt={`${altBase} 1`} className="object-cover w-full h-full rounded-tl-md" />
+      <img src={imagens[1]} alt={`${altBase} 2`} className="object-cover w-full h-full rounded-tr-md" />
+      <img src={imagens[2]} alt={`${altBase} 3`} className="object-cover w-full h-full rounded-bl-md" />
+      <div className="relative w-full h-full rounded-br-md overflow-hidden">
+        <img src={imagens[3] ?? imagens[0]} alt={`${altBase} 4`} className="object-cover w-full h-full" />
+        {extra > 0 && (
+          <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white text-sm font-semibold">
+            +{extra}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 const Pedidos = () => {
   const [pedidos, setPedidos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -33,11 +79,10 @@ const Pedidos = () => {
 
   useEffect(() => {
     fetchPedidos();
-
     intervalRef.current = setInterval(() => {
+      // força re-render para actualizar estado
       setPedidos((p) => [...p]);
     }, 30000);
-
     return () => clearInterval(intervalRef.current);
   }, []);
 
@@ -48,10 +93,17 @@ const Pedidos = () => {
   return (
     <div className="space-y-4">
       {pedidos.map((pedido) => {
-        const primeiro = pedido.produtos?.[0] ?? {};
-        const produtoPop = primeiro.produto ?? {};
-        const imagem = produtoPop.imagem || "/placeholder.png";
-        const nomePedido = produtoPop.nome || `Pedido #${String(pedido._id).slice(-6)}`;
+        // extrair imagens de todos os produtos do pedido
+        const imagens = (pedido.produtos ?? [])
+          .map((p) => p.produto?.imagem)
+          .filter(Boolean);
+        // fallback: se não houver imagens, usar placeholder
+        const imagensFinal = imagens.length ? imagens : ["/placeholder.png"];
+
+        // título: se houver só um produto, usa o seu nome, senão concatena nomes
+        const nomes = (pedido.produtos ?? []).map((p) => p.produto?.nome ?? "Produto");
+        const nomePedido = nomes.length === 1 ? nomes[0] : `${nomes[0]} +${Math.max(0, nomes.length - 1)}`;
+
         const address = pedido.shippingAddress || {};
         const total = Number(pedido.total ?? 0).toFixed(2);
         const estado = calcularEstado(pedido.createdAt);
@@ -59,6 +111,9 @@ const Pedidos = () => {
         const estadoColor =
           estado === "A cozinhar..." ? "text-yellow-300" :
           estado === "A caminho" ? "text-amber-300" : "text-emerald-400";
+
+        const userNome = pedido.user?.nome ?? "Cliente";
+        const userEmail = pedido.user?.email ?? "";
 
         return (
           <motion.div
@@ -78,41 +133,33 @@ const Pedidos = () => {
 
               <div className="mt-auto pt-4 text-right">
                 <div className="text-xs text-gray-400">Estado:</div>
-                <div className={`mt-1 text-sm font-semibold ${estadoColor}`}>
-                  {estado}
-                </div>
+                <div className={`mt-1 text-sm font-semibold ${estadoColor}`}>{estado}</div>
               </div>
             </div>
 
-            {/* Conteúdo principal: imagem + infos */}
+            {/* Conteúdo principal: imagens + infos */}
             <div className="flex items-center gap-4 pl-4 flex-1">
-              <img
-                src={imagem}
-                alt={nomePedido}
-                className="w-24 h-24 rounded-md object-cover bg-gray-700 flex-shrink-0"
-              />
+              <ImagemCollage imagens={imagensFinal} altBase={nomePedido} />
 
               <div className="flex-1">
-                <div className="text-lg font-semibold text-white">{nomePedido}</div>
-
-                {/* endereço do utilizador */}
-                <div className="text-sm text-gray-300 mt-1">
-                  {address.name}
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <div className="text-lg font-semibold text-white">{nomePedido}</div>
+                    <div className="text-sm text-gray-300">{userNome} {userEmail && <span className="text-xs text-gray-500">• {userEmail}</span>}</div>
+                  </div>
+                  <div className="text-sm text-gray-400">{pedido.createdAt ? new Date(pedido.createdAt).toLocaleString() : ""}</div>
                 </div>
-                <div className="text-sm text-gray-400 mt-1">
-                  {address.line1}{address.line2 ? `, ${address.line2}` : ""} • {address.city}
+                {/*Morada*/}
+                <div className="text-sm text-gray-300 mt-2">
+                  <div className="font-medium text-white">{address.name}</div>
+                  <div>{address.line1}{address.line2 ? `, ${address.line2}` : ""}</div>
+                  <div>{address.city} • {address.postal_code} • {address.country}</div>
                 </div>
-                <div className="text-sm text-gray-400">
-                  {address.postal_code} • {address.country}
-                </div>
-
                 <div className="text-sm text-gray-400 mt-2">
                   Entrega: <span className="font-medium text-white">{pedido.tipoEntrega}</span>
                   {"  •  "}
                   Pagamento: <span className="font-medium text-white">{pedido.metodoPagamento}</span>
                 </div>
-
-                {/* lista resumida dos produtos pedidos */}
                 <div className="mt-2 text-sm text-gray-300">
                   {pedido.produtos?.map((p, idx) => (
                     <div key={idx} className="flex justify-between">
@@ -125,25 +172,12 @@ const Pedidos = () => {
                   ))}
                 </div>
               </div>
-
-              {/* coluna direita: data / ações */}
-              <div className="w-36 text-right flex-shrink-0">
-                <div className="text-xs text-gray-400 mb-2">
-                  {pedido.createdAt ? new Date(pedido.createdAt).toLocaleString() : ""}
-                </div>
-                <button
-                  onClick={() => navigator.clipboard?.writeText(pedido._id)}
-                  className="text-xs px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-emerald-300"
-                >
-                  Copiar ID
-                </button>
-              </div>
             </div>
           </motion.div>
         );
       })}
     </div>
   );
-}
+};
 
-export default Pedidos
+export default Pedidos;
