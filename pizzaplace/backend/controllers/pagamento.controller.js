@@ -172,9 +172,11 @@ export const sucessoCheckout = async(req, res) => {
             });
 
             //Limpar carrinho
-            const user = await User.findById(sessao.metadata.userId);
-            user.itensCarrinho = [];
-            await user.save();
+            await User.findByIdAndUpdate(
+                sessao.metadata.userId,
+                { $set: { itensCarrinho: [] } },
+                { new: true }
+            );
 
             await novoPedido.save();
 
@@ -217,9 +219,10 @@ export const cashPayment = async (req, res) => {
       shippingAddress
     });
 
-    const user = await User.findById(req.user._id);
-    user.itensCarrinho = [];
-    await user.save();
+    await User.findByIdAndUpdate(
+        req.user._id,
+        { $set: { itensCarrinho: [] } }
+    );
 
     return res.status(201).json({ success: true, pedidoId: pedido._id });
   } catch (err) {

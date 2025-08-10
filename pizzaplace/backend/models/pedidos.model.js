@@ -43,7 +43,7 @@ const pedidoSchema = new mongoose.Schema({
     },
     stripeSessionID: {
         type: String,
-        unique: true
+        default: undefined
     },
     shippingAddress: {
         type: addressSchema,
@@ -61,6 +61,11 @@ const pedidoSchema = new mongoose.Schema({
     }
     },
     { timestamps: true }
+);
+
+pedidoSchema.index(
+  { stripeSessionID: 1 },
+  { unique: true, partialFilterExpression: { stripeSessionID: { $type: "string" } } }
 );
 
 const Pedido = mongoose.model("Pedido", pedidoSchema);
