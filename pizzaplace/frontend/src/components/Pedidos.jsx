@@ -11,7 +11,7 @@ function calcularEstado(createdAt) {
 }
 
 function ImagemCollage({ imagens = [], altBase = "Produto" }) {
-  // Mostra até 4 imagens; se houver mais, o último mostra +N
+  //Mostra até 4 imagens; se houver mais, o último mostra +N
   const count = imagens.length;
   if (count === 0) {
     return (
@@ -37,7 +37,6 @@ function ImagemCollage({ imagens = [], altBase = "Produto" }) {
       </div>
     );
   }
-  // 3 ou mais -> grid 2x2, último mostra overlay +N se houver mais de 3
   const extra = count - 3;
   return (
     <div className="grid grid-cols-2 grid-rows-2 gap-1 w-24 h-24">
@@ -80,7 +79,6 @@ const Pedidos = () => {
   useEffect(() => {
     fetchPedidos();
     intervalRef.current = setInterval(() => {
-      // força re-render para actualizar estado
       setPedidos((p) => [...p]);
     }, 30000);
     return () => clearInterval(intervalRef.current);
@@ -93,14 +91,14 @@ const Pedidos = () => {
   return (
     <div className="space-y-4">
       {pedidos.map((pedido) => {
-        // extrair imagens de todos os produtos do pedido
+        //Extrair imagens de todos os produtos do pedido
         const imagens = (pedido.produtos ?? [])
           .map((p) => p.produto?.imagem)
           .filter(Boolean);
-        // fallback: se não houver imagens, usar placeholder
+        //Fallback: se não houver imagens, usar placeholder
         const imagensFinal = imagens.length ? imagens : ["/placeholder.png"];
 
-        // título: se houver só um produto, usa o seu nome, senão concatena nomes
+        //Título: se houver só um produto, usa o seu nome, senão concatena nomes
         const nomes = (pedido.produtos ?? []).map((p) => p.produto?.nome ?? "Produto");
         const nomePedido = nomes.length === 1 ? nomes[0] : `${nomes[0]} +${Math.max(0, nomes.length - 1)}`;
 
@@ -124,23 +122,20 @@ const Pedidos = () => {
             exit={{ opacity: 0 }}
             className="flex items-stretch bg-gray-800/60 rounded-xl p-4 shadow-sm"
           >
-            {/* Coluna esquerda: total + estado */}
+            {/*Coluna esquerda: total + estado*/}
             <div className="w-40 flex-shrink-0 flex flex-col items-end pr-4 border-r border-gray-700">
               <div className="text-right">
                 <div className="text-sm text-gray-400">Total</div>
                 <div className="text-xl font-semibold text-emerald-400">€{total}</div>
               </div>
-
               <div className="mt-auto pt-4 text-right">
                 <div className="text-xs text-gray-400">Estado:</div>
                 <div className={`mt-1 text-sm font-semibold ${estadoColor}`}>{estado}</div>
               </div>
             </div>
-
-            {/* Conteúdo principal: imagens + infos */}
+            {/*Conteúdo principal: imagens + infos*/}
             <div className="flex items-center gap-4 pl-4 flex-1">
               <ImagemCollage imagens={imagensFinal} altBase={nomePedido} />
-
               <div className="flex-1">
                 <div className="flex items-center justify-between gap-4">
                   <div>
