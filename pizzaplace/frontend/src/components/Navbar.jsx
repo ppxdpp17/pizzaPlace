@@ -19,9 +19,11 @@ const Navbar = () => {
             <Link to={"/"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
               Página Inicial
             </Link>
-            <Link to={"/meus-pedidos"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
+            {user && (
+              <Link to={"/meus-pedidos"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
               Os Meus Pedidos
             </Link>
+            )}
             {user && (
               <Link to={"/carrinho"} className="relative group text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
                 <ShoppingCart className="inline-block mr-1 group-hover:text-emerald-400" size={20}/>
@@ -46,7 +48,6 @@ const Navbar = () => {
                 onClick={logout}>
                 <LogOut size={18}/>
                 <span className="hidden sm:inline ml-2">Sair</span>
-
               </button>
             ) : (
               <>

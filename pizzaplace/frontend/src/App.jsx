@@ -61,7 +61,7 @@ function App() {
           <Route path="/purchase-success" element={ user ?  <PaginaSucessoCompra/> : <Navigate to="/login" /> }/>
           <Route path="/purchase-cancel" element={ user ?  <PaginaCancelarCompra/> : <Navigate to="/login" /> }/>
           <Route path="/verificar-email" element={<PaginaVerificarEmail/>}/>
-          <Route path="/meus-pedidos" element={<MeusPedidos/>}/>
+          <Route path="/meus-pedidos" element={ user ? <MeusPedidos/> : <Navigate to="/login" /> }/>
         </Routes>
       </div>
       <Toaster />
