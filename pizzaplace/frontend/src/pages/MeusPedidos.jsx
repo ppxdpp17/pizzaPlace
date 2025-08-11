@@ -1,5 +1,6 @@
-import { useEffect, useState, useRef } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useEffect, useState, useRef } from "react";
 import axios from "../lib/axios";
 
 function calcularEstado(createdAt) {
@@ -49,6 +50,28 @@ function ImagemCollage({ imagens = [], altBase = "Produto" }) {
   );
 }
 
+const MeusPedidosVazio = () => (
+  <motion.div
+    className="flex flex-col items-center justify-center space-y-4 py-24"
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.4 }}
+  >
+    <svg className="h-20 w-20 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <path d="M3 3h18v4H3z" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M5 11h14v8H5z" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+    <h3 className="text-2xl font-semibold">Ainda não realizou nenhum pedido</h3>
+    <p className="text-gray-400">Comece a explorar o menu e faça a sua primeira encomenda.</p>
+    <Link
+      to="/"
+      className="mt-4 rounded-md bg-emerald-500 px-6 py-2 text-white transition-colors hover:bg-emerald-600"
+    >
+      Começar a comprar
+    </Link>
+  </motion.div>
+);
+
 export default function MeusPedidos() {
   const [pedidos, setPedidos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -78,7 +101,7 @@ export default function MeusPedidos() {
 
   if (loading) return <p className="p-4 text-center">Carregando os seus pedidos...</p>;
   if (error) return <p className="p-4 text-center text-red-400">Erro: {error}</p>;
-  if (!pedidos.length) return <p className="p-4 text-center">Ainda não realizou nenhum pedido.</p>;
+  if (!pedidos.length) return <div className="p-4"><MeusPedidosVazio /></div>;
 
   return (
     <div className="p-4 space-y-4">
@@ -93,10 +116,16 @@ export default function MeusPedidos() {
         const total = Number(pedido.total ?? 0).toFixed(2);
         const estado = calcularEstado(pedido.createdAt);
         const estadoColor = estado === "A cozinhar..." ? "text-yellow-300" : estado === "A caminho" ? "text-amber-300" : "text-emerald-400";
+        const dataHora = pedido.createdAt ? new Date(pedido.createdAt).toLocaleString() : "";
 
         return (
-          <motion.div key={pedido._id} layout initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
-            className="flex items-stretch bg-gray-800/60 rounded-xl p-4 shadow-sm">
+          <motion.div
+            key={pedido._id}
+            layout
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-stretch bg-gray-800/60 rounded-xl p-4 shadow-sm"
+          >
             <div className="w-36 flex-shrink-0 flex flex-col items-end pr-4 border-r border-gray-700">
               <div className="text-right">
                 <div className="text-sm text-gray-400">Total</div>
@@ -107,44 +136,38 @@ export default function MeusPedidos() {
                 <div className={`mt-1 text-sm font-semibold ${estadoColor}`}>{estado}</div>
               </div>
             </div>
-
             <div className="flex items-center gap-4 pl-4 flex-1">
               <ImagemCollage imagens={imagensFinal} altBase={nomePedido} />
               <div className="flex-1">
-                <div className="text-lg font-semibold text-white">{nomePedido}</div>
-
-                <div className="text-sm text-gray-300 mt-1">
-                  {address.name}
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <div className="text-lg font-semibold text-white">{nomePedido}</div>
+                    <div className="text-sm text-gray-300 mt-1">{address.name}</div>
+                  </div>
+                  <div className="text-sm text-gray-400">{dataHora}</div>
                 </div>
-                <div className="text-sm text-gray-400 mt-1">
+                <div className="text-sm text-gray-400 mt-2">
                   {address.line1}{address.line2 ? `, ${address.line2}` : ""} • {address.city}
                 </div>
                 <div className="text-sm text-gray-400">
                   {address.postal_code} • {address.country}
                 </div>
-
                 <div className="text-sm text-gray-400 mt-2">
                   Entrega: <span className="font-medium text-white">{pedido.tipoEntrega}</span>
                   {"  •  "}
                   Pagamento: <span className="font-medium text-white">{pedido.metodoPagamento}</span>
                 </div>
-
                 <div className="mt-2 text-sm text-gray-300">
                   {pedido.produtos?.map((p, idx) => (
                     <div key={idx} className="flex justify-between">
-                      <div><span className="font-medium text-white">{p.produto?.nome ?? "Produto"}</span>
+                      <div>
+                        <span className="font-medium text-white">{p.produto?.nome ?? "Produto"}</span>
                         <span className="text-gray-400"> × {p.quantidade}</span>
                       </div>
                       <div className="text-gray-400">€{(p.preco).toFixed(2)}</div>
                     </div>
                   ))}
                 </div>
-              </div>
-
-              <div className="w-36 text-right flex-shrink-0">
-                <div className="text-xs text-gray-400 mb-2">{pedido.createdAt ? new Date(pedido.createdAt).toLocaleString() : ""}</div>
-                <button onClick={() => navigator.clipboard?.writeText(pedido._id)}
-                  className="text-xs px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-emerald-300">Copiar ID</button>
               </div>
             </div>
           </motion.div>
