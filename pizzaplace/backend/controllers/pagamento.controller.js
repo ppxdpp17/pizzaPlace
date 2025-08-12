@@ -218,7 +218,7 @@ export const cashPayment = async (req, res) => {
         tipoEntrega,
         metodoPagamento: "dinheiro",
         shippingAddress,
-        estado: "a cozinhar"
+        estado: "A cozinhar"
     });
 
 
