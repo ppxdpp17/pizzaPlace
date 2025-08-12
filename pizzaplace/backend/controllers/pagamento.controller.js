@@ -168,7 +168,8 @@ export const sucessoCheckout = async(req, res) => {
                 total: sessao.amount_total / 100,
                 stripeSessionID: sessaoId,
                 metodoPagamento: sessao.metadata.metodoPagamento,
-                shippingAddress
+                shippingAddress,
+                estado: "A cozinhar"
             });
 
             //Limpar carrinho
@@ -211,13 +212,15 @@ export const cashPayment = async (req, res) => {
     const total = items.reduce((sum,i) => sum + i.preco * i.quantidade, 0);
 
     const pedido = await Pedido.create({
-      user:            req.user._id,
-      produtos:        items,
-      total,
-      tipoEntrega,
-      metodoPagamento: "dinheiro",
-      shippingAddress
+        user: req.user._id,
+        produtos: items,
+        total,
+        tipoEntrega,
+        metodoPagamento: "dinheiro",
+        shippingAddress,
+        estado: "a cozinhar"
     });
+
 
     await User.findByIdAndUpdate(
         req.user._id,

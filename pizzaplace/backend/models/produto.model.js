@@ -25,6 +25,12 @@ const produtoSchema = new mongoose.Schema({
     estaDisponivel: {
         type: Boolean,
         default: false
+    },
+    estado: {
+        type: String,
+        required: [true, "O estado é obrigatório."],
+        enum: ["A Cozinhar", "A Caminho", "Entregue"],
+        default: "A Cozinhar"
     }
 },
 {

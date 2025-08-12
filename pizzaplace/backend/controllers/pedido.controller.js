@@ -20,7 +20,7 @@ export const getPedidosDoUtilizador = async (req, res) => {
 
     const pedidos = await Pedido.find({ user: userId })
       .sort({ createdAt: -1 })
-      .populate("produtos.produto", "nome imagem preco");
+      .populate("produtos.produto", "nome imagem preco"); 
 
     return res.status(200).json({ pedidos });
   } catch (err) {
