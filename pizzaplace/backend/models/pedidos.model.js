@@ -58,6 +58,12 @@ const pedidoSchema = new mongoose.Schema({
         type: String,
         required: [true, "O metodo de pagamento é obrigatório."],
         enum: ["dinheiro", "cartao"]
+    },  
+    estado: {
+        type: String,
+        required: [true, "O estado é obrigatório."],
+        enum: ["A Cozinhar", "A Caminho", "Entregue"],
+        default: "A Cozinhar"
     }
     },
     { timestamps: true }

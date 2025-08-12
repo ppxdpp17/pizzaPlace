@@ -6,6 +6,8 @@ import cookieParser from "cookie-parser";
 import path from "path";
 import cors from "cors";
 
+import { startPedidoStatusJob } from "./jobs/pedidoStatus.job.js";
+
 //Rotas
 import authRoutes from "./routes/auth.route.js";
 import produtosRoutes from "./routes/produtos.route.js";
@@ -52,3 +54,5 @@ app.listen(PORT, () => {
 
     connectDB();
 })
+
+startPedidoStatusJob();

@@ -169,7 +169,7 @@ export const sucessoCheckout = async(req, res) => {
                 stripeSessionID: sessaoId,
                 metodoPagamento: sessao.metadata.metodoPagamento,
                 shippingAddress,
-                estado: "A cozinhar"
+                estado: "A Cozinhar"
             });
 
             //Limpar carrinho
@@ -218,7 +218,7 @@ export const cashPayment = async (req, res) => {
         tipoEntrega,
         metodoPagamento: "dinheiro",
         shippingAddress,
-        estado: "A cozinhar"
+        estado: "A Cozinhar"
     });
 
 

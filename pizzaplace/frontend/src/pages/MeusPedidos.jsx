@@ -6,7 +6,7 @@ import { Package } from "lucide-react";
 
 function calcularEstado(createdAt) {
   const minutes = (Date.now() - new Date(createdAt).getTime()) / 60000;
-  if (minutes < 5) return "A cozinhar...";
+  if (minutes < 5) return "A Cozinhar...";
   if (minutes < 10) return "A caminho";
   return "Entregue!";
 }
@@ -93,9 +93,12 @@ export default function MeusPedidos() {
 
   useEffect(() => {
     fetchPedidos();
-    intervalRef.current = setInterval(() => setPedidos(p => [...p]), 30000);
+    intervalRef.current = setInterval(() => {
+      fetchPedidos();
+    }, 30000); //30s
     return () => clearInterval(intervalRef.current);
   }, []);
+
 
   if (loading) return <p className="p-4 text-center">A carregar...</p>;
   if (error) return <p className="p-4 text-center text-red-400">Erro: {error}</p>;
@@ -112,8 +115,10 @@ export default function MeusPedidos() {
           const nomePedido = nomes.length === 1 ? nomes[0] : `${nomes[0]} +${Math.max(0, nomes.length - 1)}`;
           const address = pedido.shippingAddress || {};
           const total = Number(pedido.total ?? 0).toFixed(2);
-          const estado = calcularEstado(pedido.createdAt);
-          const estadoColor = estado === "A cozinhar..." ? "text-yellow-300" : estado === "A caminho" ? "text-amber-300" : "text-emerald-400";
+          const estado = pedido.estadoAtual || pedido.estado || calcularEstado(pedido.createdAt);
+          const estadoColor =
+            estado === "A Cozinhar" ? "text-yellow-300" :
+            estado === "Em entrega" ? "text-amber-300" : "text-emerald-400";
           const dataHora = pedido.createdAt ? new Date(pedido.createdAt).toLocaleString() : "";
 
           return (

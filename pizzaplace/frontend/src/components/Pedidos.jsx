@@ -5,7 +5,7 @@ import axios from "../lib/axios";
 
 function calcularEstado(createdAt) {
   const minutes = (Date.now() - new Date(createdAt).getTime()) / 60000;
-  if (minutes < 5) return "A cozinhar...";
+  if (minutes < 5) return "A Cozinhar...";
   if (minutes < 10) return "A caminho";
   return "Entregue!";
 }
@@ -79,10 +79,11 @@ const Pedidos = () => {
   useEffect(() => {
     fetchPedidos();
     intervalRef.current = setInterval(() => {
-      setPedidos((p) => [...p]);
-    }, 30000);
+      fetchPedidos();
+    }, 30000); // 30s
     return () => clearInterval(intervalRef.current);
   }, []);
+
 
   if (loading) return <p className="p-4 text-center">Carregando pedidos...</p>;
   if (error) return <p className="p-4 text-center text-red-400">Erro: {error}</p>;
@@ -104,11 +105,11 @@ const Pedidos = () => {
 
         const address = pedido.shippingAddress || {};
         const total = Number(pedido.total ?? 0).toFixed(2);
-        const estado = calcularEstado(pedido.createdAt);
+        const estado = pedido.estado || calcularEstado(pedido.createdAt);
 
         const estadoColor =
-          estado === "A cozinhar..." ? "text-yellow-300" :
-          estado === "A caminho" ? "text-amber-300" : "text-emerald-400";
+          estado === "A Cozinhar" ? "text-yellow-300" :
+          estado === "Em entrega" ? "text-amber-300" : "text-emerald-400";
 
         const userNome = pedido.user?.nome ?? "Cliente";
         const userEmail = pedido.user?.email ?? "";
