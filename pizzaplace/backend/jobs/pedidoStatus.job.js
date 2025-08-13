@@ -29,7 +29,7 @@ export function startPedidoStatusJob() {
     }
   }, {
     scheduled: true,
-    timezone: "UTC"
+    timezone: "Europe/Lisbon"
   });
 
   console.log("PedidoStatusJob iniciado (a executar a cada minuto).");
