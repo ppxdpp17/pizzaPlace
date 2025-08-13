@@ -16,7 +16,7 @@ export function startPedidoStatusJob() {
 
       //Marca como "Em entrega" os que ainda estão "A cozinhar" e createdAt <= 5m
       const resEmEntrega = await Pedido.updateMany(
-        { estado: "A cozinhar", createdAt: { $lte: fiveMinAgo } },
+        { estado: "A Cozinhar", createdAt: { $lte: fiveMinAgo } },
         { $set: { estado: "Em entrega" } }
       );
 
