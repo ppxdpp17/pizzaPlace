@@ -42,11 +42,9 @@ export const getPedidosDoUtilizador = async (req, res) => {
 };
 
 function calcularEstadoPorTempo(createdAt) {
-  if (!createdAt) return "A cozinhar";
+  if (!createdAt) return "A Cozinhar";
   const mins = (Date.now() - new Date(createdAt).getTime()) / 60000;
-  if (mins < 5) return "A cozinhar";
+  if (mins < 5) return "A Cozinhar";
   if (mins < 10) return "Em entrega";
   return "Entregue";
 }
-
-
