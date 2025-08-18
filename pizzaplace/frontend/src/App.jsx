@@ -11,6 +11,7 @@ import PaginaSucessoCompra from "./pages/PaginaSucessoCompra.jsx";
 import PaginaCancelarCompra from "./pages/PaginaCancelarCompra.jsx";
 import PaginaVerificarEmail from "./pages/PaginaVerificarEmail.jsx";
 import MeusPedidos from "./pages/MeusPedidos.jsx";
+import PaginaEsqueceuPassword from "./pages/PaginaEsqueceuPassword.jsx";
 
 //Hooks
 import { useCarrinhoStore } from "./stores/useCarrinhoStore.js";
@@ -62,6 +63,7 @@ function App() {
           <Route path="/purchase-cancel" element={ user ?  <PaginaCancelarCompra/> : <Navigate to="/login" /> }/>
           <Route path="/verificar-email" element={<PaginaVerificarEmail/>}/>
           <Route path="/meus-pedidos" element={ user ? <MeusPedidos/> : <Navigate to="/login" /> }/>
+          <Route path="/esqueceu-password" element={<PaginaEsqueceuPassword/>}/>
         </Routes>
       </div>
       <Toaster />
