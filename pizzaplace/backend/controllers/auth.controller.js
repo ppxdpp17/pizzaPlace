@@ -223,59 +223,61 @@ export const getPerfil = async (req, res) => {
 } 
 
 export const esqueceuPassword = async (req, res) => {
-    const {email} = req.body;
+    const { email } = req.body;
 
     try {
-        const user = await User.findOne({email});
+        const user = await User.findOne({ email });
 
-        if(!user)
-        {
-            return res.status(404).json({success: false, msg: "Email nao encontrado."});
+        //Não revelar se o email existe — resposta genérica
+        if (!user) {
+            return res.status(200).json({ success: true, msg: "Se esse email existir no nosso sistema, enviámos um link." });
         }
 
-        //Gerar token de repor password
+        //Gerar token de repor password (texto claro enviado por email)
         const resetToken = crypto.randomBytes(20).toString("hex");
-        const resetTokenExpiresAt = Date.now() + 1 * 60 * 60 * 1000; //1h
+        //Guardar expiry como Date object (1 hora)
+        const resetTokenExpiresAt = new Date(Date.now() + 1 * 60 * 60 * 1000); //1 hora a partir de agora
 
         user.resetPasswordToken = resetToken;
         user.resetPasswordExpire = resetTokenExpiresAt;
         await user.save();
 
+        //Enviar email com link (path param)
         await enviarPasswordResetEmail(user.email, `${process.env.CLIENT_URL}/reset-password/${resetToken}`);
 
-        res.status(200).json({success: true, msg: "Email enviado com sucesso!"});
+        return res.status(200).json({ success: true, msg: "Se esse email existir no nosso sistema, enviámos um link." });
 
     } catch (error) {
         console.log("Erro ao esquecer password", error);
-        res.status(400).json({success: false, msg: error.message});
+        return res.status(500).json({ success: false, msg: "Erro no servidor" });
     }
-}
+};
+
 
 export const reporPassword = async (req, res) => {
     try {
-        const {token} = req.params;
-        const {password} = req.body;
+        const { token } = req.params;
+        const { password } = req.body;
 
-        const user = await User.findOne({resetPasswordToken: token, resetPasswordExpire: {$gt: Date.now()}});
+        //Procurar user com token válido (token em claro, expiry > now)
+        const user = await User.findOne({ resetPasswordToken: token, resetPasswordExpire: { $gt: new Date() } });
 
-        if(!user)
-        {
-            return res.status(400).json({success: false, msg: "Token nao valido ou expirado."});
+        if (!user) {
+            return res.status(400).json({ success: false, msg: "Token não válido ou expirado." });
         }
 
-        //Atualizar Password
-        const passHashada = await bcrypt.hash(password, 10);
-        user.password = passHashada;
+        user.password = password;
         user.resetPasswordToken = undefined;
         user.resetPasswordExpire = undefined;
 
         await user.save();
 
+        //Enviar email de confirmação
         await enviarEmailResetSucesso(user.email);
 
-        res.status(200).json({success: true, msg: "Password atualizada com sucesso!"});
+        return res.status(200).json({ success: true, msg: "Password atualizada com sucesso!" });
     } catch (error) {
         console.log("Erro ao repor password", error);
-        res.status(400).json({success: false, msg: error.message});
+        return res.status(500).json({ success: false, msg: "Erro no servidor" });
     }
-}
+};

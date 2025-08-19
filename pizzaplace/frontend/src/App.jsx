@@ -12,6 +12,7 @@ import PaginaCancelarCompra from "./pages/PaginaCancelarCompra.jsx";
 import PaginaVerificarEmail from "./pages/PaginaVerificarEmail.jsx";
 import MeusPedidos from "./pages/MeusPedidos.jsx";
 import PaginaEsqueceuPassword from "./pages/PaginaEsqueceuPassword.jsx";
+import PaginaResetPassword from "./pages/PaginaResetPassword.jsx";
 
 //Hooks
 import { useCarrinhoStore } from "./stores/useCarrinhoStore.js";
@@ -64,6 +65,7 @@ function App() {
           <Route path="/verificar-email" element={<PaginaVerificarEmail/>}/>
           <Route path="/meus-pedidos" element={ user ? <MeusPedidos/> : <Navigate to="/login" /> }/>
           <Route path="/esqueceu-password" element={<PaginaEsqueceuPassword/>}/>
+          <Route path="/reset-password/:token" element={<PaginaResetPassword/>}/>
         </Routes>
       </div>
       <Toaster />

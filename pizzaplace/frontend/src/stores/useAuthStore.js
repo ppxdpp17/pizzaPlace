@@ -80,11 +80,11 @@ export const useAuthStore = create((set) => ({
 		set({ isLoading: true, error: null });
 		try {
 			const response = await axios.post(`${API_URL}/esqueceu-password`, { email });
-			set({ message: response.data.message, isLoading: false });
+			set({ message: response.data?.msg || response.data?.message || null, isLoading: false });
 		} catch (error) {
 			set({
-				isLoading: false,
-				error: error.response.data.message || "Erro no envio do email de redefinição de password",
+			isLoading: false,
+			error: error.response?.data?.msg || error.response?.data?.message || "Erro no envio do email de redefinição de password",
 			});
 			throw error;
 		}
@@ -93,11 +93,11 @@ export const useAuthStore = create((set) => ({
 		set({ isLoading: true, error: null });
 		try {
 			const response = await axios.post(`${API_URL}/reset-password/${token}`, { password });
-			set({ message: response.data.message, isLoading: false });
+			set({ message: response.data?.msg || response.data?.message || null, isLoading: false });
 		} catch (error) {
 			set({
-				isLoading: false,
-				error: error.response.data.message || "Erro ao redifinir a passwords",
+			isLoading: false,
+			error: error.response?.data?.msg || error.response?.data?.message || "Erro ao redifinir a password",
 			});
 			throw error;
 		}
