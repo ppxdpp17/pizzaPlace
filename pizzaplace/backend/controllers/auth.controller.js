@@ -226,24 +226,39 @@ export const esqueceuPassword = async (req, res) => {
     const { email } = req.body;
 
     try {
-        const user = await User.findOne({ email });
+        if (!email) {
+          console.log("esqueceuPassword: pedido sem email");
+          return res.status(400).json({ success: false, msg: "Email é obrigatório." });
+        }
 
-        //Não revelar se o email existe — resposta genérica
+        const emailNormalized = String(email).toLowerCase().trim();
+        console.log("esqueceuPassword: pedido para:", emailNormalized);
+
+        const user = await User.findOne({ email: emailNormalized });
+
+        // Resposta genérica para evitar enumeração de emails
         if (!user) {
+            console.log("esqueceuPassword: email não encontrado:", emailNormalized);
             return res.status(200).json({ success: true, msg: "Se esse email existir no nosso sistema, enviámos um link." });
         }
 
-        //Gerar token de repor password (texto claro enviado por email)
+        // Gerar token e expiry (guardar como Date)
         const resetToken = crypto.randomBytes(20).toString("hex");
-        //Guardar expiry como Date object (1 hora)
-        const resetTokenExpiresAt = new Date(Date.now() + 1 * 60 * 60 * 1000); //1 hora a partir de agora
+        const resetTokenExpiresAt = new Date(Date.now() + 1 * 60 * 60 * 1000); // 1h
 
         user.resetPasswordToken = resetToken;
         user.resetPasswordExpire = resetTokenExpiresAt;
         await user.save();
 
-        //Enviar email com link (path param)
-        await enviarPasswordResetEmail(user.email, `${process.env.CLIENT_URL}/reset-password/${resetToken}`);
+        console.log("esqueceuPassword: token gerado para userId=", user._id, "token=", resetToken);
+
+        try {
+          await enviarPasswordResetEmail(user.email, `${process.env.CLIENT_URL}/reset-password/${resetToken}`);
+          console.log("esqueceuPassword: email enviado para", user.email);
+        } catch (sendErr) {
+          console.error("esqueceuPassword: erro ao enviar email:", sendErr);
+          // Não devolver erro para o cliente (mantemos a resposta genérica)
+        }
 
         return res.status(200).json({ success: true, msg: "Se esse email existir no nosso sistema, enviámos um link." });
 
@@ -251,7 +266,7 @@ export const esqueceuPassword = async (req, res) => {
         console.log("Erro ao esquecer password", error);
         return res.status(500).json({ success: false, msg: "Erro no servidor" });
     }
-};
+}
 
 
 export const reporPassword = async (req, res) => {

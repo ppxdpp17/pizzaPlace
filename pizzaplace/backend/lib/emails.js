@@ -27,7 +27,7 @@ export const enviarEmailWelcome = async (email, nome) => {
         const response = await mailTrapClient.send({
             from: sender,
             to: recipient,
-            template_uuid: "707f6f2e-9c2f-4146-84f3-0a6eb59296ea",
+            template_uuid: "ecf1b1e4-e6eb-43cf-9b41-f8059b9b56b5",
             template_variables: {
                 "company_info_name": "Big Boss'",
                 "name": nome,
@@ -55,12 +55,16 @@ export const enviarPasswordResetEmail = async (email, resetURL) => {
             subject: "Redefinir Password",
             html: PASSWORD_RESET_REQUEST_TEMPLATE.replace("{resetURL}", resetURL),
             category: "Password Reset"
-        })
+        });
+
+        console.log("enviarPasswordResetEmail: enviado com sucesso para", email, "res:", response);
+        return response;
     } catch (error) {
-        console.error("Erro ao enviar email de redefinição de password", error);
-        throw new Error(`Erro ao enviar email de redefinição de password: ${error}`);
+        console.error("enviarPasswordResetEmail: erro ao enviar para", email, error);
+        throw error;
     }
 }
+
 
 export const enviarEmailResetSucesso = async (email) => {
     const recipient = [{email}];
