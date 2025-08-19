@@ -5,6 +5,7 @@ import { Lock, Loader } from "lucide-react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import Input from "../components/Input";
 import { useAuthStore } from "../stores/useAuthStore.js";
+import { MedidorForcaPassword } from "../components/MedidorForcaPassword.jsx";
 
 export default function PaginaResetPassword() {
   const { token } = useParams();
@@ -83,6 +84,8 @@ export default function PaginaResetPassword() {
               onChange={(e) => setConfirm(e.target.value)}
               required
             />
+
+            <MedidorForcaPassword password={password} />
 
             {msg && <p className="text-sm text-center mt-2 text-emerald-300">{msg}</p>}
             {error && <p className="text-sm text-center mt-2 text-red-400">{error}</p>}
