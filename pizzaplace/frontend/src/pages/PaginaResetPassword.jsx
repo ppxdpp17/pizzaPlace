@@ -5,7 +5,7 @@ import { Lock, Loader } from "lucide-react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import Input from "../components/Input";
 import { useAuthStore } from "../stores/useAuthStore.js";
-import { MedidorForcaPassword } from "../components/MedidorForcaPassword.jsx";
+import MedidorForcaPassword from "../components/MedidorForcaPassword.jsx";
 
 export default function PaginaResetPassword() {
   const { token } = useParams();
