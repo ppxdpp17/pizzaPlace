@@ -28,11 +28,11 @@ const SumarioPedido = () => {
     const navigate = useNavigate();
 
 
-    const handleSelectEntrega = async ({ tipoEntrega, paymentMethod }) => {
+    const handleSelectEntrega = async ({ tipoEntrega, paymentMethod, pedidoLocation }) => {
         fecharModal();
 
         if(paymentMethod === "dinheiro") {
-            setPendingCash({ tipoEntrega });
+            setPendingCash({ tipoEntrega, pedidoLocation });
             setShowAddressForm(true);
             return;
         }
@@ -43,7 +43,8 @@ const SumarioPedido = () => {
             produtos: carrinho,
             codigoCupao: cupao?.codigo || "",
             tipoEntrega,
-            paymentMethod: "cartao"
+            paymentMethod: "cartao",
+            pedidoLocation
         })).data;
 
         const { error } = await stripe.redirectToCheckout({ sessionId });
@@ -56,6 +57,7 @@ const SumarioPedido = () => {
         await axios.post("/pagamentos/dinheiro", {
             produtos: carrinho,
             tipoEntrega,
+            pedidoLocation,
             shippingAddress
         });
         limparCarrinho();
