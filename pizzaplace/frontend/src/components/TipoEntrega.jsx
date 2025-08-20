@@ -2,19 +2,29 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Utensils, Bike, CreditCard, Coins } from "lucide-react";
 
+const LOCATIONS = [
+  "Bragança (Av. João da Cruz)",
+  "Bragança (Shopping)",
+  "Vila Real",
+  "Chaves",
+  "Braga"
+];
+
 export default function TipoEntrega({ isOpen, onClose, onSelect }) {
   if (!isOpen) return null;
 
   const [deliveryType, setDeliveryType] = useState(null);
   const [paymentType, setPaymentType] = useState(null);
+  const [pedidoLocation, setPedidoLocation] = useState("");
 
   useEffect(() => {
     if (deliveryType && paymentType) {
-      onSelect({ tipoEntrega: deliveryType, paymentMethod: paymentType });
+      onSelect({ tipoEntrega: deliveryType, paymentMethod: paymentType, pedidoLocation });
       setDeliveryType(null);
       setPaymentType(null);
+      setPedidoLocation("");
     }
-  }, [deliveryType, paymentType, onSelect]);
+  }, [deliveryType, paymentType, pedidoLocation,onSelect]);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
@@ -24,7 +34,23 @@ export default function TipoEntrega({ isOpen, onClose, onSelect }) {
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.3 }}
       >
-        {/* Passo 1: escolha de entrega */}
+        {/* Combobox para selecionar as localizações */}
+        <div>
+          <label className="block text-sm text-gray-300 mb-1">Localização/Loja</label>
+          <div className="relative">
+            <select
+              value={pedidoLocation}
+              onChange={(e) => setPedidoLocation(e.target.value)}
+              className="w-full p-3 rounded-lg bg-gray-700 text-white focus:outline-none"
+            >
+              <option value="">-- Selecionar localização (opcional) --</option>
+              {LOCATIONS.map((loc) => (
+                <option key={loc} value={loc}>{loc}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        {/* Passo 2: escolha de entrega */}
         <h3 className="text-lg font-semibold text-white text-center">
           Escolha uma forma de entrega
         </h3>
@@ -82,6 +108,7 @@ export default function TipoEntrega({ isOpen, onClose, onSelect }) {
           onClick={() => {
             setDeliveryType(null);
             setPaymentType(null);
+            setPedidoLocation("");
             onClose();
           }}
           className="w-full mt-4 block text-center text-sm text-red-400 hover:text-gray-200 font-bold"
