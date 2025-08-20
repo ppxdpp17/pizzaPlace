@@ -65,7 +65,8 @@ export const criarSessaoCheckout = async (req, res) => {
                         quantidade: p.quantidade,
                         preco: p.preco,
                     })
-                ))
+                )),
+                pedidoLocation: req.body.pedidoLocation || "",
             }
         });
 
@@ -169,7 +170,8 @@ export const sucessoCheckout = async(req, res) => {
                 stripeSessionID: sessaoId,
                 metodoPagamento: sessao.metadata.metodoPagamento,
                 shippingAddress,
-                estado: "A Cozinhar"
+                estado: "A Cozinhar",
+                localizacao: sessao.metadata.pedidoLocation,
             });
 
             //Limpar carrinho
@@ -218,7 +220,8 @@ export const cashPayment = async (req, res) => {
         tipoEntrega,
         metodoPagamento: "dinheiro",
         shippingAddress,
-        estado: "A Cozinhar"
+        estado: "A Cozinhar",
+        localizacao: pedidoLocation
     });
 
 
