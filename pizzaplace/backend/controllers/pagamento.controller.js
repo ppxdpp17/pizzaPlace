@@ -5,7 +5,7 @@ import User from "../models/user.model.js";
 
 export const criarSessaoCheckout = async (req, res) => {
     try {
-        const {produtos, codigoCupao, pedidoLocation} = req.body;
+        const {produtos, codigoCupao, tipoEntrega, pedidoLocation} = req.body;
 
         if(!Array.isArray(produtos) || produtos.length === 0)
         {
@@ -62,7 +62,7 @@ export const criarSessaoCheckout = async (req, res) => {
             metadata: {
                 userId: req.user._id.toString(),
                 codigoCupao: codigoCupao || "",
-                tipoEntrega: req.body.tipoEntrega ? "delivery" : "takeaway",
+                tipoEntrega: tipoEntrega,
                 metodoPagamento: "cartao",
                 produtos: JSON.stringify(
                     produtos.map((p) => ({

@@ -53,7 +53,7 @@ const SumarioPedido = () => {
 
     const handleAddressSubmit = async (shippingAddress) => {
         setShowAddressForm(false);
-        const { tipoEntrega } = pendingCash;
+        const { tipoEntrega, pedidoLocation } = pendingCash;
         await axios.post("/pagamentos/dinheiro", {
             produtos: carrinho,
             tipoEntrega,
