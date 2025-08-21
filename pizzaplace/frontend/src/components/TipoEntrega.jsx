@@ -27,7 +27,7 @@ export default function TipoEntrega({ isOpen, onClose, onSelect }) {
     }
   }, [deliveryType, paymentType, pedidoLocation, onSelect]);
 
-  const paymentDisabled = !pedidoLocation; // true se não houver localização
+  const paymentDisabled = !pedidoLocation; //true se não houver localização
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
@@ -46,7 +46,7 @@ export default function TipoEntrega({ isOpen, onClose, onSelect }) {
               onChange={(e) => setPedidoLocation(e.target.value)}
               className="w-full p-3 rounded-lg bg-gray-700 text-white focus:outline-none"
             >
-              <option value="">-- Selecionar localização (obrigatório) --</option>
+              <option value="">-- Selecionar localização --</option>
               {LOCATIONS.map((loc) => (
                 <option key={loc} value={loc}>{loc}</option>
               ))}

@@ -5,11 +5,16 @@ import User from "../models/user.model.js";
 
 export const criarSessaoCheckout = async (req, res) => {
     try {
-        const {produtos, codigoCupao} = req.body;
+        const {produtos, codigoCupao, pedidoLocation} = req.body;
 
         if(!Array.isArray(produtos) || produtos.length === 0)
         {
             return res.status(400).json({msg: "Conjunto de produtos vazio ou inválido"});
+        }
+
+        if (!pedidoLocation) 
+        {
+            return res.status(400).json({ msg: "A localização/loja é obrigatória." });
         }
 
         let precoTotal = 0;
@@ -66,7 +71,7 @@ export const criarSessaoCheckout = async (req, res) => {
                         preco: p.preco,
                     })
                 )),
-                pedidoLocation: req.body.pedidoLocation || "",
+                pedidoLocation: pedidoLocation,
             }
         });
 
@@ -197,7 +202,7 @@ export const sucessoCheckout = async(req, res) => {
 
 export const cashPayment = async (req, res) => {
   try {
-    const { produtos, tipoEntrega, shippingAddress } = req.body;
+    const { produtos, tipoEntrega, pedidoLocation, shippingAddress } = req.body;
 
     if (!Array.isArray(produtos) || produtos.length === 0) {
       return res.status(400).json({ msg: "Carrinho vazio" });
