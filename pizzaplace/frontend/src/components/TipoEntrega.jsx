@@ -1,14 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Utensils, Bike, CreditCard, Coins } from "lucide-react";
-
-const LOCATIONS = [
-  "Bragança (Av. João da Cruz)",
-  "Bragança (Shopping)",
-  "Vila Real",
-  "Chaves",
-  "Braga"
-];
+import LocationDropdown from "./LocationDropdown";
 
 export default function TipoEntrega({ isOpen, onClose, onSelect }) {
   if (!isOpen) return null;
@@ -41,16 +34,7 @@ export default function TipoEntrega({ isOpen, onClose, onSelect }) {
         <div>
           <label className="block text-sm text-gray-300 mb-1">Localização / Loja <span className="text-red-400">*</span></label>
           <div className="relative">
-            <select
-              value={pedidoLocation}
-              onChange={(e) => setPedidoLocation(e.target.value)}
-              className="w-full p-3 rounded-lg bg-gray-700 text-white focus:outline-none"
-            >
-              <option value="">-- Selecionar localização --</option>
-              {LOCATIONS.map((loc) => (
-                <option key={loc} value={loc}>{loc}</option>
-              ))}
-            </select>
+            <LocationDropdown />
           </div>
         </div>
 
