@@ -35,7 +35,6 @@ export default function TipoEntrega({ isOpen, onClose, onSelect }) {
           <label className="block text-sm text-gray-300 mb-1">Localização / Loja <span className="text-red-400">*</span></label>
           <div className="relative">
             <LocationDropdown value={pedidoLocation} onChange={setPedidoLocation} />
-
           </div>
         </div>
 
