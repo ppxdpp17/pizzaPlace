@@ -63,7 +63,7 @@ export const useAuthStore = create((set) => ({
 			set({ user: response.data.user, isAuthenticated: true, isLoading: false });
 			return response.data;
 		} catch (error) {
-			set({ error: error.response.data.message || "Erro ao verificar email", isLoading: false });
+			set({ error: error.response.data.message || "Erro ao verificar email!", isLoading: false });
 			throw error;
 		}
 	},

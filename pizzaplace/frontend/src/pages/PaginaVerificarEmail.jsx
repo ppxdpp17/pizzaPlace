@@ -66,7 +66,7 @@ const PaginaVerificarEmail = () => {
 	}, [codigo]);
 
 	return (
-		<div className="min-h-screen flex items-center justify-center bg-gray-900">
+		<div className="min-h-screen flex items-center justify-center">
 			<div className='max-w-md w-full bg-gray-800 bg-opacity-50 backdrop-filter backdrop-blur-xl rounded-2xl shadow-xl overflow-hidden'>
 				<motion.div
 					initial={{ opacity: 0, y: -50 }}
@@ -77,7 +77,7 @@ const PaginaVerificarEmail = () => {
 					<h2 className='text-3xl font-bold mb-6 text-center bg-gradient-to-r from-green-400 to-emerald-500 text-transparent bg-clip-text'>
 						Verifique o seu Email
 					</h2>
-					<p className='text-center text-gray-300 mb-6'>Insira o código d 6 digitos enviado para o email registado</p>
+					<p className='text-center text-gray-300 mb-6'>Insira o código de 6 digitos enviado para o email registado</p>
 
 					<form onSubmit={handleSubmit} className='space-y-6'>
 						<div className='flex justify-between'>
@@ -94,7 +94,7 @@ const PaginaVerificarEmail = () => {
 								/>
 							))}
 						</div>
-						{error && <p className='text-red-500 font-semibold mt-2'>{error}</p>}
+						{error && <p className='text-center text-red-500 font-semibold mt-2'>{error}</p>}
 						<motion.button
 							whileHover={{ scale: 1.05 }}
 							whileTap={{ scale: 0.95 }}
