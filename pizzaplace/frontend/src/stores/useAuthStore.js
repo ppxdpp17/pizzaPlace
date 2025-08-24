@@ -41,7 +41,7 @@ export const useAuthStore = create((set) => ({
 				isLoading: false,
 			});
 		} catch (error) {
-			set({ error: error.response?.data?.message || "Erro ao entrar", isLoading: false });
+			set({ error: error.response?.data?.message || "Credenciais inválidas!", isLoading: false });
 			throw error;
 		}
 	},
