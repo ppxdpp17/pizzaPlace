@@ -21,7 +21,7 @@ export const useAuthStore = create((set) => ({
 		} catch (error) {
 			console.error("Resposta completa do erro:", error.response);
   			console.error("Mensagem do servidor:", error.response?.data);
-			set({ error: error.response.data.message || "Erro ao criar conta", isLoading: false });
+			set({ error: error.response.data.message || "Por favor preencha todos os campos!", isLoading: false });
 			throw error;
 		}
 	},

@@ -71,7 +71,6 @@ const SignUpPage = () => {
               onChange={(e) => setPassword(e.target.value)}
             />
 
-            {/* Novo campo de confirmação */}
             <Input
               icon={Lock}
               type='password'
@@ -80,9 +79,8 @@ const SignUpPage = () => {
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
 
-            {/* Erro de mismatch */}
             {(localError || error) && (
-              <p className='text-red-500 font-semibold mt-2'>
+              <p className='text-center text-red-500 font-semibold mt-2'>
                 {localError || error}
               </p>
             )}
