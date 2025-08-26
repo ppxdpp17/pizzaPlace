@@ -4,13 +4,6 @@ import { useEffect, useState, useRef } from "react";
 import axios from "../lib/axios";
 import { Package } from "lucide-react";
 
-function calcularEstado(createdAt) {
-  const minutes = (Date.now() - new Date(createdAt).getTime()) / 60000;
-  if (minutes < 5) return "A Cozinhar...";
-  if (minutes < 10) return "A caminho";
-  return "Entregue!";
-}
-
 function ImagemCollage({ imagens = [], altBase = "Produto" }) {
   const count = imagens.length;
   if (count === 0) {
@@ -37,8 +30,8 @@ function ImagemCollage({ imagens = [], altBase = "Produto" }) {
   return (
     <div className="grid grid-cols-2 grid-rows-2 gap-1 w-16 h-16">
       <img src={imagens[0]} alt={`${altBase} 1`} className="object-cover w-full h-full rounded-tl-md" />
-      <img src={imagens[1]} alt={`${altBase} 2`} className="object-cover w-full h-full rounded-tr-md" />
-      <img src={imagens[2]} alt={`${altBase} 3`} className="object-cover w-full h-full rounded-bl-md" />
+      <img src={imagens[1]} alt={`${altBase} 2`} className="object-cover w-full h/full rounded-tr-md" />
+      <img src={imagens[2]} alt={`${altBase} 3`} className="object-cover w-full h/full rounded-bl-md" />
       <div className="relative w-full h-full rounded-br-md overflow-hidden">
         <img src={imagens[3] ?? imagens[0]} alt={`${altBase} 4`} className="object-cover w-full h-full" />
         {extra > 0 && (
@@ -95,10 +88,9 @@ export default function MeusPedidos() {
     fetchPedidos();
     intervalRef.current = setInterval(() => {
       fetchPedidos();
-    }, 30000); //30s
+    }, 30000);
     return () => clearInterval(intervalRef.current);
   }, []);
-
 
   if (loading) return <p className="p-4 text-center">A carregar...</p>;
   if (error) return <p className="p-4 text-center text-red-400">Erro: {error}</p>;
@@ -108,6 +100,7 @@ export default function MeusPedidos() {
     <div className="p-4">
       <div className="max-w-7xl mx-auto space-y-4">
         <h2 className="text-2xl font-semibold text-emerald-400">Os Meus Pedidos</h2>
+
         {pedidos.map(pedido => {
           const imagens = (pedido.produtos ?? []).map(p => p.produto?.imagem).filter(Boolean);
           const imagensFinal = imagens.length ? imagens : ["/placeholder.png"];
@@ -115,10 +108,16 @@ export default function MeusPedidos() {
           const nomePedido = nomes.length === 1 ? nomes[0] : `${nomes[0]} +${Math.max(0, nomes.length - 1)}`;
           const address = pedido.shippingAddress || {};
           const total = Number(pedido.total ?? 0).toFixed(2);
-          const estado = pedido.estadoAtual || pedido.estado || calcularEstado(pedido.createdAt);
-          const estadoColor =
-            estado === "A Cozinhar" ? "text-yellow-300" :
-            estado === "Em entrega" ? "text-amber-300" : "text-emerald-400";
+
+          //Usar "A cozinhar" ou o que está guardado no "pedido"
+          const estado = pedido.estado || "A Cozinhar";
+
+          //Mapping para cor e label
+          const estadoLabel = estado === "A Cozinhar" ? "A cozinhar..." :
+                              estado === "A Caminho"   ? "A caminho" : "Entregue!";
+          const estadoColor = estado === "A Cozinhar" ? "text-yellow-300" :
+                              estado === "A Caminho"   ? "text-amber-300" : "text-emerald-400";
+
           const dataHora = pedido.createdAt ? new Date(pedido.createdAt).toLocaleString() : "";
 
           return (
@@ -136,9 +135,10 @@ export default function MeusPedidos() {
                 </div>
                 <div className="mt-auto pt-4 text-right">
                   <div className="text-xs text-gray-400">Estado:</div>
-                  <div className={`mt-1 text-sm font-semibold ${estadoColor}`}>{estado}</div>
+                  <div className={`mt-1 text-sm font-semibold ${estadoColor}`}>{estadoLabel}</div>
                 </div>
               </div>
+
               <div className="flex items-center gap-4 pl-4 flex-1">
                 <ImagemCollage imagens={imagensFinal} altBase={nomePedido} />
                 <div className="flex-1">
@@ -149,17 +149,20 @@ export default function MeusPedidos() {
                     </div>
                     <div className="text-sm text-gray-400">{dataHora}</div>
                   </div>
+
                   <div className="text-sm text-gray-400 mt-2">
                     {address.line1}{address.line2 ? `, ${address.line2}` : ""} • {address.city}
                   </div>
                   <div className="text-sm text-gray-400">
                     {address.postal_code} • {address.country}
                   </div>
+
                   <div className="text-sm text-gray-400 mt-2">
                     Entrega: <span className="font-medium text-white">{pedido.tipoEntrega}</span>
                     {"  •  "}
                     Pagamento: <span className="font-medium text-white">{pedido.metodoPagamento}</span>
                   </div>
+
                   <div className="mt-2 text-sm text-gray-300">
                     {pedido.produtos?.map((p, idx) => (
                       <div key={idx} className="flex justify-between">
@@ -173,6 +176,7 @@ export default function MeusPedidos() {
                   </div>
                 </div>
               </div>
+
             </motion.div>
           );
         })}

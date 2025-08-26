@@ -1,6 +1,11 @@
 import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
 import axios from "../lib/axios";
+import { useAuthStore } from "../stores/useAuthStore";
+
+//Verificar se é administrador
+const { user } = useUserStore();
+const isAdmin = user?.cargo === "admin";
 
 function calcularEstado(createdAt) {
   const minutes = (Date.now() - new Date(createdAt).getTime()) / 60000;
@@ -128,9 +133,42 @@ const Pedidos = () => {
                 <div className="text-sm text-gray-400">Total</div>
                 <div className="text-xl font-semibold text-emerald-400">€{total}</div>
               </div>
+
               <div className="mt-auto pt-4 text-right">
                 <div className="text-xs text-gray-400">Estado:</div>
-                <div className={`mt-1 text-sm font-semibold ${estadoColor}`}>{estado}</div>
+
+                {isAdmin ? (
+                  <div className="mt-1">
+                    <select
+                      value={pedido.estado}
+                      onChange={async (e) => {
+                        const novoEstado = e.target.value;
+                        //Atualiza UI
+                        setPedidos(prev => prev.map(p => p._id === pedido._id ? { ...p, estado: novoEstado } : p));
+                        try {
+                          await axios.patch(`/pedidos/${pedido._id}/estado`, { estado: novoEstado });
+                        } catch (err) {
+                          setPedidos(prev => prev.map(p => p._id === pedido._id ? { ...p, estado: pedido.estado } : p));
+                          console.error("Erro ao atualizar estado:", err);
+                          alert("Erro ao atualizar estado. Tenta novamente.");
+                        }
+                      }}
+                      className="mt-1 w-full bg-gray-700 text-white rounded-md p-2"
+                    >
+                      <option value="A Cozinhar">A Cozinhar</option>
+                      <option value="A Caminho">A Caminho</option>
+                      <option value="Entregue">Entregue</option>
+                    </select>
+                  </div>
+                ) : (
+                  //Mostrar normalmente para utilizadores não admin
+                  <div className={`mt-1 text-sm font-semibold ${
+                      pedido.estado === "A Cozinhar" ? "text-yellow-300" :
+                      pedido.estado === "A Caminho" ? "text-amber-300" : "text-emerald-400"
+                  }`}>
+                    {pedido.estado === "A Cozinhar" ? "A cozinhar..." : pedido.estado === "A Caminho" ? "A caminho" : "Entregue!"}
+                  </div>
+                )}
               </div>
             </div>
             {/*Conteúdo principal: imagens + infos*/}
