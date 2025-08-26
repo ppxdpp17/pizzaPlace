@@ -89,7 +89,7 @@ export default function PaginaSucessoCompra() {
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-400">Tempo estimado:</span>
               <span className="text-sm font-semibold text-emerald-400">
-                30-40 minutos
+                20-30 minutos
               </span>
             </div>
           </div>

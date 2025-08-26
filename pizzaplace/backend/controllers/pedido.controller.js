@@ -7,13 +7,7 @@ export const getTodosPedidos = async (req, res) => {
       .populate("user", "name email")
       .populate("produtos.produto", "nome imagem preco");
 
-      const pedidosComEstado = pedidos.map(p => {
-        const o = p.toObject();
-        o.estadoAtual = o.estado || calcularEstadoPorTempo(o.createdAt);
-        return o;
-      });
-    return res.status(200).json({ pedidos: pedidosComEstado });
-
+    return res.status(200).json({ pedidos });
   } catch (err) {
     console.error("Erro ao buscar pedidos:", err);
     return res.status(500).json({ msg: "Erro no servidor" });
@@ -28,12 +22,7 @@ export const getPedidosDoUtilizador = async (req, res) => {
       .sort({ createdAt: -1 })
       .populate("produtos.produto", "nome imagem preco"); 
 
-    const pedidosComEstado = pedidos.map(p => {
-      const o = p.toObject();
-      o.estadoAtual = o.estado || calcularEstadoPorTempo(o.createdAt);
-      return o;
-    });
-    return res.status(200).json({ pedidos: pedidosComEstado });
+    return res.status(200).json({ pedidos });
 
   } catch (err) {
     console.error("Erro ao buscar pedidos do user:", err);
@@ -41,10 +30,11 @@ export const getPedidosDoUtilizador = async (req, res) => {
   }
 };
 
-function calcularEstadoPorTempo(createdAt) {
+//Função para calcular estado com base no tempo passado
+/* function calcularEstadoPorTempo(createdAt) {
   if (!createdAt) return "A Cozinhar";
   const mins = (Date.now() - new Date(createdAt).getTime()) / 60000;
   if (mins < 5) return "A Cozinhar";
   if (mins < 10) return "Em entrega";
   return "Entregue";
-}
+} */
