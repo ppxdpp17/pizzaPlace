@@ -38,3 +38,36 @@ export const getPedidosDoUtilizador = async (req, res) => {
   if (mins < 10) return "Em entrega";
   return "Entregue";
 } */
+
+export const updatePedidoEstado = async (req, res) => {
+  try {
+    const pedidoId = req.params.id;
+    const { estado } = req.body;
+
+    const estadosPermitidos = ["A Cozinhar", "A Caminho", "Entregue"];
+    if (!estadosPermitidos.includes(estado)) {
+      return res.status(400).json({ msg: "Estado inválido." });
+    }
+
+    //Só admins podem mudaqr
+    if (!req.user || req.user.cargo !== "admin") {
+      return res.status(403).json({ msg: "Acesso negado. Apenas administradores." });
+    }
+
+    const pedido = await Pedido.findByIdAndUpdate(
+      pedidoId,
+      { $set: { estado } },
+      { new: true }
+    ).populate("produtos.produto", "nome imagem preco")
+     .populate("user", "name email");
+
+    if (!pedido) {
+      return res.status(404).json({ msg: "Pedido não encontrado." });
+    }
+
+    return res.status(200).json({ success: true, pedido });
+  } catch (err) {
+    console.error("Erro ao actualizar estado do pedido:", err);
+    return res.status(500).json({ msg: "Erro no servidor" });
+  }
+};
