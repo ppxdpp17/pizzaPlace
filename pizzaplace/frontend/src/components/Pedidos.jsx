@@ -1,11 +1,8 @@
 import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
 import axios from "../lib/axios";
-import { useAuthStore } from "../stores/useAuthStore";
-
-//Verificar se é administrador
-const { user } = useUserStore();
-const isAdmin = user?.cargo === "admin";
+import { useUserStore } from "../stores/useUserStore.js";
+import EstadoDropdown from "./EstadoDropdown.jsx";
 
 function calcularEstado(createdAt) {
   const minutes = (Date.now() - new Date(createdAt).getTime()) / 60000;
@@ -60,6 +57,11 @@ function ImagemCollage({ imagens = [], altBase = "Produto" }) {
 }
 
 const Pedidos = () => {
+
+  //Verificar se é administrador
+  const { user } = useUserStore();
+  const isAdmin = user?.cargo === "admin";
+
   const [pedidos, setPedidos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -139,26 +141,21 @@ const Pedidos = () => {
 
                 {isAdmin ? (
                   <div className="mt-1">
-                    <select
+                    <EstadoDropdown
                       value={pedido.estado}
-                      onChange={async (e) => {
-                        const novoEstado = e.target.value;
-                        //Atualiza UI
+                      onChange={async (novoEstado) => {
+                        // Atualiza UI imediatamente
                         setPedidos(prev => prev.map(p => p._id === pedido._id ? { ...p, estado: novoEstado } : p));
                         try {
                           await axios.patch(`/pedidos/${pedido._id}/estado`, { estado: novoEstado });
                         } catch (err) {
+                          // reverter em caso de erro
                           setPedidos(prev => prev.map(p => p._id === pedido._id ? { ...p, estado: pedido.estado } : p));
                           console.error("Erro ao atualizar estado:", err);
-                          alert("Erro ao atualizar estado. Tenta novamente.");
+                          alert("Erro ao atualizar estado. Tente novamente.");
                         }
                       }}
-                      className="mt-1 w-full bg-gray-700 text-white rounded-md p-2"
-                    >
-                      <option value="A Cozinhar">A Cozinhar</option>
-                      <option value="A Caminho">A Caminho</option>
-                      <option value="Entregue">Entregue</option>
-                    </select>
+                    />
                   </div>
                 ) : (
                   //Mostrar normalmente para utilizadores não admin
