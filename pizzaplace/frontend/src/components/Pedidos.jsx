@@ -143,13 +143,14 @@ const Pedidos = () => {
                   <div className="mt-1">
                     <EstadoDropdown
                       value={pedido.estado}
+                      compact={true}   // <--- torna-o menos largo
                       onChange={async (novoEstado) => {
-                        // Atualiza UI imediatamente
+                        // Atualiza UI de forma optimistic
                         setPedidos(prev => prev.map(p => p._id === pedido._id ? { ...p, estado: novoEstado } : p));
                         try {
                           await axios.patch(`/pedidos/${pedido._id}/estado`, { estado: novoEstado });
                         } catch (err) {
-                          // reverter em caso de erro
+                          // Reverter em caso de erro
                           setPedidos(prev => prev.map(p => p._id === pedido._id ? { ...p, estado: pedido.estado } : p));
                           console.error("Erro ao atualizar estado:", err);
                           alert("Erro ao atualizar estado. Tente novamente.");
