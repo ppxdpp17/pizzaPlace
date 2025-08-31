@@ -1,4 +1,3 @@
-// src/pages/PaginaResetPassword.jsx
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Lock, Loader } from "lucide-react";
@@ -44,12 +43,11 @@ export default function PaginaResetPassword() {
 
     setIsLoading(true);
     try {
-      // chama a store (que faz POST para /auth/reset-password/:token)
+      //Chama a store (que faz POST para /auth/reset-password/:token)
       await resetPassword(token, password);
       setMsg("Password alterada com sucesso. A redirecionar para o login...");
       setTimeout(() => navigate("/login"), 1400);
     } catch (err) {
-      // a store já define mensagens, mas garantimos fallback
       setError(err?.response?.data?.msg || err?.message || "Erro ao repor a password.");
     } finally {
       setIsLoading(false);

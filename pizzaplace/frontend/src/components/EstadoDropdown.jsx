@@ -49,7 +49,7 @@ export default function EstadoDropdown({
   }, [open, focusedIndex, onChange]);
 
   const selected = ESTADOS.find(s => s.value === value);
-  const btnWidthClass = compact ? "w-36" : "w-full"; // menos largo quando compact
+  const btnWidthClass = compact ? "w-36" : "w-full";
 
   return (
     <div className={`relative ${btnWidthClass}`} ref={containerRef}>
@@ -61,7 +61,6 @@ export default function EstadoDropdown({
         className={`flex items-center justify-between px-3 py-2 rounded-md ${compact ? "text-sm" : ""} bg-gray-700 text-white hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500`}
       >
         <div className="flex items-center gap-2">
-          {/* Removido círculo; em vez disso mostra um pequeno indicador colorido quando seleccionado */}
           {selected ? (
             <span className={`${selected.color} w-2 h-2 rounded-full inline-block`} />
           ) : (
@@ -100,7 +99,6 @@ export default function EstadoDropdown({
                     onClick={() => { onChange(st.value); setOpen(false); }}
                     className={`w-full text-left flex items-center gap-3 px-3 py-2 rounded-md transition ${rowClass}`}
                   >
-                    {/* barra colorida à esquerda em vez de ícone */}
                     <div className={`w-1 h-6 rounded-md ${st.color}`} />
                     <div className="flex-1">
                       <div className="text-sm font-medium">{st.label}</div>

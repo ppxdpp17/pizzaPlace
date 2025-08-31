@@ -49,7 +49,7 @@ export const updatePedidoEstado = async (req, res) => {
       return res.status(400).json({ msg: "Estado inválido." });
     }
 
-    //Só admins podem mudaqr
+    //Só admins podem mudar
     if (!req.user || req.user.cargo !== "admin") {
       return res.status(403).json({ msg: "Acesso negado. Apenas administradores." });
     }

@@ -30,7 +30,7 @@ export default function TipoEntrega({ isOpen, onClose, onSelect }) {
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.3 }}
       >
-        {/* Combobox para selecionar as localizações */}
+        {/*Combobox para selecionar as localizações*/}
         <div>
           <label className="block text-sm text-gray-300 mb-1">Localização / Loja <span className="text-red-400">*</span></label>
           <div className="relative">
@@ -38,7 +38,7 @@ export default function TipoEntrega({ isOpen, onClose, onSelect }) {
           </div>
         </div>
 
-        {/* Passo 2: escolha de entrega */}
+        {/*Escolha no tipo de entrega */}
         <h3 className="text-lg font-semibold text-white text-center">
           Escolha uma forma de entrega
         </h3>
@@ -66,7 +66,7 @@ export default function TipoEntrega({ isOpen, onClose, onSelect }) {
           </motion.button>
         </div>
 
-        {/* Escolha do tipo de pagamento*/}
+        {/*Escolha do tipo de pagamento*/}
         <h3 className="text-lg font-semibold text-white text-center mt-4">
           Selecione um método de pagamento
         </h3>

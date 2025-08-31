@@ -54,7 +54,7 @@ export const useUserStore = create((set, get) => ({
         }
     },
     refreshToken: async () => {
-        //Para previnir multipals tentativas de refresh simultâneas
+        //Para previnir multiplas tentativas de refresh simultâneas
         if(get().checkingAuth) return;
 
         set({ checkingAuth: true });

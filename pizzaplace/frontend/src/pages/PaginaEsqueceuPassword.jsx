@@ -1,10 +1,9 @@
-// src/pages/PaginaEsqueceuPassword.jsx
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, Loader } from "lucide-react";
 import { Link } from "react-router-dom";
 import Input from "../components/Input";
-import axios from "../lib/axios"; // usa o axios do teu projecto
+import axios from "../lib/axios"; 
 
 const PaginaEsqueceuPassword = () => {
   const [email, setEmail] = useState("");
@@ -22,7 +21,6 @@ const PaginaEsqueceuPassword = () => {
       const emailNormalized = String(email).toLowerCase().trim();
       console.log("[Esqueceu] a enviar para:", emailNormalized);
 
-      // Se o axios tiver baseURL='/api' então isto chama /api/auth/esqueceu-password
       const res = await axios.post("/auth/esqueceu-password", { email: emailNormalized });
 
       console.log("[Esqueceu] resposta:", res?.data);

@@ -236,15 +236,15 @@ export const esqueceuPassword = async (req, res) => {
 
         const user = await User.findOne({ email: emailNormalized });
 
-        // Resposta genérica para evitar enumeração de emails
+        //Resposta genérica para evitar enumeração de emails
         if (!user) {
             console.log("esqueceuPassword: email não encontrado:", emailNormalized);
             return res.status(200).json({ success: true, msg: "Se esse email existir no nosso sistema, enviámos um link." });
         }
 
-        // Gerar token e expiry (guardar como Date)
+        //Gerar token e expiry (guardar como Date)
         const resetToken = crypto.randomBytes(20).toString("hex");
-        const resetTokenExpiresAt = new Date(Date.now() + 1 * 60 * 60 * 1000); // 1h
+        const resetTokenExpiresAt = new Date(Date.now() + 1 * 60 * 60 * 1000); //1h
 
         user.resetPasswordToken = resetToken;
         user.resetPasswordExpire = resetTokenExpiresAt;
@@ -257,7 +257,6 @@ export const esqueceuPassword = async (req, res) => {
           console.log("esqueceuPassword: email enviado para", user.email);
         } catch (sendErr) {
           console.error("esqueceuPassword: erro ao enviar email:", sendErr);
-          // Não devolver erro para o cliente (mantemos a resposta genérica)
         }
 
         return res.status(200).json({ success: true, msg: "Se esse email existir no nosso sistema, enviámos um link." });

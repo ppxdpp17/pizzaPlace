@@ -50,7 +50,7 @@ const CriarPizzaForm = () => {
                 <h2 className="text-2xl font-semibold mb-6 text-emerald-300">Criar Nova Pizza</h2>
 
                 <form onSubmit={gerirSubmissao} className="space-y-4">
-                    {/** Input para o nome do produto */}
+                    {/**Input para o nome do produto*/}
                     <div>
                         <label htmlFor="nome" className="block text-sm font-medium text-gray-300">
                             Nome do Produto
@@ -67,7 +67,7 @@ const CriarPizzaForm = () => {
                             />
                     </div>
 
-                    {/** Input para a descrição da pizza */}
+                    {/**Input para a descrição da pizza*/}
                     <div>
                         <label htmlFor="descricao" className="block text-sm font-medium text-gray-300">
                             Descrição acerca do produto
@@ -84,7 +84,7 @@ const CriarPizzaForm = () => {
                             />
                     </div>
 
-                    {/** Input para o preço da pizza */}
+                    {/**Input para o preço da pizza*/}
                     <div>
                         <label htmlFor="preco" className="block text-sm font-medium text-gray-300">
                             Preço
@@ -102,7 +102,7 @@ const CriarPizzaForm = () => {
                             />
                     </div>
 
-                    {/** Input para a categoria do produto */}
+                    {/**Input para a categoria do produto*/}
                     <div>
                         <label htmlFor="categoria" className="block text-sm font-medium text-gray-300">
                             Categoria
@@ -126,7 +126,7 @@ const CriarPizzaForm = () => {
                         </select>
                     </div>
 
-                    {/** Input para a foto do produto */}
+                    {/**Input para a foto do produto*/}
                     <div className="mt-1 flex items-center">
                         <input type="file" id="imagem" className="sr-only" accept="image/*" onChange={gerirMudancaImagem}/>
                         <label htmlFor="imagem" className="cursor-pointer bg-gray-700 py-2 px-3 border border-gray-600 rounded-md shadow-sm text-sm
@@ -136,7 +136,7 @@ const CriarPizzaForm = () => {
                         {novoProduto.imagem && <span className="ml-3 text-sm text-gray-400">Imagem Enviada!</span>}
                     </div>
                     
-                    {/** Botão de submissão do produto */}
+                    {/**Botão de submissão do produto*/}
                     <button type="submit" 
                         className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm
                             text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2

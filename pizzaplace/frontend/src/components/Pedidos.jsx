@@ -86,7 +86,7 @@ const Pedidos = () => {
     fetchPedidos();
     intervalRef.current = setInterval(() => {
       fetchPedidos();
-    }, 30000); // 30s
+    }, 30000); //30s
     return () => clearInterval(intervalRef.current);
   }, []);
 
@@ -143,14 +143,14 @@ const Pedidos = () => {
                   <div className="mt-1">
                     <EstadoDropdown
                       value={pedido.estado}
-                      compact={true}   // <--- torna-o menos largo
+                      compact={true} 
                       onChange={async (novoEstado) => {
-                        // Atualiza UI de forma optimistic
+                        //Atualiza UI
                         setPedidos(prev => prev.map(p => p._id === pedido._id ? { ...p, estado: novoEstado } : p));
                         try {
                           await axios.patch(`/pedidos/${pedido._id}/estado`, { estado: novoEstado });
                         } catch (err) {
-                          // Reverter em caso de erro
+                          //Reverter em caso de erro
                           setPedidos(prev => prev.map(p => p._id === pedido._id ? { ...p, estado: pedido.estado } : p));
                           console.error("Erro ao atualizar estado:", err);
                           alert("Erro ao atualizar estado. Tente novamente.");
