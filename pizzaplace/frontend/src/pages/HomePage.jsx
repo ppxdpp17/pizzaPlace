@@ -4,13 +4,9 @@ import { useProductStore } from "../stores/useProductStore";
 import ProdutosRecomendados from "../components/ProdutosRecomendados";
 
 const categorias = [
-  { href: "/calcas", nome: "Calças", imageUrl: "calcas.avif" },
-  { href: "/t-shirt", nome: "T-shirts", imageUrl: "/tshirt.jpg" },
-  { href: "/sapatos", nome: "Sapatos", imageUrl: "/tilhas.avif" },
-  { href: "/oculos", nome: "Óculos", imageUrl: "/oculos.png" },
-  { href: "/casaco", nome: "Casacos", imageUrl: "/casaco.avif" },
-  { href: "/fato", nome: "Fatos", imageUrl: "/suit.png" },
-  { href: "/mala", nome: "Malas", imageUrl: "/mala.png" },
+  { href: "/pizzas", nome: "Pizzas", imageUrl: "/calcas.avif" },
+  { href: "/bebidas", nome: "Bebidas", imageUrl: "/tshirt.jpg" },
+  { href: "/Entradas", nome: "Entradas & Sobremesas", imageUrl: "/tilhas.avif" }
 ]
 
 const HomePage = () => {
