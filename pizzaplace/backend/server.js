@@ -16,6 +16,7 @@ import cupoesRoutes from "./routes/cupoes.route.js";
 import pagamentosRoutes from "./routes/pagamentos.route.js";
 import analisesRoutes from "./routes/analises.route.js";
 import pedidosRoutes from "./routes/pedidos.route.js";
+import ingredienteRoutes from "./routes/ingrediente.route.js"
 
 dotenv.config();
 
@@ -39,6 +40,7 @@ app.use("/api/cupoes", cupoesRoutes)    //Rotas do carrinho
 app.use("/api/pagamentos", pagamentosRoutes)    //Rotas do carrinho 
 app.use("/api/analises", analisesRoutes)    //Rotas do carrinho 
 app.use("/api/pedidos", pedidosRoutes)    //Rotas dos pedidos
+app.use("/api/ingredientes", ingredienteRoutes)  //Rota dos ingredientes
 
 if(process.env.NODE_ENV === "production")
 {
