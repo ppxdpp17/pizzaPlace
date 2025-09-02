@@ -26,6 +26,7 @@ const CriarPizzaForm = () => {
 
   const gerirSubmissao = async (e) => {
     e.preventDefault();
+    console.log("Enviar produto:", novoProduto);   
     try {
       await criarProduto(novoProduto);
       toast.success("Produto Criado Com Sucesso");

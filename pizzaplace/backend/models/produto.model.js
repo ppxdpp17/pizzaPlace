@@ -1,5 +1,10 @@
 import mongoose, { mongo } from "mongoose";
 
+const ingredienteSchema = new mongoose.Schema({
+  nome: { type: String, required: true },
+  icone: { type: String, default: "" }
+}, { _id: false });
+
 const produtoSchema = new mongoose.Schema({
     nome: {
         type: String,
@@ -26,9 +31,10 @@ const produtoSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    ingredientes: [
-        { type: mongoose.Schema.Types.ObjectId, ref: "Ingrediente" }
-    ],
+    ingredientes: { 
+        type: [ingredienteSchema], default: [] 
+    },
+
 },
 {
     timestamps: true
