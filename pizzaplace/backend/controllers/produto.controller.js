@@ -44,9 +44,12 @@ export const getProdutosDisponiveis = async (req, res) => {
 //Criar um produto
 export const criarProduto = async (req, res) => {
     try {
-        const {nome, descricao, preco, imagem, categoria} = req.body;
+        const {nome, descricao, preco, imagem, categoria, ingredientes} = req.body;
 
         let respostaCloudinary = null;
+
+        const ingredientesArray = Array.isArray(ingredientes) ? ingredientes : [];
+
 
         if(imagem)
         {
@@ -56,6 +59,7 @@ export const criarProduto = async (req, res) => {
         const produto = await Produto.create({
             nome, 
             descricao, 
+            ingredientes: ingredientesArray,
             preco,
             imagem: respostaCloudinary?.secure_url ? respostaCloudinary.secure_url : "", 
             categoria
