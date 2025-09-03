@@ -15,7 +15,6 @@ const categorias = [
 const CriarPizzaForm = () => {
   const [novoProduto, setNovoProduto] = useState({
     nome: "",
-    descricao: "",
     preco: "",
     categoria: "",
     imagem: "",
@@ -30,7 +29,7 @@ const CriarPizzaForm = () => {
     try {
       await criarProduto(novoProduto);
       toast.success("Produto Criado Com Sucesso");
-      setNovoProduto({ nome: "", descricao: "", preco: "", categoria: "", imagem: "", ingredientes: [] });
+      setNovoProduto({ nome: "", preco: "", categoria: "", imagem: "", ingredientes: [] });
     } catch (error) {
       console.error("Erro ao criar o produto", error);
       toast.error("Erro NA CRIAÇÃO de produto");
@@ -65,18 +64,6 @@ const CriarPizzaForm = () => {
             id="nome"
             value={novoProduto.nome}
             onChange={(e) => setNovoProduto({ ...novoProduto, nome: e.target.value })}
-            className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            required
-          />
-        </div>
-
-        <div>
-          <label htmlFor="descricao" className="block text-sm font-medium text-gray-300">Descrição</label>
-          <textarea
-            id="descricao"
-            value={novoProduto.descricao}
-            onChange={(e) => setNovoProduto({ ...novoProduto, descricao: e.target.value })}
-            rows="3"
             className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
             required
           />

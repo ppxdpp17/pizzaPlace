@@ -10,10 +10,6 @@ const produtoSchema = new mongoose.Schema({
         type: String,
         required: [true, "O nome é obrigatório."],
     },
-    descricao: {
-        type: String,
-        required: [true, "A descricao é obrigatória."],
-    },
     preco: {
         type: Number,
         min: 0,

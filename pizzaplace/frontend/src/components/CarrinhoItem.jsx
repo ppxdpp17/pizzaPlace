@@ -36,7 +36,9 @@ const CarrinhoItem = ({item}) => {
                 <p className="text-base font-medium text-white hover:text-emerald-400 hover:underline">
                     {item.nome}
                 </p>
-                <p className="text-sm text-gray-400">{item.descricao}</p>
+                <p className="text-sm text-gray-300">
+                    {item.ingredientes?.map(i => `${i.icone ? i.icone + ' ' : ''}${i.nome}`).join(", ")}
+                </p>
                 <div className="flex items-center gap-4">
                     <button className="inline-flex items-center text-sm font-medium text-red-400 hover:text-red-300 hover:underline"
                         onClick={() => apagarDoCarrinho(item._id)}>
