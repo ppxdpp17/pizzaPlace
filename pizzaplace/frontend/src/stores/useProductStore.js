@@ -11,15 +11,16 @@ export const useProductStore = create((set) => ({
 		set({ loading: true });
 		try {
 			const res = await axios.post("/produtos", productData);
-			set((prevState) => ({
-				products: [...prevState.products, res.data],
-				loading: false,
-			}));
+			const novo = res.data && res.data._id ? res.data : res.data.produto ? res.data.produto : res.data;
+			set((s) => ({ products: [...s.products, novo], loading: false }));
+			toast.success("Produto Criado Com Sucesso");
+			return novo;
 		} catch (error) {
-			toast.error(error.response.data.error);
 			set({ loading: false });
+			toast.error(error.response?.data?.msg || "Erro NA CRIAÇÃO de produto");
+			throw error;
 		}
-	},
+		},
 	getTodosProdutos: async () => {
 		set({ loading: true });
 		try {

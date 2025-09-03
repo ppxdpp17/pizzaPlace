@@ -27,9 +27,8 @@ const produtoSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    ingredientes: { 
-        type: [ingredienteSchema], default: [] 
-    },
+    ingredientes: [{ type: mongoose.Schema.Types.ObjectId, ref: "Ingrediente" }],
+
 
 },
 {

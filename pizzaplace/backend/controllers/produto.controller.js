@@ -43,33 +43,41 @@ export const getProdutosDisponiveis = async (req, res) => {
 
 //Criar um produto
 export const criarProduto = async (req, res) => {
-    try {
-        const {nome, preco, imagem, categoria, ingredientes} = req.body;
+  try {
+    const { nome, descricao, preco, imagem, categoria, ingredientes } = req.body;
 
-        let respostaCloudinary = null;
+    // normalizar ingredientes para array de ids
+    const ingredientesIds = Array.isArray(ingredientes)
+      ? ingredientes.map(i => {
+          // se vier object com _id usa esse, se vier string usa a string
+          if (typeof i === "string") return i;
+          if (i && (i._id || i.id)) return i._id ?? i.id;
+          return null;
+        }).filter(Boolean)
+      : [];
 
-        const ingredientesArray = Array.isArray(ingredientes) ? ingredientes : [];
-
-
-        if(imagem)
-        {
-            respostaCloudinary = await cloudinary.uploader.upload(imagem,{folder: "produtos"});
-        }
-
-        const produto = await Produto.create({
-            nome, 
-            ingredientes: ingredientesArray,
-            preco,
-            imagem: respostaCloudinary?.secure_url ? respostaCloudinary.secure_url : "", 
-            categoria
-        });
-
-        res.status(201).json(produto);
-    } catch (error) {
-        console.log("Erro na criação de produto", error.message);
-        res.status(500).json({msg: "Erro no servidor", error: error.message});
+    let respostaCloudinary = null;
+    if (imagem) {
+      respostaCloudinary = await cloudinary.uploader.upload(imagem, { folder: "produtos" });
     }
-}
+
+    const produto = await Produto.create({
+      nome,
+      descricao,
+      preco,
+      imagem: respostaCloudinary?.secure_url ?? "",
+      categoria,
+      ingredientes: ingredientesIds
+    });
+
+    // actualizar cache se necessário
+    res.status(201).json(produto);
+  } catch (error) {
+    console.log("Erro na criação de produto", error.message);
+    res.status(500).json({ msg: "Erro no servidor", error: error.message });
+  }
+};
+
 
 //Apagar um produto
 export const apagarProduto = async (req, res) => {

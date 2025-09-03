@@ -1,115 +1,132 @@
-// src/components/IngredientsSelector.jsx
-import { useState, useMemo } from "react";
-import { Plus, Search, X } from "lucide-react";
-
-const DEFAULT_INGREDIENTS = [
-  { nome: "Mozzarella", icone: "🧀" },
-  { nome: "Tomate", icone: "🍅" },
-  { nome: "Fiambre", icone: "🥓" },
-  { nome: "Cebola", icone: "🧅" },
-  { nome: "Pimento", icone: "🌶️" },
-  { nome: "Azeitonas", icone: "🫒" },
-];
+import { useEffect, useState, useRef } from "react";
+import axios from "../lib/axios";
+import { Plus } from "lucide-react";
 
 export default function IngredientsSelector({ value = [], onChange }) {
+  const [ingredientes, setIngredientes] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [showAdd, setShowAdd] = useState(false);
+  const [novoNome, setNovoNome] = useState("");
+  const [novoIcone, setNovoIcone] = useState("");
   const [query, setQuery] = useState("");
-  const [ingredients, setIngredients] = useState(DEFAULT_INGREDIENTS);
-  const [newName, setNewName] = useState("");
-  const [newIcon, setNewIcon] = useState("");
+  const mountedRef = useRef(true);
 
-  const selected = value || [];
+  useEffect(() => {
+    mountedRef.current = true;
+    fetchIngredientes();
+    return () => (mountedRef.current = false);
+  }, []);
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return ingredients;
-    return ingredients.filter(i => i.nome.toLowerCase().includes(q));
-  }, [ingredients, query]);
-
-  const toggleSelect = (ing) => {
-    const exists = selected.find(x => x.nome === ing.nome);
-    if (exists) {
-      onChange(selected.filter(x => x.nome !== ing.nome));
-    } else {
-      onChange([...selected, ing]);
+  const fetchIngredientes = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get("/ingredientes");
+      if (!mountedRef.current) return;
+      setIngredientes(res.data.ingredientes ?? []);
+    } catch (err) {
+      console.error("Erro a buscar ingredientes:", err);
+    } finally {
+      if (mountedRef.current) setLoading(false);
     }
   };
 
-  const addIngredient = () => {
-    const name = newName.trim();
-    if (!name) return;
-    const ing = { nome: name, icone: newIcon || "➕" };
-    setIngredients(prev => [ing, ...prev]);
-    onChange([...selected, ing]);
-    setNewName("");
-    setNewIcon("");
+  const toggleSelect = (id) => {
+    if (!onChange) return;
+    if (value.includes(id)) {
+      onChange(value.filter((x) => x !== id));
+    } else {
+      onChange([...value, id]);
+    }
   };
 
+  const criarNovoIngrediente = async () => {
+    if (!novoNome.trim()) return;
+    try {
+      const res = await axios.post("/ingredientes", { nome: novoNome.trim(), icone: novoIcone.trim() });
+      const novo = res.data.ingrediente;
+      // atualizar lista
+      setIngredientes((s) => [novo, ...s]);
+      // selecionar automaticamente
+      onChange([...(value || []), novo._id]);
+      // reset UI
+      setNovoNome("");
+      setNovoIcone("");
+      setShowAdd(false);
+    } catch (err) {
+      console.error("Erro ao criar ingrediente:", err);
+      alert(err.response?.data?.msg || "Erro ao criar ingrediente");
+    }
+  };
+
+  const listaFiltrada = ingredientes.filter((i) =>
+    i.nome.toLowerCase().includes(query.trim().toLowerCase())
+  );
+
   return (
-    <div className="space-y-2">
-      <div className="flex items-center gap-2">
-        <div className="relative flex-1">
+    <div>
+      <div className="flex items-center gap-2 mb-2">
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Procurar ingredientes..."
+          className="flex-1 p-2 rounded-md bg-gray-700 border border-gray-600 text-white"
+        />
+        <button
+          type="button"
+          onClick={() => setShowAdd((s) => !s)}
+          className="px-3 py-2 bg-emerald-600 text-white rounded-md inline-flex items-center gap-2"
+        >
+          <Plus /> <span className="text-sm">Novo</span>
+        </button>
+      </div>
+
+      {showAdd && (
+        <div className="flex gap-2 mb-3">
           <input
-            placeholder="Procurar ingrediente..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="w-full py-2 px-3 bg-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            value={novoNome}
+            onChange={(e) => setNovoNome(e.target.value)}
+            placeholder="Nome"
+            className="flex-1 p-2 rounded-md bg-gray-700 border border-gray-600 text-white"
           />
-          <Search className="absolute right-3 top-2.5 text-gray-400" />
-        </div>
-        <div className="flex items-center gap-2">
           <input
-            placeholder="Novo ingrediente"
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            className="py-2 px-3 bg-gray-700 rounded-md text-white focus:outline-none"
-          />
-          <input
-            placeholder="ícone (emoji)"
-            value={newIcon}
-            onChange={(e) => setNewIcon(e.target.value)}
-            className="w-24 py-2 px-3 bg-gray-700 rounded-md text-white focus:outline-none"
+            value={novoIcone}
+            onChange={(e) => setNovoIcone(e.target.value)}
+            placeholder="Ícone (ex: 🧀)"
+            className="w-28 p-2 rounded-md bg-gray-700 border border-gray-600 text-white text-center"
           />
           <button
             type="button"
-            onClick={addIngredient}
-            className="py-2 px-3 bg-emerald-600 rounded-md text-white hover:bg-emerald-700"
+            onClick={criarNovoIngrediente}
+            className="px-3 py-2 bg-emerald-600 text-white rounded-md"
           >
-            <Plus />
+            Adicionar
           </button>
         </div>
-      </div>
+      )}
 
-      <div className="max-h-44 overflow-auto grid grid-cols-2 gap-2">
-        {filtered.map((ing) => {
-          const isSelected = !!selected.find(x => x.nome === ing.nome);
+      <div className="flex gap-3 overflow-x-auto py-2 pb-3">
+        {loading && <div className="text-sm text-gray-400">A carregar...</div>}
+        {!loading && listaFiltrada.length === 0 && (
+          <div className="text-sm text-gray-400 whitespace-nowrap">Nenhum ingrediente</div>
+        )}
+
+        {listaFiltrada.map((ing) => {
+          const selected = value.includes(ing._id);
           return (
             <button
-              key={ing.nome}
+              key={ing._id}
               type="button"
-              onClick={() => toggleSelect(ing)}
-              className={`flex items-center gap-2 p-2 rounded-md text-sm transition ${
-                isSelected ? "bg-emerald-600 text-white" : "bg-gray-700 text-gray-200 hover:bg-gray-600"
+              onClick={() => toggleSelect(ing._id)}
+              className={`flex items-center gap-3 px-4 py-2 rounded-2xl flex-shrink-0 transition ${
+                selected ? "bg-emerald-600 text-white" : "bg-gray-700 text-gray-200 hover:bg-gray-600"
               }`}
+              style={{ minWidth: 140 }}
             >
-              <span className="text-lg">{ing.icone || "•"}</span>
-              <span className="flex-1 text-left">{ing.nome}</span>
-              {isSelected && <span className="text-xs px-2 py-0.5 bg-white/10 rounded-full">OK</span>}
+              <span className="text-xl">{ing.icone || "🍕"}</span>
+              <span className="truncate">{ing.nome}</span>
             </button>
           );
         })}
-      </div>
-
-      {/*chips de selecionados*/}
-      <div className="flex flex-wrap gap-2">
-        {selected.map(s => (
-          <div key={s.nome} className="flex items-center gap-2 bg-gray-700 text-white px-2 py-1 rounded-md text-sm">
-            <span className="text-lg">{s.icone || "•"}</span>
-            <span>{s.nome}</span>
-            <button type="button" onClick={() => onChange(selected.filter(x => x.nome !== s.nome))} className="ml-1">
-              <X className="w-4 h-4 text-gray-300" />
-            </button>
-          </div>
-        ))}
       </div>
     </div>
   );

@@ -30,6 +30,9 @@ const CartaoProduto = ({product}) => {
 
         <div className="mt-4 px-5 pb-5">
             <h5 className="text-xl font-semibold tracking-tight text-white">{product.nome}</h5>
+            <p className="text-sm text-gray-300">
+                {product.ingredientes?.map(i => `${i.icone ? i.icone + ' ' : ''}${i.nome}`).join(", ")}
+            </p>
             <div className="mt-2 mb-5 flex items-center justify-between">
                 <p>
                     <span className="text-3xl font-bold text-emerald-400">€{product.preco}</span>
