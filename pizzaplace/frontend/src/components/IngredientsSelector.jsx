@@ -44,11 +44,8 @@ export default function IngredientsSelector({ value = [], onChange }) {
     try {
       const res = await axios.post("/ingredientes", { nome: novoNome.trim(), icone: novoIcone.trim() });
       const novo = res.data.ingrediente;
-      // atualizar lista
       setIngredientes((s) => [novo, ...s]);
-      // selecionar automaticamente
       onChange([...(value || []), novo._id]);
-      // reset UI
       setNovoNome("");
       setNovoIcone("");
       setShowAdd(false);
@@ -104,8 +101,14 @@ export default function IngredientsSelector({ value = [], onChange }) {
         </div>
       )}
 
-      <div className="flex gap-3 overflow-x-auto py-2 pb-3">
-        {loading && <div className="text-sm text-gray-400">A carregar...</div>}
+      {/* Scrolling grid: duas linhas, colunas auto, snap center */}
+      <div
+        className="grid grid-flow-col grid-rows-2 auto-cols-max gap-3 overflow-x-auto py-2 pb-3 px-2
+                   scrollbar-styled scroll-smooth snap-x snap-mandatory"
+        role="list"
+        aria-label="Lista de ingredientes"
+      >
+        {loading && <div className="text-sm text-gray-400 whitespace-nowrap">A carregar...</div>}
         {!loading && listaFiltrada.length === 0 && (
           <div className="text-sm text-gray-400 whitespace-nowrap">Nenhum ingrediente</div>
         )}
@@ -117,13 +120,14 @@ export default function IngredientsSelector({ value = [], onChange }) {
               key={ing._id}
               type="button"
               onClick={() => toggleSelect(ing._id)}
-              className={`flex items-center gap-3 px-4 py-2 rounded-2xl flex-shrink-0 transition ${
-                selected ? "bg-emerald-600 text-white" : "bg-gray-700 text-gray-200 hover:bg-gray-600"
-              }`}
-              style={{ minWidth: 140 }}
+              className={`flex flex-col items-center justify-center gap-1 px-4 py-3 rounded-2xl flex-shrink-0 transition
+                ${selected ? "bg-emerald-600 text-white" : "bg-gray-700 text-gray-200 hover:bg-gray-600"}
+              snap-center`}
+              style={{ width: 120, height: 88 }}
+              aria-pressed={selected}
             >
-              <span className="text-xl">{ing.icone || "🍕"}</span>
-              <span className="truncate">{ing.nome}</span>
+              <span className="text-2xl leading-none">{ing.icone || "🍕"}</span>
+              <span className="text-sm font-medium text-center truncate">{ing.nome}</span>
             </button>
           );
         })}

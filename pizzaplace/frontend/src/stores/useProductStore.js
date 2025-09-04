@@ -13,7 +13,6 @@ export const useProductStore = create((set) => ({
 			const res = await axios.post("/produtos", productData);
 			const novo = res.data && res.data._id ? res.data : res.data.produto ? res.data.produto : res.data;
 			set((s) => ({ products: [...s.products, novo], loading: false }));
-			toast.success("Produto Criado Com Sucesso");
 			return novo;
 		} catch (error) {
 			set({ loading: false });
