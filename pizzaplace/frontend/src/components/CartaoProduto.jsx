@@ -31,7 +31,13 @@ const CartaoProduto = ({product}) => {
         <div className="mt-4 px-5 pb-5">
             <h5 className="text-xl font-semibold tracking-tight text-white">{product.nome}</h5>
             <p className="text-sm text-gray-300">
-                {product.ingredientes?.map(i => `${i.icone ? i.icone + ' ' : ''}${i.nome}`).join(", ")}
+                {Array.isArray(product.ingredientes) && product.ingredientes.length > 0
+                    ? product.ingredientes
+                        .map((i) =>
+                        typeof i === "string" ? i : `${i.icone ? i.icone + " " : ""}${i.nome}`
+                        )
+                        .join(", ")
+                    : "Sem ingredientes listados"}
             </p>
             <div className="mt-2 mb-5 flex items-center justify-between">
                 <p>
