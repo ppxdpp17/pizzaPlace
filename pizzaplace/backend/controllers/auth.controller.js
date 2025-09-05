@@ -6,8 +6,6 @@ import bcrypt from "bcryptjs";
 import { generateTokenAndSetCookie } from "../utils/generateTokenAndSetCookie.js";
 import {sendVerificationEmail, enviarEmailWelcome, enviarPasswordResetEmail, enviarEmailResetSucesso } from "../lib/emails.js";
 
-
-
 //Geração de tokens/cookies
 const gerarTokens = (userId) => {
     const tokenAcesso = jwt.sign({userId}, process.env.ACCESS_TOKEN_SECRET, {expiresIn: "15m",});
@@ -59,8 +57,6 @@ export const signup = async (req, res) => {
     //Gerar token de verificação
     const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
     const verificationTokenExpire = Date.now() + 24 * 60 * 60 * 1000; //24h
-
-
 
     //Cria o user (pre-save do schema vai hashar a password)
     const user = await User.create({

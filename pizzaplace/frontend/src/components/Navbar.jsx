@@ -68,5 +68,4 @@ const Navbar = () => {
   );
 };
 
-//Intercetores axios para fazer refresh dos tokens de acesso
 export default Navbar

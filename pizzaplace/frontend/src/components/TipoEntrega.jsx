@@ -20,7 +20,7 @@ export default function TipoEntrega({ isOpen, onClose, onSelect }) {
     }
   }, [deliveryType, paymentType, pedidoLocation, onSelect]);
 
-  const paymentDisabled = !pedidoLocation; //true se não houver localização
+  const paymentDisabled = !pedidoLocation; //True se não houver localização
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
@@ -38,7 +38,7 @@ export default function TipoEntrega({ isOpen, onClose, onSelect }) {
           </div>
         </div>
 
-        {/*Escolha no tipo de entrega */}
+        {/*Escolha do tipo de entrega*/}
         <h3 className="text-lg font-semibold text-white text-center">
           Escolha uma forma de entrega
         </h3>

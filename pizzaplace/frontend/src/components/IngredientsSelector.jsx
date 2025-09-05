@@ -101,7 +101,6 @@ export default function IngredientsSelector({ value = [], onChange }) {
         </div>
       )}
 
-      {/* Scrolling grid: duas linhas, colunas auto, snap center */}
       <div
         className="grid grid-flow-col grid-rows-2 auto-cols-max gap-3 overflow-x-auto py-2 pb-3 px-2
                    scrollbar-styled scroll-smooth snap-x snap-mandatory"

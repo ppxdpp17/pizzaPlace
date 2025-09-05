@@ -109,7 +109,7 @@ export default function MeusPedidos() {
           const address = pedido.shippingAddress || {};
           const total = Number(pedido.total ?? 0).toFixed(2);
 
-          //Usar "A cozinhar" ou o que está guardado no "pedido"
+          //Usar "A cozinhar" (por defeito) ou o que está guardado no "pedido"
           const estado = pedido.estado || "A Cozinhar";
 
           //Mapping para cor e label
