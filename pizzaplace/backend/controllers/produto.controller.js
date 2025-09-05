@@ -124,7 +124,6 @@ export const apagarProduto = async (req, res) => {
 };
 
 
-
 // Obter 3-4 produtos recomendados (usando aggregate + lookup para popular)
 export const getProdutosRecomendados = async (req, res) => {
   try {
