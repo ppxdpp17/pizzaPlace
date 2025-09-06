@@ -120,28 +120,13 @@ export const apagarProduto = async (req, res) => {
   }
 };
 
-//Obter 3-4 produtos recomendados (usando aggregate + lookup para populate)
+//Obter até 6 produtos recomendados de forma aleatória (usando aggregate + lookup para populate)
 export const getProdutosRecomendados = async (req, res) => {
   try {
     const produtos = await Produto.aggregate([
-      { $sample: { size: 4 } },
-      {
-        $lookup: {
-          from: "ingredientes",
-          localField: "ingredientes",
-          foreignField: "_id",
-          as: "ingredientes",
-        },
-      },
-      {
-        $project: {
-          _id: 1,
-          nome: 1,
-          preco: 1,
-          imagem: 1,
-          ingredientes: { nome: 1, icone: 1 },
-        },
-      },
+      { $match: { estaDisponivel: true } },
+      { $sample: { size: 6 } },
+      { $project: { _id: 1, nome: 1, preco: 1, imagem: 1, categoria: 1, ingredientes: 1 } }
     ]);
 
     res.json(produtos);
@@ -149,21 +134,20 @@ export const getProdutosRecomendados = async (req, res) => {
     console.log("Erro no controller de produtos", error.message);
     res.status(500).json({ msg: "Erro no servidor", error: error.message });
   }
-};
+}
 
 //Filtrar produtos por categoria
 export const getProdutosPorCategoria = async (req, res) => {
   const { categoria } = req.params;
   try {
-    const produtos = await Produto.find({ categoria })
-      .populate("ingredientes", "nome icone")
-      .exec();
+    // só produtos disponíveis
+    const produtos = await Produto.find({ categoria, estaDisponivel: true });
     res.json({ produtos });
   } catch (error) {
     console.log("Erro no controller de produtos", error.message);
     res.status(500).json({ msg: "Erro no servidor", error: error.message });
   }
-};
+}
 
 //Disponibilizar produto
 export const disponibilizarProduto = async (req, res) => {

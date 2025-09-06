@@ -13,13 +13,14 @@ export const useProductStore = create((set) => ({
 			const res = await axios.post("/produtos", productData);
 			const novo = res.data && res.data._id ? res.data : res.data.produto ? res.data.produto : res.data;
 			set((s) => ({ products: [...s.products, novo], loading: false }));
+			try { window.dispatchEvent(new CustomEvent("produtos:updated")); } catch (e) {}
 			return novo;
 		} catch (error) {
 			set({ loading: false });
 			toast.error(error.response?.data?.msg || "Erro NA CRIAÇÃO de produto");
 			throw error;
 		}
-		},
+	},
 	getTodosProdutos: async () => {
 		set({ loading: true });
 		try {
@@ -31,32 +32,33 @@ export const useProductStore = create((set) => ({
 		}
 	},
 	apagarProduto: async (productId) => {
-		set({ loading: true });
-		try {
-			await axios.delete(`/produtos/${productId}`);
-			set((prevProducts) => ({
-				products: prevProducts.products.filter((product) => product._id !== productId),
-				loading: false,
-			}))
-		} catch (error) {
-			set({ loading: false });
-			toast.error(error.response.data.error || "Falha ao apagar produto");
-		}	
+	set({ loading: true });
+	try {
+		await axios.delete(`/produtos/${productId}`);
+		set((prev) => ({ products: prev.products.filter((p) => p._id !== productId), loading: false }));
+		try { window.dispatchEvent(new CustomEvent("produtos:updated")); } catch (e) {}
+	} catch (error) {
+		set({ loading: false });
+		toast.error(error.response?.data?.msg || "Falha ao apagar produto");
+	}
 	},
 	disponibilizarProduto: async (productId) => {
 		set({ loading: true });
 		try {
 			const response = await axios.patch(`/produtos/${productId}`);
-			//Isto vai atualizar a propriedade "estaDisponivel" de um produto
 			set((prevProducts) => ({
-				products: prevProducts.products.map((product) =>
-					product._id === productId ? { ...product, estaDisponivel: response.data.estaDisponivel } : product
-				),
-				loading: false,
+			products: prevProducts.products.map((product) =>
+				product._id === productId ? { ...product, estaDisponivel: response.data.estaDisponivel } : product
+			),
+			loading: false,
 			}));
+			try { window.dispatchEvent(new CustomEvent("produtos:updated")); } catch (e) {}
+
+			return response.data;
 		} catch (error) {
 			set({ loading: false });
-			toast.error(error.response.data.error || "Falha ao atualizar o produto");
+			toast.error(error.response?.data?.msg || "Falha ao atualizar o produto");
+			throw error;
 		}
 	},
 	getProdutosCategoria: async (categoria) => {
