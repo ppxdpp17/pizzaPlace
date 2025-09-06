@@ -1,21 +1,20 @@
 import { redis } from "../lib/redis.js";
 import cloudinary from "../lib/cloudinary.js";
 import Produto from "../models/produto.model.js";
-import Ingrediente from "../models/ingrediente.model.js";
+
 
 //Obter todos os produtos
 export const getAllProdutos = async (req, res) => {
   try {
     const produtos = await Produto.find({})
       .populate("ingredientes", "nome icone")
-      .sort({ createdAt: -1 });
+      .exec();
     res.json({ produtos });
   } catch (error) {
     console.log("Erro no controller de produtos", error.message);
     res.status(500).json({ msg: "Erro no servidor", error: error.message });
   }
 };
-
 
 //Obter apenas produtos que estão definidos como "disponível"
 export const getProdutosDisponiveis = async (req, res) => {
@@ -25,7 +24,7 @@ export const getProdutosDisponiveis = async (req, res) => {
       return res.json(JSON.parse(produtosDisponiveis));
     }
 
-    // buscar e popular
+    //Retrieve e populate os ingredientes
     produtosDisponiveis = await Produto.find({ estaDisponivel: true })
       .populate("ingredientes", "nome icone")
       .lean();
@@ -34,7 +33,9 @@ export const getProdutosDisponiveis = async (req, res) => {
       return res.status(404).json({ msg: "Nenhum produto disponível." });
     }
 
+    //Guardar no redis
     await redis.set("produtos_disponiveis", JSON.stringify(produtosDisponiveis));
+
     res.json(produtosDisponiveis);
   } catch (error) {
     console.log("Erro no controller de produtos", error.message);
@@ -123,38 +124,49 @@ export const apagarProduto = async (req, res) => {
 //Obter até 6 produtos recomendados de forma aleatória (usando aggregate + lookup para populate)
 export const getProdutosRecomendados = async (req, res) => {
   try {
-    //Escolhe até 6 produtos disponíveis aleatórios
-    const produtos = await Produto.aggregate([
+    let produtos = await Produto.aggregate([
       { $match: { estaDisponivel: true } },
       { $sample: { size: 6 } },
-      { $project: { nome: 1, preco: 1, imagem: 1, categoria: 1, ingredientes: 1 } }
+      { $project: { _id: 1, nome: 1, preco: 1, imagem: 1, categoria: 1, ingredientes: 1 } }
     ]);
 
-    const produtosPopulados = await Produto.populate(produtos, {
-      path: "ingredientes",
-      select: "nome icone"
-    });
+    const anyNeedPopulate = produtos.some(p => p.ingredientes && p.ingredientes.length > 0 && typeof p.ingredientes[0] !== "object");
 
-    res.json({ produtos: produtosPopulados });
+    if (anyNeedPopulate) {
+      const allIds = produtos.flatMap(p => (p.ingredientes || []).filter(Boolean));
+      const uniqueIds = Array.from(new Set(allIds.map(String))).filter(id => id);
+
+      const ingredientesDocs = await Ingrediente.find({ _id: { $in: uniqueIds } }).lean();
+      const map = new Map(ingredientesDocs.map(i => [String(i._id), i]));
+
+      produtos = produtos.map(p => {
+        if (!p.ingredientes || p.ingredientes.length === 0) return p;
+        if (typeof p.ingredientes[0] === "object") return p;
+
+        const ordenadas = p.ingredientes.map(id => map.get(String(id))).filter(Boolean);
+        return { ...p, ingredientes: ordenadas };
+      });
+    }
+
+    return res.json(produtos);
   } catch (error) {
     console.log("Erro no controller de produtos", error.message);
-    res.status(500).json({ msg: "Erro no servidor", error: error.message });
+    return res.status(500).json({ msg: "Erro no servidor", error: error.message });
   }
 };
-
 
 //Filtrar produtos por categoria
 export const getProdutosPorCategoria = async (req, res) => {
   const { categoria } = req.params;
   try {
-    const produtos = await Produto.find({ categoria })
-      .populate("ingredientes", "nome icone");
+    //Só produtos disponíveis
+    const produtos = await Produto.find({ categoria, estaDisponivel: true }).populate("ingredientes");
     res.json({ produtos });
   } catch (error) {
     console.log("Erro no controller de produtos", error.message);
     res.status(500).json({ msg: "Erro no servidor", error: error.message });
   }
-};
+}
 
 //Disponibilizar produto
 export const disponibilizarProduto = async (req, res) => {

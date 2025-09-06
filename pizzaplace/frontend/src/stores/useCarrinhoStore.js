@@ -9,12 +9,16 @@ export const useCarrinhoStore = create((set, get) => ({
     subTotal: 0,
     cupaoAplicado: false,
     
-
-    getItensCarrinho: async() => {
+    getItensCarrinho: async () => {
         try {
-            const res = await axios.get("/carrinho");
-            set({carrinho: res.data});    
-            get().calcularTotal();
+            const res = await axios.get("/carrinho"); // ou endpoint que usas
+            const itens = res.data.itens ?? res.data;
+            // filtrar produtos indisponiveis (se o backend fornecer produto.estaDisponivel)
+            const filtrados = itens.filter(i => i.produto?.estaDisponivel !== false);
+            if (filtrados.length !== itens.length) {
+                toast.error("Alguns produtos no carrinho foram removidos (indisponíveis).");
+            }
+            set({ carrinho: filtrados });
         } catch (error) {
             set({carrinho: []});
             toast.error(error.response.data.msg || "Um erro ocorreu, tente novamente mais tarde.");

@@ -13,7 +13,7 @@ export const useProductStore = create((set) => ({
 			const res = await axios.post("/produtos", productData);
 			const novo = res.data && res.data._id ? res.data : res.data.produto ? res.data.produto : res.data;
 			set((s) => ({ products: [...s.products, novo], loading: false }));
-			try { window.dispatchEvent(new CustomEvent("produtos:updated")); } catch (e) {}
+			window.dispatchEvent(new Event("produtos:updated")); // atualiza recomendações / UI
 			return novo;
 		} catch (error) {
 			set({ loading: false });
@@ -46,19 +46,15 @@ export const useProductStore = create((set) => ({
 		set({ loading: true });
 		try {
 			const response = await axios.patch(`/produtos/${productId}`);
-			set((prevProducts) => ({
-			products: prevProducts.products.map((product) =>
-				product._id === productId ? { ...product, estaDisponivel: response.data.estaDisponivel } : product
-			),
+			set((prev) => ({
+			products: prev.products.map((p) => p._id === productId ? response.data : p),
 			loading: false,
 			}));
-			try { window.dispatchEvent(new CustomEvent("produtos:updated")); } catch (e) {}
-
-			return response.data;
+			// Notificar o app que produtos foram atualizados
+			window.dispatchEvent(new Event("produtos:updated"));
 		} catch (error) {
 			set({ loading: false });
 			toast.error(error.response?.data?.msg || "Falha ao atualizar o produto");
-			throw error;
 		}
 	},
 	getProdutosCategoria: async (categoria) => {
