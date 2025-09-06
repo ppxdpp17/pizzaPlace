@@ -65,10 +65,11 @@ export const useProductStore = create((set) => ({
 		set({ loading: true });
 		try {
 			const response = await axios.get(`/produtos/categoria/${categoria}`);
-			set({ products: response.data.produtos, loading: false });
+			const produtos = response.data?.produtos ?? response.data;
+			set({ products: Array.isArray(produtos) ? produtos : [], loading: false });
 		} catch (error) {
 			set({ error: "Falha a ir buscar os produtos desta categoria", loading: false });
-			toast.error(error.response.data.error || "Falha a ir buscar os produtos desta categoria");
+			toast.error(error.response?.data?.msg || "Falha a ir buscar os produtos desta categoria");
 		}
 	},
 	fetchProdutosRecomendados: async () => {

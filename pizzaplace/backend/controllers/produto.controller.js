@@ -1,19 +1,21 @@
 import { redis } from "../lib/redis.js";
 import cloudinary from "../lib/cloudinary.js";
 import Produto from "../models/produto.model.js";
+import Ingrediente from "../models/ingrediente.model.js";
 
 //Obter todos os produtos
 export const getAllProdutos = async (req, res) => {
   try {
     const produtos = await Produto.find({})
       .populate("ingredientes", "nome icone")
-      .exec();
+      .sort({ createdAt: -1 });
     res.json({ produtos });
   } catch (error) {
     console.log("Erro no controller de produtos", error.message);
     res.status(500).json({ msg: "Erro no servidor", error: error.message });
   }
 };
+
 
 //Obter apenas produtos que estão definidos como "disponível"
 export const getProdutosDisponiveis = async (req, res) => {
@@ -23,7 +25,7 @@ export const getProdutosDisponiveis = async (req, res) => {
       return res.json(JSON.parse(produtosDisponiveis));
     }
 
-    //Retrieve e populate os ingredientes
+    // buscar e popular
     produtosDisponiveis = await Produto.find({ estaDisponivel: true })
       .populate("ingredientes", "nome icone")
       .lean();
@@ -32,9 +34,7 @@ export const getProdutosDisponiveis = async (req, res) => {
       return res.status(404).json({ msg: "Nenhum produto disponível." });
     }
 
-    //Guardar no redis
     await redis.set("produtos_disponiveis", JSON.stringify(produtosDisponiveis));
-
     res.json(produtosDisponiveis);
   } catch (error) {
     console.log("Erro no controller de produtos", error.message);
@@ -123,31 +123,38 @@ export const apagarProduto = async (req, res) => {
 //Obter até 6 produtos recomendados de forma aleatória (usando aggregate + lookup para populate)
 export const getProdutosRecomendados = async (req, res) => {
   try {
+    //Escolhe até 6 produtos disponíveis aleatórios
     const produtos = await Produto.aggregate([
       { $match: { estaDisponivel: true } },
       { $sample: { size: 6 } },
-      { $project: { _id: 1, nome: 1, preco: 1, imagem: 1, categoria: 1, ingredientes: 1 } }
+      { $project: { nome: 1, preco: 1, imagem: 1, categoria: 1, ingredientes: 1 } }
     ]);
 
-    res.json(produtos);
+    const produtosPopulados = await Produto.populate(produtos, {
+      path: "ingredientes",
+      select: "nome icone"
+    });
+
+    res.json({ produtos: produtosPopulados });
   } catch (error) {
     console.log("Erro no controller de produtos", error.message);
     res.status(500).json({ msg: "Erro no servidor", error: error.message });
   }
-}
+};
+
 
 //Filtrar produtos por categoria
 export const getProdutosPorCategoria = async (req, res) => {
   const { categoria } = req.params;
   try {
-    // só produtos disponíveis
-    const produtos = await Produto.find({ categoria, estaDisponivel: true });
+    const produtos = await Produto.find({ categoria })
+      .populate("ingredientes", "nome icone");
     res.json({ produtos });
   } catch (error) {
     console.log("Erro no controller de produtos", error.message);
     res.status(500).json({ msg: "Erro no servidor", error: error.message });
   }
-}
+};
 
 //Disponibilizar produto
 export const disponibilizarProduto = async (req, res) => {
