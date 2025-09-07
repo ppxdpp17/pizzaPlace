@@ -27,7 +27,12 @@ const CarrinhoPage = () => {
                   ))}
                 </div>
               )}
-            {carrinho.length > 0 && <Recomendacoes />}
+            {carrinho.length > 0 && (
+              <Recomendacoes
+                excludeIds={carrinho.map(i => i._id)}
+                size={3}
+              />
+            )}
           </motion.div>
           {carrinho.length > 0 && (
             <motion.div

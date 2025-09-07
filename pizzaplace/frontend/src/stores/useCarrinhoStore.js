@@ -2,45 +2,43 @@ import { create } from "zustand";
 import axios from "../lib/axios";
 import { toast } from "react-hot-toast";
 
-export const useCarrinhoStore = create((set, get) => ({
-    carrinho:[],
+export const useCarrinhoStore = create((set, get) => {
+  // Adicionar listener uma vez, apenas no browser
+  if (typeof window !== "undefined") {
+    window.addEventListener("produtos:updated", () => {
+      // Recarrega o carrinho do servidor (melhor que filtrar localmente)
+      get().getItensCarrinho();
+    });
+  }
+
+  return {
+    carrinho: [],
     cupao: null,
     total: 0,
     subTotal: 0,
     cupaoAplicado: false,
-    
+
     getItensCarrinho: async () => {
-        try {
-            const res = await axios.get("/carrinho"); // ou endpoint que usas
-            const itens = res.data.itens ?? res.data;
-            // filtrar produtos indisponiveis (se o backend fornecer produto.estaDisponivel)
-            const filtrados = itens.filter(i => i.produto?.estaDisponivel !== false);
-            if (filtrados.length !== itens.length) {
-                toast.error("Alguns produtos no carrinho foram removidos (indisponíveis).");
-            }
-            set({ carrinho: filtrados });
-        } catch (error) {
-            set({carrinho: []});
-            toast.error(error.response.data.msg || "Um erro ocorreu, tente novamente mais tarde.");
-        }
+      try {
+        const res = await axios.get("/carrinho");
+        const itens = res.data; // server devolve array de produtos com quantidade
+        set({ carrinho: itens });
+        get().calcularTotal();
+      } catch (error) {
+        set({ carrinho: [] });
+        toast.error(error.response?.data?.msg || error.response?.data?.message || "Um erro ocorreu, tente novamente mais tarde.");
+      }
     },
     adicionarAoCarrinho: async(product) => {
-        try {
-			await axios.post("/carrinho", { productId: product._id });
-			toast.success("Produto adicionado ao carrinho.");
-			set((prevState) => {
-				const existingItem = prevState.carrinho.find((item) => item._id === product._id);
-				const newCart = existingItem
-					? prevState.carrinho.map((item) =>
-							item._id === product._id ? { ...item, quantidade: item.quantidade + 1 } : item
-					  )
-					: [...prevState.carrinho, { ...product, quantidade: 1 }];
-				return { carrinho: newCart };
-			});
-			get().calcularTotal();
-		} catch (error) {
-			toast.error(error.response.data.message || "Ocorreu um erro.");
-		}
+    try {
+        const res = await axios.post("/carrinho", { productId: product._id });
+        const itens = res.data; // server now returns array populado com quantidade
+        set({ carrinho: itens });
+        toast.success("Produto adicionado ao carrinho.");
+        get().calcularTotal();
+    } catch (error) {
+        toast.error(error.response?.data?.message || "Ocorreu um erro.");
+    }
     },
     calcularTotal: () => {
         const {carrinho, cupao} = get();
@@ -56,22 +54,24 @@ export const useCarrinhoStore = create((set, get) => ({
         set({subTotal, total});
     },
     apagarDoCarrinho: async (productId) => {
-        await axios.delete(`/carrinho`, {data: { productId }});
-        set((prevState) => ({ carrinho: prevState.carrinho.filter(item => item._id !== productId) }));
+    try {
+        const res = await axios.delete(`/carrinho`, { data: { produtoID: productId } });
+        const itens = res.data;
+        set({ carrinho: itens });
         get().calcularTotal();
+    } catch (err) {
+        toast.error(err.response?.data?.msg || "Erro ao apagar do carrinho");
+    }
     },
     atualizarQuantidade: async (productId, quantidade) => {
-        if(quantidade === 0) 
-        {
-            get().apagarDoCarrinho(productId);
-            return
-        }
-        
-        await axios.put(`/carrinho/${productId}`, { quantidade });
-        set((prevState) => ({
-            carrinho: prevState.carrinho.map((item) => (item._id === productId ? { ...item, quantidade } : item)),
-        }));
+    try {
+        const res = await axios.put(`/carrinho/${productId}`, { quantidade });
+        const itens = res.data;
+        set({ carrinho: itens });
         get().calcularTotal();
+    } catch (err) {
+        toast.error(err.response?.data?.msg || "Erro ao atualizar quantidade");
+    }
     },
     limparCarrinho: async () => {
         set({ carrinho: [], cupao: null, total: 0, subTotal: 0 });
@@ -100,4 +100,5 @@ export const useCarrinhoStore = create((set, get) => ({
         toast.success("Cupão removido!");
     }
 
-}));
+}
+});

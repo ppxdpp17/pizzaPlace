@@ -2,6 +2,8 @@ import { redis } from "../lib/redis.js";
 import cloudinary from "../lib/cloudinary.js";
 import Produto from "../models/produto.model.js";
 import Ingrediente from "../models/ingrediente.model.js";
+import mongoose from "mongoose";
+import User from "../models/user.model.js";
 
 //Obter todos os produtos
 export const getAllProdutos = async (req, res) => {
@@ -187,6 +189,16 @@ export const disponibilizarProduto = async (req, res) => {
     if (produto) {
       produto.estaDisponivel = !produto.estaDisponivel;
       const produtoAtualizado = await produto.save();
+      if (produtoAtualizado.estaDisponivel === false) {
+        try {
+          await User.updateMany(
+            {},
+            { $pull: { itensCarrinho: { produto: produtoAtualizado._id } } }
+          );
+        } catch (err) {
+          console.warn("Falha ao remover produto de carrinhos persistidos:", err.message);
+        }
+      }
       await atualizarCacheProdutosDisponiveis();
       res.json(produtoAtualizado);
     } else {

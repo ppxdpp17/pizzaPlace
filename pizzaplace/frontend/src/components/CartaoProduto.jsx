@@ -24,7 +24,7 @@ const CartaoProduto = ({product}) => {
   return (
     <div className="flex w-full relative flex-col overflow-hidden rounded-lg border border-gray-700 shadow-lg">
         <div className="relative mx-3 mt-3 flex h-60 overflow-hidden rounded-xl">
-            <img className="object-cover w-full" src={product.imagem} alt="Imagem do Produto"/>
+            <img className="object-cover w-full" src={product.imagem} alt={product.nome || "Produto"} />
             <div className="absolute inset-0 bg-black bg-opacity-20" />
         </div>
 
@@ -40,7 +40,7 @@ const CartaoProduto = ({product}) => {
             </p>
             <div className="mt-2 mb-5 flex items-center justify-between">
                 <p>
-                    <span className="text-3xl font-bold text-emerald-400">€{product.preco}</span>
+                    <span className="text-3xl font-bold text-emerald-400">€{product.preco.toFixed(2)}</span>
                 </p>
             </div>
             <button
