@@ -1,7 +1,7 @@
 import { redis } from "../lib/redis.js";
 import cloudinary from "../lib/cloudinary.js";
 import Produto from "../models/produto.model.js";
-
+import Ingrediente from "../models/ingrediente.model.js";
 
 //Obter todos os produtos
 export const getAllProdutos = async (req, res) => {
@@ -121,36 +121,48 @@ export const apagarProduto = async (req, res) => {
   }
 };
 
-//Obter até 6 produtos recomendados de forma aleatória (usando aggregate + lookup para populate)
+//Receber 6 produtos recomendados (aleatórios)
 export const getProdutosRecomendados = async (req, res) => {
   try {
-    let produtos = await Produto.aggregate([
-      { $match: { estaDisponivel: true } },
-      { $sample: { size: 6 } },
-      { $project: { _id: 1, nome: 1, preco: 1, imagem: 1, categoria: 1, ingredientes: 1 } }
-    ]);
+    const size = Math.min(Math.max(parseInt(req.query.size || "6", 10), 1), 20); //Default 6, cap 20
+    const excludeIds = (req.query.excludeIds || "")
+      .split(",")
+      .map(s => s.trim())
+      .filter(Boolean);
 
-    const anyNeedPopulate = produtos.some(p => p.ingredientes && p.ingredientes.length > 0 && typeof p.ingredientes[0] !== "object");
-
-    if (anyNeedPopulate) {
-      const allIds = produtos.flatMap(p => (p.ingredientes || []).filter(Boolean));
-      const uniqueIds = Array.from(new Set(allIds.map(String))).filter(id => id);
-
-      const ingredientesDocs = await Ingrediente.find({ _id: { $in: uniqueIds } }).lean();
-      const map = new Map(ingredientesDocs.map(i => [String(i._id), i]));
-
-      produtos = produtos.map(p => {
-        if (!p.ingredientes || p.ingredientes.length === 0) return p;
-        if (typeof p.ingredientes[0] === "object") return p;
-
-        const ordenadas = p.ingredientes.map(id => map.get(String(id))).filter(Boolean);
-        return { ...p, ingredientes: ordenadas };
-      });
+    const match = { estaDisponivel: true };
+    if (excludeIds.length > 0) {
+      match._id = { $nin: excludeIds.map(id => new mongoose.Types.ObjectId(id)) };
     }
 
-    return res.json(produtos);
+    const pipeline = [
+      { $match: match },
+      { $sample: { size } },
+      //Lookup para ingredients
+      {
+        $lookup: {
+          from: "ingredientes",
+          localField: "ingredientes",
+          foreignField: "_id",
+          as: "ingredientes"
+        }
+      },
+      {
+        $project: {
+          nome: 1,
+          preco: 1,
+          imagem: 1,
+          categoria: 1,
+          estaDisponivel: 1,
+          ingredientes: { nome: 1, icone: 1 }
+        }
+      }
+    ];
+
+    const produtos = await Produto.aggregate(pipeline);
+    return res.json(produtos); //Devolve array
   } catch (error) {
-    console.log("Erro no controller de produtos", error.message);
+    console.log("Erro no controller de produtos (recomendados)", error.message);
     return res.status(500).json({ msg: "Erro no servidor", error: error.message });
   }
 };
