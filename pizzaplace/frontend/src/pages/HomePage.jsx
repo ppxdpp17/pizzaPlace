@@ -11,11 +11,11 @@ const categorias = [
 
 const HomePage = () => {
 
-  const { fetchProdutosRecomendados, products, isLoading } = useProductStore();
+const { fetchProdutosRecomendados, products, isLoading } = useProductStore();
 
-  useEffect(() => {
-    fetchProdutosRecomendados()
-  }, [fetchProdutosRecomendados]);
+useEffect(() => {
+  fetchProdutosRecomendados({ size: 6 });
+}, [fetchProdutosRecomendados]);
 
   return (
   <div className="relative min-h-screen text-white overflow-hidden">
