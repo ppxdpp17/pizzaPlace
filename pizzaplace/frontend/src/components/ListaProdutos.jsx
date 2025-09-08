@@ -1,9 +1,12 @@
 import { motion } from "framer-motion";
-import { Trash, CheckCircle, Circle } from "lucide-react"; // <-- troquei Star por estes dois
+import { Trash, CheckCircle, Circle } from "lucide-react";  
 import { useProductStore } from "../stores/useProductStore";
+import { useNavigate } from "react-router-dom";
+
 
 const ListaProdutos = () => {
   const { apagarProduto, disponibilizarProduto, products } = useProductStore();
+  const navigate = useNavigate();
 
   return (
     <motion.div
@@ -63,14 +66,23 @@ const ListaProdutos = () => {
                 </button>
               </td>
 
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex gap-2">
+                <button
+                  onClick={() => navigate(`/admin/produtos/${product._id}/editar`)}
+                  className="text-emerald-400 hover:text-emerald-300"
+                  title="Editar produto"
+                >
+                  <Edit2 className="h-5 w-5" />
+                </button>
+
                 <button
                   onClick={() => apagarProduto(product._id)}
                   className="text-red-400 hover:text-red-300"
+                  title="Apagar produto"
                 >
                   <Trash className="h-5 w-5" />
                 </button>
-              </td>
+            </td>
             </tr>
           ))}
         </tbody>
