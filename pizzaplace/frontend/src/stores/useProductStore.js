@@ -85,5 +85,24 @@ export const useProductStore = create((set) => ({
       set({ error: "Falha a ir buscar os produtos recomendados", isLoading: false });
       console.log("Erro a ir buscar os produtos recomendados: ", error);
     }
+  },
+
+  editarProduto: async (productId, productData) => {
+  set({ isLoading: true });
+  try {
+    const res = await axios.put(`/produtos/${productId}`, productData);
+    const atualizado = res.data;
+    set((prev) => ({
+      products: prev.products.map(p => p._id === productId ? atualizado : p),
+      isLoading: false
+    }));
+    window.dispatchEvent(new Event("produtos:updated"));
+    return atualizado;
+  } catch (error) {
+    set({ isLoading: false });
+    toast.error(error.response?.data?.msg || "Falha ao editar produto");
+    throw error;
   }
+},
+
 }));
