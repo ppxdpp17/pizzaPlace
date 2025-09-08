@@ -18,6 +18,22 @@ export const getAllProdutos = async (req, res) => {
   }
 };
 
+//Obter 1 produto
+export const getProdutoById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ msg: "ID inválido" });
+
+    const produto = await Produto.findById(id).populate("ingredientes", "nome icone");
+    if (!produto) return res.status(404).json({ msg: "Produto não encontrado." });
+
+    return res.json(produto);
+  } catch (error) {
+    console.error("Erro getProdutoById:", error.message);
+    return res.status(500).json({ msg: "Erro no servidor", error: error.message });
+  }
+};
+
 //Obter apenas produtos que estão definidos como "disponível"
 export const getProdutosDisponiveis = async (req, res) => {
   try {
@@ -209,6 +225,74 @@ export const disponibilizarProduto = async (req, res) => {
     res.status(500).json({ msg: "Erro no servidor", error: error.message });
   }
 };
+
+//Função para atualizar produto
+export const atualizarProduto = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ msg: "ID inválido" });
+
+    const { nome, descricao, preco, imagem, categoria, ingredientes } = req.body;
+
+    const produto = await Produto.findById(id);
+    if (!produto) return res.status(404).json({ msg: "Produto não encontrado." });
+
+    //Atualizar campos simples
+    if (nome !== undefined) produto.nome = nome;
+    if (descricao !== undefined) produto.descricao = descricao;
+    if (preco !== undefined) produto.preco = preco;
+    if (categoria !== undefined) produto.categoria = categoria;
+
+    //Processar ingredientes: aceitar array de ids ou array de objects
+    if (ingredientes !== undefined) {
+      const ingredientesIds = Array.isArray(ingredientes)
+        ? ingredientes.map(i => (typeof i === "string" ? i : (i._id ?? i.id ?? null))).filter(Boolean)
+        : [];
+      produto.ingredientes = ingredientesIds;
+    }
+
+    //Se a imagem recebida for diferente da atual (novo path),
+    //faz upload para Cloudinary e apaga a anterior.
+    if (imagem !== undefined && imagem !== produto.imagem) {
+      //Apagar imagem antiga
+      if (produto.imagem) {
+        try {
+          const parts = produto.imagem.split("/");
+          const last = parts[parts.length - 1];
+          const publicId = last.includes(".") ? last.substring(0, last.lastIndexOf(".")) : last;
+          await cloudinary.uploader.destroy(`produtos/${publicId}`, { resource_type: "image" });
+        } catch (err) {
+          console.warn("Falha ao apagar imagem antiga do Cloudinary (prosseguir):", err.message);
+        }
+      }
+
+      //Se imagem for dataURL/base64 ou uma URL remota
+      try {
+        const resposta = await cloudinary.uploader.upload(imagem, { folder: "produtos" });
+        produto.imagem = resposta.secure_url;
+      } catch (err) {
+        console.warn("Upload imagem Cloudinary falhou (mantém imagem antiga):", err.message);
+      }
+    }
+
+    const atualizado = await produto.save();
+    await atualizado.populate("ingredientes", "nome icone");
+
+    //Invalidar cache de produtos disponíveis
+    try {
+      if (redis) await redis.del("produtos_disponiveis");
+      await atualizarCacheProdutosDisponiveis();
+    } catch (err) {
+      console.warn("Falha ao atualizar cache após update:", err?.message || err);
+    }
+
+    return res.json(atualizado);
+  } catch (error) {
+    console.error("Erro ao atualizar produto:", error.message);
+    return res.status(500).json({ msg: "Erro no servidor", error: error.message });
+  }
+};
+
 
 async function atualizarCacheProdutosDisponiveis() {
   try {
