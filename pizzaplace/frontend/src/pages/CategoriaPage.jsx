@@ -36,17 +36,18 @@ const CategoriaPage = () => {
             </h2>
           )}
 
-          {/*Cartão fixo de pizza personalizada*/}
+          {/* Cartão fixo de pizza personalizada */}
           {categoria.toLowerCase() === "pizzas" && (
             <CartaoProduto
               product={{
                 _id: "make-your-own",
                 nome: "Make Your Own Pizza 🍕",
                 preco: 0,
-                imagem: "/images/make-your-own.jpg", // mete um asset ou placeholder
+                imagem: "/makeYourOwn.png",
                 descricao:
                   "Escolhe massa, molho e ingredientes para criar a tua pizza!",
                 estaDisponivel: true,
+                ingredientes: [],
               }}
               especial
             />
