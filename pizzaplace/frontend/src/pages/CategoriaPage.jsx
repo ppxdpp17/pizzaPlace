@@ -36,8 +36,8 @@ const CategoriaPage = () => {
             </h2>
           )}
 
-          {/* Cartão fixo de pizza personalizada */}
-          {categoria.toLowerCase() === "pizza" && (
+          {/*Cartão fixo de pizza personalizada*/}
+          {categoria.toLowerCase() === "pizzas" && (
             <CartaoProduto
               product={{
                 _id: "make-your-own",
