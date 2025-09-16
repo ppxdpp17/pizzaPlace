@@ -14,6 +14,7 @@ import MeusPedidos from "./pages/MeusPedidos.jsx";
 import PaginaEsqueceuPassword from "./pages/PaginaEsqueceuPassword.jsx";
 import PaginaResetPassword from "./pages/PaginaResetPassword.jsx";
 import EditProductPage from "./pages/EditProductPage.jsx";
+import CustomizarPizza from "./pages/CustomizarPizza.jsx";
 
 //Hooks
 import { useCarrinhoStore } from "./stores/useCarrinhoStore.js";
@@ -68,6 +69,7 @@ function App() {
           <Route path="/esqueceu-password" element={<PaginaEsqueceuPassword/>}/>
           <Route path="/reset-password/:token" element={<PaginaResetPassword/>}/>
           <Route path="/admin/produtos/:id/editar" element={ user?.cargo === "admin" ? <EditProductPage/> : <Navigate to="/login" /> }/>
+          <Route path="/pizza/customizar" element={ user ? <CustomizarPizza/> : <Navigate to="/login" /> } />
         </Routes>
       </div>
       <Toaster />

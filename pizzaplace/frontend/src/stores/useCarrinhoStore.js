@@ -98,7 +98,19 @@ export const useCarrinhoStore = create((set, get) => {
         set({cupao: null, cupaoAplicado: false});
         get().calcularTotal();
         toast.success("Cupão removido!");
-    }
+    },
+    adicionarAoCarrinhoCustom: (customProduct) => {
+        set((prev) => {
+            // verifica se já existe item igual (por _id)
+            const exists = prev.carrinho.find(item => item._id === customProduct._id);
+            const newCart = exists
+                ? prev.carrinho.map(item => item._id === customProduct._id ? { ...item, quantidade: (item.quantidade || 1) + 1 } : item)
+                : [...prev.carrinho, { ...customProduct, quantidade: customProduct.quantidade ?? 1 }];
+        return { carrinho: newCart };
+        });
+        // recalcula total
+        get().calcularTotal();
+    },
 
 }
 });
