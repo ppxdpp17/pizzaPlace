@@ -10,7 +10,7 @@ import { motion } from "framer-motion";
 
 import OptionDropdown from "../components/OptionDropdown";
 import IngredientsSelector from "../components/IngredientsSelector";
-import { MapPin } from "lucide-react";
+import { MapPin, ShoppingCart as ShoppingCartIcon } from "lucide-react";
 
 const TAMANHOS = [
   { id: "small", label: "Pequena", multiplier: 1, base: 6 },
@@ -158,8 +158,14 @@ export default function CustomizarPizza() {
           </div>
 
           <div className="bg-gray-800 rounded-lg p-6 flex flex-col justify-between shadow-sm">
-            <div>
-              {/* Aqui escondemos preço e ações no cartão de preview */}
+            {/* preço no topo da coluna */}
+            <div className="mb-4">
+              <div className="text-sm text-gray-300">Preço estimado</div>
+              <div className="text-2xl font-bold text-emerald-400">€{preco.toFixed(2)}</div>
+            </div>
+
+            <div className="mb-4">
+              {/*Aqui escondemos preço e ações no cartão de preview*/}
               <CartaoProduto
                 product={{
                   _id: "preview-custom",
@@ -174,25 +180,19 @@ export default function CustomizarPizza() {
               />
             </div>
 
-            <div className="mt-4">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <div className="text-sm text-gray-300">Preço estimado</div>
-                  <div className="text-2xl font-bold text-emerald-400">€{preco.toFixed(2)}</div>
-                </div>
+            {/* botões empilhados em baixo */}
+            <div className="mt-6 flex flex-col gap-3">
+              <button onClick={handleAddToCart} className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded text-white font-medium">
+                <ShoppingCartIcon size={18} />
+                Adicionar ao carrinho
+              </button>
 
-                <div className="flex gap-2">
-                  <button onClick={handleAddToCart} className="bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded text-white font-medium">
-                    Adicionar ao carrinho
-                  </button>
-                  <button onClick={handleCancel} className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-white text-sm">
-                    Anular
-                  </button>
-                </div>
-              </div>
-
-              <div className="text-xs text-gray-400">Ao adicionar a pizza personalizada, ela será colocada no carrinho como um item separado.</div>
+              <button onClick={handleCancel} className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-white text-sm">
+                Anular
+              </button>
             </div>
+
+            <div className="mt-4 text-xs text-gray-400">Ao adicionar a pizza personalizada, ela será colocada no carrinho como um item separado.</div>
           </div>
         </div>
       </div>
