@@ -35,7 +35,7 @@ export default function CustomizarPizza() {
   const [loading, setLoading] = useState(true);
 
   // Form state
-  const [nome, setNome] = useState("Minha Pizza Personalizada");
+  const [nome, setNome] = useState("A Minha Pizza");
   const [tamanho, setTamanho] = useState(TAMANHOS[1].id); // média por defeito
   const [massa, setMassa] = useState(MASSAS[0].id);
   const [molho, setMolho] = useState(MOLHOS[0].id);
@@ -114,85 +114,93 @@ export default function CustomizarPizza() {
   return (
     <div className="min-h-screen bg-transparent">
       <div className="max-w-6xl mx-auto px-4 py-12">
-        <motion.h1 className="text-4xl font-bold text-emerald-400 mb-6" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-          Personalizar Pizza
+        <motion.h1
+          className="text-center text-4xl sm:text-5xl font-bold text-emerald-400 mb-8"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          Costumizar Pizza
         </motion.h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Form */}
-          <div className="bg-gray-800 rounded-lg p-6 shadow-sm">
-            <label className="block text-sm text-gray-300 mb-1">Nome da pizza</label>
-            <input value={nome} onChange={e => setNome(e.target.value)} className="w-full p-2 rounded bg-gray-700 text-white mb-4" />
+        <motion.div
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 justify-items-center"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+        >
+            {/* Form */}
+            <div className="bg-gray-800 rounded-lg p-6 shadow-sm">
 
-            <div className="mb-4">
-              <div className="text-sm text-gray-300 mb-2">Tamanho</div>
-              <div className="flex gap-2">
-                {TAMANHOS.map(t => (
-                  <button key={t.id} onClick={() => setTamanho(t.id)} className={`px-3 py-2 rounded ${t.id === tamanho ? "bg-emerald-600" : "bg-gray-700"} text-white`}>
-                    {t.label}
+              <div className="mb-4">
+                <div className="text-sm text-gray-300 mb-2">Tamanho</div>
+                <div className="flex gap-2">
+                  {TAMANHOS.map(t => (
+                    <button key={t.id} onClick={() => setTamanho(t.id)} className={`px-3 py-2 rounded ${t.id === tamanho ? "bg-emerald-600" : "bg-gray-700"} text-white`}>
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <div className="text-sm text-gray-300 mb-2">Massa</div>
+                <select value={massa} onChange={e => setMassa(e.target.value)} className="w-full p-2 rounded bg-gray-700 text-white">
+                  {MASSAS.map(m => <option key={m.id} value={m.id}>{m.label}</option>)}
+                </select>
+              </div>
+
+              <div className="mb-4">
+                <div className="text-sm text-gray-300 mb-2">Molho</div>
+                <select value={molho} onChange={e => setMolho(e.target.value)} className="w-full p-2 rounded bg-gray-700 text-white">
+                  {MOLHOS.map(m => <option key={m.id} value={m.id}>{m.label}</option>)}
+                </select>
+              </div>
+
+              <div className="mb-4">
+                <div className="text-sm text-gray-300 mb-2">Toppings (cada um €0.75)</div>
+                <div className="grid grid-cols-2 gap-2 max-h-52 overflow-y-auto pr-2">
+                  {ingredientes.map(i => (
+                    <label key={i._id ?? i.id} className="flex items-center gap-2 text-sm text-gray-300">
+                      <input type="checkbox" checked={selecionados.includes(String(i._id ?? i.id))} onChange={() => toggle(i._id ?? i.id)} />
+                      <span>{i.icone ? `${i.icone} ` : ""}{i.nome}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-sm text-gray-300 mb-1">Observações</label>
+                <textarea value={observacoes} onChange={e => setObservacoes(e.target.value)} className="w-full p-2 rounded bg-gray-700 text-white" rows="3" />
+              </div>
+
+              <div className="flex items-center justify-between mt-4">
+                <div>
+                  <div className="text-sm text-gray-300">Preço estimado</div>
+                  <div className="text-2xl font-bold text-emerald-400">€{preco.toFixed(2)}</div>
+                </div>
+                <div>
+                  <button onClick={handleAddToCart} className="bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded text-white">
+                    Adicionar ao carrinho
                   </button>
-                ))}
+                </div>
               </div>
             </div>
 
-            <div className="mb-4">
-              <div className="text-sm text-gray-300 mb-2">Massa</div>
-              <select value={massa} onChange={e => setMassa(e.target.value)} className="w-full p-2 rounded bg-gray-700 text-white">
-                {MASSAS.map(m => <option key={m.id} value={m.id}>{m.label}</option>)}
-              </select>
-            </div>
-
-            <div className="mb-4">
-              <div className="text-sm text-gray-300 mb-2">Molho</div>
-              <select value={molho} onChange={e => setMolho(e.target.value)} className="w-full p-2 rounded bg-gray-700 text-white">
-                {MOLHOS.map(m => <option key={m.id} value={m.id}>{m.label}</option>)}
-              </select>
-            </div>
-
-            <div className="mb-4">
-              <div className="text-sm text-gray-300 mb-2">Toppings (cada um €0.75)</div>
-              <div className="grid grid-cols-2 gap-2 max-h-52 overflow-y-auto pr-2">
-                {ingredientes.map(i => (
-                  <label key={i._id ?? i.id} className="flex items-center gap-2 text-sm text-gray-300">
-                    <input type="checkbox" checked={selecionados.includes(String(i._id ?? i.id))} onChange={() => toggle(i._id ?? i.id)} />
-                    <span>{i.icone ? `${i.icone} ` : ""}{i.nome}</span>
-                  </label>
-                ))}
+            {/*Preview (usa CartaoProduto para manter consistência visual)*/}
+            <div className="lg:col-span-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <CartaoProduto product={{
+                  _id: "preview-custom",
+                  nome,
+                  preco,
+                  descricao: `${massa} · ${molho} · ${selecionados.length} toppings`,
+                  imagem: "/makeYourOwn.png",
+                  ingredientes: ingredientes.filter(i => selecionados.includes(String(i._id ?? i.id))).map(i => ({ _id: i._id ?? i.id, nome: i.nome, icone: i.icone }))
+                }} />
               </div>
             </div>
-
-            <div className="mb-4">
-              <label className="block text-sm text-gray-300 mb-1">Observações</label>
-              <textarea value={observacoes} onChange={e => setObservacoes(e.target.value)} className="w-full p-2 rounded bg-gray-700 text-white" rows="3" />
-            </div>
-
-            <div className="flex items-center justify-between mt-4">
-              <div>
-                <div className="text-sm text-gray-300">Preço estimado</div>
-                <div className="text-2xl font-bold text-emerald-400">€{preco.toFixed(2)}</div>
-              </div>
-              <div>
-                <button onClick={handleAddToCart} className="bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded text-white">
-                  Adicionar ao carrinho
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Preview (usa CartaoProduto para manter consistência visual) */}
-          <div className="lg:col-span-2">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <CartaoProduto product={{
-                _id: "preview-custom",
-                nome,
-                preco,
-                descricao: `${massa} · ${molho} · ${selecionados.length} toppings`,
-                imagem: "/make-your-own.png",
-                ingredientes: ingredientes.filter(i => selecionados.includes(String(i._id ?? i.id))).map(i => ({ _id: i._id ?? i.id, nome: i.nome, icone: i.icone }))
-              }} />
-            </div>
-          </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
