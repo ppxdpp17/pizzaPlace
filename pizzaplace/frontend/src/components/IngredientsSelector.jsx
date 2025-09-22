@@ -35,7 +35,7 @@ export default function IngredientsSelector({ value = [], onChange }) {
     if (value.includes(id)) {
       onChange(value.filter((x) => x !== id));
     } else {
-      onChange([...value, id]);
+      onChange([...(value || []), id]);
     }
   };
 
