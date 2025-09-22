@@ -121,12 +121,6 @@ export default function CustomizarPizza() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Form (ocupando 2 colunas) */}
           <div className="lg:col-span-2 bg-gray-800 rounded-lg p-6 flex flex-col gap-4">
-            <label className="block text-sm text-gray-300">Nome da pizza</label>
-            <input
-              value={nome}
-              onChange={(e) => setNome(e.target.value)}
-              className="w-full p-3 rounded bg-gray-700 text-white border border-gray-600"
-            />
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
