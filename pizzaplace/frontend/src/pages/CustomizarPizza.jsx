@@ -10,7 +10,7 @@ import { motion } from "framer-motion";
 
 import OptionDropdown from "../components/OptionDropdown";
 import IngredientsSelector from "../components/IngredientsSelector";
-import { MapPin } from "lucide-react"; // só para exemplo se quiseres ícone
+import { MapPin } from "lucide-react";
 
 const TAMANHOS = [
   { id: "small", label: "Pequena", multiplier: 1, base: 6 },
@@ -40,7 +40,7 @@ export default function CustomizarPizza() {
   const [loading, setLoading] = useState(true);
 
   // default name (fixed)
-  const nomePadrao = "pizzaPersonalizada";
+  const nomePadrao = "Pizza Costumizada";
 
   // Form state
   const [tamanho, setTamanho] = useState(TAMANHOS[1].id);
@@ -104,7 +104,6 @@ export default function CustomizarPizza() {
   };
 
   const handleCancel = () => {
-    // anular: reseta e volta à página anterior
     setTamanho(TAMANHOS[1].id);
     setMassa(MASSAS[0].id);
     setMolho(MOLHOS[0].id);
@@ -116,7 +115,7 @@ export default function CustomizarPizza() {
   if (loading) return <div className="p-8 text-center">A Carregar...</div>;
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12">
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }} className="min-h-screen flex items-center justify-center py-12">
       <div className="w-full max-w-6xl bg-gray-900/60 backdrop-blur-sm border border-gray-700 rounded-2xl shadow-2xl p-6" style={{ minHeight: 640 }}>
         <motion.h1 className="text-center text-4xl sm:text-5xl font-bold text-emerald-400 mb-6" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
           Personalizar Pizza
@@ -160,15 +159,19 @@ export default function CustomizarPizza() {
 
           <div className="bg-gray-800 rounded-lg p-6 flex flex-col justify-between shadow-sm">
             <div>
-              <div className="text-sm text-gray-300 mb-3">Pré-visualização</div>
-              <CartaoProduto product={{
-                _id: "preview-custom",
-                nome: nomePadrao,
-                preco,
-                descricao: `${massa} · ${molho} · ${selecionados.length} toppings`,
-                imagem: "/makeYourOwnpng.png",
-                ingredientes: ingredientes.filter((i) => selecionados.includes(String(i._id ?? i.id))).map(i => ({ _id: i._id ?? i.id, nome: i.nome, icone: i.icone }))
-              }} />
+              {/* Aqui escondemos preço e ações no cartão de preview */}
+              <CartaoProduto
+                product={{
+                  _id: "preview-custom",
+                  nome: nomePadrao,
+                  preco,
+                  descricao: `${massa} · ${molho} · ${selecionados.length} toppings`,
+                  imagem: "/makeYourOwn.png",
+                  ingredientes: ingredientes.filter((i) => selecionados.includes(String(i._id ?? i.id))).map(i => ({ _id: i._id ?? i.id, nome: i.nome, icone: i.icone }))
+                }}
+                hideActions
+                hidePrice
+              />
             </div>
 
             <div className="mt-4">
@@ -193,6 +196,6 @@ export default function CustomizarPizza() {
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
