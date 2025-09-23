@@ -10,7 +10,7 @@ import { motion } from "framer-motion";
 
 import OptionDropdown from "../components/OptionDropdown";
 import IngredientsSelector from "../components/IngredientsSelector";
-import { MapPin, ShoppingCart as ShoppingCartIcon } from "lucide-react";
+import { Shell, Badge, ShoppingCart as ShoppingCartIcon } from "lucide-react";
 
 const TAMANHOS = [
   { id: "small", label: "Pequena", multiplier: 1, base: 6 },
@@ -35,18 +35,18 @@ export default function CustomizarPizza() {
   const { adicionarAoCarrinhoCustom } = useCarrinhoStore();
   const navigate = useNavigate();
 
-  // state
+  //state
   const [ingredientes, setIngredientes] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // default name (fixed)
+  //default name (fixed)
   const nomePadrao = "Pizza Costumizada";
 
-  // Form state
+  //Form state
   const [tamanho, setTamanho] = useState(TAMANHOS[1].id);
   const [massa, setMassa] = useState(MASSAS[0].id);
   const [molho, setMolho] = useState(MOLHOS[0].id);
-  const [selecionados, setSelecionados] = useState([]); // ids
+  const [selecionados, setSelecionados] = useState([]); //ids
   const [observacoes, setObservacoes] = useState("");
 
   useEffect(() => {
@@ -137,12 +137,12 @@ export default function CustomizarPizza() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <div className="text-sm text-gray-300 mb-2">Massa</div>
-                <OptionDropdown options={MASSAS} value={massa} onChange={setMassa} placeholder="Escolher massa" Icon={MapPin} />
+                <OptionDropdown options={MASSAS} value={massa} onChange={setMassa} placeholder="Escolher massa" Icon={Badge} />
               </div>
 
               <div>
                 <div className="text-sm text-gray-300 mb-2">Molho</div>
-                <OptionDropdown options={MOLHOS} value={molho} onChange={setMolho} placeholder="Escolher molho" Icon={MapPin} />
+                <OptionDropdown options={MOLHOS} value={molho} onChange={setMolho} placeholder="Escolher molho" Icon={Shell} />
               </div>
             </div>
 
@@ -158,14 +158,14 @@ export default function CustomizarPizza() {
           </div>
 
           <div className="bg-gray-800 rounded-lg p-6 flex flex-col justify-between shadow-sm">
-            {/* preço no topo da coluna */}
+            {/*preço no topo da coluna*/}
             <div className="mb-4">
               <div className="text-sm text-gray-300">Preço estimado</div>
               <div className="text-2xl font-bold text-emerald-400">€{preco.toFixed(2)}</div>
             </div>
 
             <div className="mb-4">
-              {/*Aqui escondemos preço e ações no cartão de preview*/}
+              {/*Esconde-se o preço e ações no cartão de preview*/}
               <CartaoProduto
                 product={{
                   _id: "preview-custom",
@@ -180,7 +180,7 @@ export default function CustomizarPizza() {
               />
             </div>
 
-            {/* botões empilhados em baixo */}
+            {/*Botões empilhados em baixo*/}
             <div className="mt-6 flex flex-col gap-3">
               <button onClick={handleAddToCart} className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded text-white font-medium">
                 <ShoppingCartIcon size={18} />
