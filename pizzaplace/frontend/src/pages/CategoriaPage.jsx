@@ -36,21 +36,40 @@ const CategoriaPage = () => {
             </h2>
           )}
 
-          {/* Cartão fixo de pizza personalizada */}
+          {/* Cartões fixos: apenas na categoria "pizzas" */}
           {categoria.toLowerCase() === "pizzas" && (
-            <CartaoProduto
-              product={{
-                _id: "make-your-own",
-                nome: "Make Your Own Pizza 🍕",
-                preco: 0,
-                imagem: "/makeYourOwn.png",
-                descricao:
-                  "Escolhe massa, molho e ingredientes para criar a tua pizza!",
-                estaDisponivel: true,
-                ingredientes: [],
-              }}
-              especial
-            />
+            <>
+              {/* Make Your Own Pizza — mantém o comportamento "especial" (botão Personalizar) */}
+              <CartaoProduto
+                key="make-your-own"
+                product={{
+                  _id: "make-your-own",
+                  nome: "Make Your Own Pizza 🍕",
+                  preco: 0,
+                  imagem: "/makeYourOwn.png",
+                  descricao: "Escolhe massa, molho e ingredientes para criar a tua pizza!",
+                  estaDisponivel: true,
+                  ingredientes: [],
+                }}
+                especial
+              />
+
+              {/* Mix 2 Pizzas — cartão informativo, sem ações por agora */}
+              <CartaoProduto
+                key="mix-2-pizzas"
+                product={{
+                  _id: "mix-2-pizzas",
+                  nome: "Mix 2 Pizzas 🍕🍕",
+                  preco: 0,
+                  imagem: "/mix-2-pizzas.png", // ajusta o ficheiro em public/ conforme quiseres
+                  descricao: "Escolhe duas pizzas e combina-as num só pedido (brevemente disponível).",
+                  estaDisponivel: true,
+                  ingredientes: [],
+                }}
+                hideActions
+                hidePrice
+              />
+            </>
           )}
 
           {products?.map((product) => (
