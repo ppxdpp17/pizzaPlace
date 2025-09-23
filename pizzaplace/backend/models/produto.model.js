@@ -25,7 +25,7 @@ const produtoSchema = new mongoose.Schema({
     },
     estaDisponivel: {
         type: Boolean,
-        default: false
+        default: true
     },
     ingredientes: [{ type: mongoose.Schema.Types.ObjectId, ref: "Ingrediente" }],
 
