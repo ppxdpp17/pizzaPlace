@@ -61,8 +61,8 @@ const CategoriaPage = () => {
                   _id: "mix-2-pizzas",
                   nome: "Mix 2 Pizzas 🍕🍕",
                   preco: 0,
-                  imagem: "/mix-2-pizzas.png", // ajusta o ficheiro em public/ conforme quiseres
-                  descricao: "Escolhe duas pizzas e combina-as num só pedido (brevemente disponível).",
+                  imagem: "/pizza2mix.png", // ajusta o ficheiro em public/ conforme quiseres
+                  descricao: "Escolhe duas pizzas e combina-as num só pedido",
                   estaDisponivel: true,
                   ingredientes: [],
                 }}
