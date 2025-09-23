@@ -1,5 +1,5 @@
 // src/pages/CriarPizzaForm.jsx
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { PlusCircle, Upload, Loader } from "lucide-react";
 import toast from "react-hot-toast";
@@ -21,18 +21,44 @@ const CriarPizzaForm = () => {
     ingredientes: []
   });
 
+  const [showIngredientes, setShowIngredientes] = useState(false); // toggle para mostrar selector
+
   const { criarProduto, loading } = useProductStore();
+
+  // Quando a categoria muda, por defeito mostrar ingredientes só se for "pizzas"
+  useEffect(() => {
+    if (novoProduto.categoria === "pizzas") {
+      setShowIngredientes(true);
+    } else {
+      setShowIngredientes(false);
+    }
+  }, [novoProduto.categoria]);
 
   const gerirSubmissao = async (e) => {
     e.preventDefault();
-    console.log("Enviar produto:", novoProduto);   
+
     try {
-      await criarProduto(novoProduto);
-      toast.success("Produto Criado Com Sucesso");
+      // Montar payload: só inclui ingredientes se o toggle estiver activo
+      const payload = {
+        nome: novoProduto.nome,
+        preco: Number(novoProduto.preco),
+        categoria: novoProduto.categoria,
+        imagem: novoProduto.imagem || ""
+      };
+
+      if (showIngredientes && Array.isArray(novoProduto.ingredientes) && novoProduto.ingredientes.length > 0) {
+        payload.ingredientes = novoProduto.ingredientes;
+      }
+      // opcional: se houver uma descrição, inclui-a (se quiseres)
+      if (novoProduto.descricao) payload.descricao = novoProduto.descricao;
+
+      await criarProduto(payload);
+      toast.success("Produto criado com sucesso");
       setNovoProduto({ nome: "", preco: "", categoria: "", imagem: "", ingredientes: [] });
+      setShowIngredientes(false);
     } catch (error) {
       console.error("Erro ao criar o produto", error);
-      toast.error("Erro NA CRIAÇÃO de produto");
+      toast.error(error.response?.data?.msg || "Erro na criação do produto");
     }
   };
 
@@ -41,7 +67,7 @@ const CriarPizzaForm = () => {
     if (ficheiro) {
       const leitor = new FileReader();
       leitor.onloadend = () => {
-        setNovoProduto({ ...novoProduto, imagem: leitor.result });
+        setNovoProduto((s) => ({ ...s, imagem: leitor.result }));
       };
       leitor.readAsDataURL(ficheiro);
     }
@@ -54,11 +80,11 @@ const CriarPizzaForm = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8 }}
     >
-      <h2 className="text-2xl font-semibold mb-6 text-emerald-300">Criar Nova Pizza</h2>
+      <h2 className="text-2xl font-semibold mb-6 text-emerald-300">Criar Novo Produto</h2>
 
       <form onSubmit={gerirSubmissao} className="space-y-4">
         <div>
-          <label htmlFor="nome" className="block text-sm font-medium text-gray-300">Nome do Produto</label>
+          <label htmlFor="nome" className="block text-sm font-medium text-gray-300">Nome</label>
           <input
             type="text"
             id="nome"
@@ -69,13 +95,19 @@ const CriarPizzaForm = () => {
           />
         </div>
 
-        {/*Ingredients selector*/}
+        {/* Ingredients selector toggle */}
         <div>
-          <label className="block text-sm font-medium text-gray-300">Ingredientes</label>
-          <IngredientsSelector
-            value={novoProduto.ingredientes}
-            onChange={(ings) => setNovoProduto({ ...novoProduto, ingredientes: ings })}
-          />
+          <label htmlFor="categoria" className="block text-sm font-medium text-gray-300">Categoria</label>
+          <select
+            id="categoria"
+            value={novoProduto.categoria}
+            onChange={(e) => setNovoProduto({ ...novoProduto, categoria: e.target.value })}
+            className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            required
+          >
+            <option value="">Selecione uma categoria</option>
+            {categorias.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
+          </select>
         </div>
 
         <div>
@@ -91,28 +123,40 @@ const CriarPizzaForm = () => {
           />
         </div>
 
-        <div>
-          <label htmlFor="categoria" className="block text-sm font-medium text-gray-300">Categoria</label>
-          <select
-            id="categoria"
-            value={novoProduto.categoria}
-            onChange={(e) => setNovoProduto({ ...novoProduto, categoria: e.target.value })}
-            className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            required
-          >
-            <option value="">Selecione uma categoria</option>
-            {categorias.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
-          </select>
+        {/* Toggle para ingredients (opcional) */}
+        <div className="flex items-center gap-3">
+          <input
+            id="toggle-ings"
+            type="checkbox"
+            checked={showIngredientes}
+            onChange={(e) => setShowIngredientes(e.target.checked)}
+            className="h-4 w-4 rounded bg-gray-700 border-gray-600 text-emerald-500 focus:ring-emerald-400"
+          />
+          <label htmlFor="toggle-ings" className="text-sm text-gray-300">
+            Adicionar ingredientes ao produto (opcional)
+          </label>
         </div>
 
-        {/*Escolher imagem*/}
+        {/* Ingredients selector — só renderiza se showIngredientes for true */}
+        {showIngredientes && (
+          <div>
+            <label className="block text-sm font-medium text-gray-300">Ingredientes (opcional)</label>
+            <IngredientsSelector
+              value={novoProduto.ingredientes}
+              onChange={(ings) => setNovoProduto({ ...novoProduto, ingredientes: ings })}
+            />
+            <p className="text-xs text-gray-400 mt-1">Se ficar vazio, o produto será criado sem ingredientes.</p>
+          </div>
+        )}
+
+        {/* Escolher imagem */}
         <div className="flex flex-col items-center">
           <input type="file" id="imagem" className="sr-only" accept="image/*" onChange={gerirMudancaImagem} />
           <label htmlFor="imagem" className="cursor-pointer bg-gray-700 py-2 px-4 border border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-300 hover:bg-gray-600">
             <Upload className="h-5 inline-block mr-2" /> Escolher Imagem
           </label>
           {novoProduto.imagem && (
-            <div className="mt-3 text-sm text-gray-300">Imagem Enviada com Sucesso</div>
+            <div className="mt-3 text-sm text-gray-300">Imagem pronta para upload (dataURL)</div>
           )}
         </div>
 
