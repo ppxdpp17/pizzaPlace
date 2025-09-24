@@ -1,107 +1,97 @@
 // src/pages/CategoriaPage.jsx
 import { useEffect, useMemo, useState } from "react";
 import { useProductStore } from "../stores/useProductStore";
-import { useCarrinhoStore } from "../stores/useCarrinhoStore";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import CartaoProduto from "../components/CartaoProduto";
-import OptionDropdown from "../components/OptionDropdown";
+import { useCarrinhoStore } from "../stores/useCarrinhoStore";
+import { useUserStore } from "../stores/useUserStore";
 import toast from "react-hot-toast";
+import OptionDropdown from "../components/OptionDropdown"; // se já tens este componente
+// Se não tens OptionDropdown, substitui por <select> simples abaixo.
 
 const TAMANHOS = [
-  { id: "small", label: "Pequena", multiplier: 1 },
-  { id: "medium", label: "Média", multiplier: 1.3 },
-  { id: "large", label: "Grande", multiplier: 1.6 },
+  { value: "pequena", label: "Pequena" },
+  { value: "media", label: "Média" },
+  { value: "grande", label: "Grande" },
 ];
 
 const CategoriaPage = () => {
   const { getProdutosCategoria, products } = useProductStore();
-  const { adicionarAoCarrinhoCustom } = useCarrinhoStore();
   const { categoria } = useParams();
+  const navigate = useNavigate();
+
+  const { adicionarAoCarrinho } = useCarrinhoStore();
+  const { user } = useUserStore();
 
   useEffect(() => {
     getProdutosCategoria(categoria);
   }, [getProdutosCategoria, categoria]);
 
-  // modal state
+  // Modal state e selecções
   const [modalOpen, setModalOpen] = useState(false);
-  const [pizzaA, setPizzaA] = useState("");
-  const [pizzaB, setPizzaB] = useState("");
-  const [tamanho, setTamanho] = useState(TAMANHOS[1].id);
+  const [pizzaA, setPizzaA] = useState(null);
+  const [pizzaB, setPizzaB] = useState(null);
+  const [tamanho, setTamanho] = useState(null);
 
-  // Build options for the dropdowns from products (map to { id, label })
+  // Opções derivadas dos products (segura se products undefined)
   const pizzaOptions = useMemo(() => {
     if (!Array.isArray(products)) return [];
-    return products.map((p) => ({ id: p._id, label: p.nome }));
+    return products.map((p) => ({ value: p._id, label: p.nome }));
   }, [products]);
 
-  // helper to find product by id
-  const findProduct = (id) => products?.find((p) => String(p._id) === String(id));
-
-  const openModal = () => {
-    setPizzaA("");
-    setPizzaB("");
-    setTamanho(TAMANHOS[1].id);
-    setModalOpen(true);
+  const closeModal = () => {
+    setModalOpen(false);
+    setPizzaA(null);
+    setPizzaB(null);
+    setTamanho(null);
   };
-  const closeModal = () => setModalOpen(false);
 
   const handleAddMixToCart = () => {
-    if (!pizzaA || !pizzaB) {
-      toast.error("Por favor selecione duas pizzas diferentes.");
+    if (!user) {
+      toast.error("Por favor, faça login para adicionar produtos ao carrinho.");
+      navigate("/login");
       return;
     }
-    if (pizzaA === pizzaB) {
-      toast.error("Escolha duas pizzas diferentes.");
+    if (!pizzaA || !pizzaB) {
+      toast.error("Escolha as duas pizzas.");
+      return;
+    }
+    if (!tamanho) {
+      toast.error("Escolha um tamanho.");
       return;
     }
 
-    const pA = findProduct(pizzaA);
-    const pB = findProduct(pizzaB);
+    const pA = products.find((p) => p._id === pizzaA);
+    const pB = products.find((p) => p._id === pizzaB);
 
     if (!pA || !pB) {
-      toast.error("Não foi possível encontrar as pizzas selecionadas.");
+      toast.error("Seleção inválida das pizzas.");
       return;
     }
 
-    // calcular preço: soma (podes ajustar regras)
-    const precoA = Number(pA.preco) || 0;
-    const precoB = Number(pB.preco) || 0;
-    // aplicar multiplicador do tamanho (média por defeito)
-    const mult = TAMANHOS.find((t) => t.id === tamanho)?.multiplier ?? 1;
-    const preco = +((precoA + precoB) * mult).toFixed(2);
-
-    // ingredients combinados (sem duplicados)
-    const ingsA = Array.isArray(pA.ingredientes)
-      ? pA.ingredientes.map((i) => (typeof i === "string" ? i : i._id ?? i.id ?? i))
-      : [];
-    const ingsB = Array.isArray(pB.ingredientes)
-      ? pB.ingredientes.map((i) => (typeof i === "string" ? i : i._id ?? i.id ?? i))
-      : [];
-    const uniqueIngIds = Array.from(new Set([...ingsA, ...ingsB]));
-
-    const combinedIngredients = uniqueIngIds.map((id) => {
-      // tentar mapear à estrutura {_id, nome, icone} se existir nos produtos carregados
-      const found = (pA.ingredientes || []).concat(pB.ingredientes || []).find((i) => String(i._id ?? i.id) === String(id));
-      if (!found) return { _id: id, nome: "" };
-      return { _id: found._id ?? found.id, nome: found.nome ?? "", icone: found.icone ?? "" };
-    });
+    // Exemplo de calculo de preço: soma dos preços (podes adaptar)
+    const precoA = typeof pA.preco === "number" ? pA.preco : Number(pA.preco) || 0;
+    const precoB = typeof pB.preco === "number" ? pB.preco : Number(pB.preco) || 0;
+    const preco = precoA + precoB;
 
     const mixProduct = {
-      _id: `mix-${Date.now()}`,
-      nome: `Mix: ${pA.nome} + ${pB.nome} (${tamanho})`,
-      descricao: `${pA.nome} + ${pB.nome} — Tamanho: ${tamanho}`,
+      _id: `mix-2-${Date.now()}`,
+      nome: `Mix 2 Pizzas — ${pA.nome} + ${pB.nome} (${tamanho})`,
+      descricao: "Junta duas pizzas à tua escolha para máximo sabor!",
       preco,
-      imagem: pA.imagem || pB.imagem || "/makeYourOwn.png",
-      categoria: "pizzas",
+      imagem: pA.imagem || pB.imagem || "/pizza2mix.png",
       estaDisponivel: true,
-      ingredientes: combinedIngredients,
-      isCustom: true,
-      meta: { pizzaA: pA._id, pizzaB: pB._id, tamanho },
+      meta: {
+        tipo: "mix-2",
+        pizzaA: pA._id,
+        pizzaB: pB._id,
+        tamanho,
+      },
     };
 
-    adicionarAoCarrinhoCustom(mixProduct);
-    toast.success("Mix adicionado ao carrinho!");
+    adicionarAoCarrinho(mixProduct);
+    toast.success("Mix 2 Pizzas adicionado ao carrinho!");
     closeModal();
   };
 
@@ -132,7 +122,7 @@ const CategoriaPage = () => {
           {/* Cartões fixos: apenas na categoria "pizzas" */}
           {categoria?.toLowerCase() === "pizzas" && (
             <>
-              {/* Make Your Own Pizza */}
+              {/* Make Your Own Pizza — mantém o comportamento "especial" (botão Personalizar) */}
               <CartaoProduto
                 key="make-your-own"
                 product={{
@@ -147,22 +137,24 @@ const CategoriaPage = () => {
                 especial
               />
 
-              {/*Mix 2 Pizzas*/}
+              {/* Mix 2 Pizzas — agora é "especial" com descrição e abre modal */}
               <CartaoProduto
-              key="mix-2-pizzas"
-              product={{
-                _id: "mix-2-pizzas",
-                nome: "Mix 2 Pizzas 🍕🍕",
-                preco: 0,
-                imagem: "/pizza2mix.png",
-                descricao: "Junta duas pizzas à tua escolha para máximo sabor",
-                estaDisponivel: true,
-                ingredientes: [],
-              }}
-              ctaLabel="Escolher Pizzas"
-              onCta={openModal}
-            />
-
+                key="mix-2-pizzas"
+                product={{
+                  _id: "mix-2-pizzas",
+                  nome: "Mix 2 Pizzas 🍕🍕",
+                  preco: 0,
+                  imagem: "/pizza2mix.png",
+                  descricao: "Junta duas pizzas à tua escolha para máximo sabor!",
+                  estaDisponivel: true,
+                  ingredientes: [],
+                }}
+                especial
+                hidePrice={false}
+                hideActions={false}
+                // quando o botão Personalizar for clicado, abre o modal
+                onPersonalizar={() => setModalOpen(true)}
+              />
             </>
           )}
 
@@ -172,7 +164,7 @@ const CategoriaPage = () => {
         </motion.div>
       </div>
 
-      {/* Modal (simples) */}
+      {/* Modal Mix 2 Pizzas */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           {/* overlay */}
@@ -190,18 +182,39 @@ const CategoriaPage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
               <div>
                 <label className="text-sm text-gray-300 mb-1 block">Pizza A</label>
-                <OptionDropdown options={pizzaOptions} value={pizzaA} onChange={setPizzaA} placeholder="Escolher Pizza A" />
+                {OptionDropdown ? (
+                  <OptionDropdown options={pizzaOptions} value={pizzaA} onChange={setPizzaA} placeholder="Escolher Pizza A" />
+                ) : (
+                  <select className="w-full p-2 rounded bg-gray-800 text-white" value={pizzaA || ""} onChange={(e) => setPizzaA(e.target.value)}>
+                    <option value="">Escolher Pizza A</option>
+                    {pizzaOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
+                )}
               </div>
 
               <div>
                 <label className="text-sm text-gray-300 mb-1 block">Pizza B</label>
-                <OptionDropdown options={pizzaOptions} value={pizzaB} onChange={setPizzaB} placeholder="Escolher Pizza B" />
+                {OptionDropdown ? (
+                  <OptionDropdown options={pizzaOptions} value={pizzaB} onChange={setPizzaB} placeholder="Escolher Pizza B" />
+                ) : (
+                  <select className="w-full p-2 rounded bg-gray-800 text-white" value={pizzaB || ""} onChange={(e) => setPizzaB(e.target.value)}>
+                    <option value="">Escolher Pizza B</option>
+                    {pizzaOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
+                )}
               </div>
             </div>
 
             <div className="mb-4">
               <label className="text-sm text-gray-300 mb-1 block">Tamanho</label>
-              <OptionDropdown options={TAMANHOS} value={tamanho} onChange={setTamanho} placeholder="Escolher tamanho" />
+              {OptionDropdown ? (
+                <OptionDropdown options={TAMANHOS} value={tamanho} onChange={setTamanho} placeholder="Escolher tamanho" />
+              ) : (
+                <select className="w-full p-2 rounded bg-gray-800 text-white" value={tamanho || ""} onChange={(e) => setTamanho(e.target.value)}>
+                  <option value="">Escolher tamanho</option>
+                  {TAMANHOS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+                </select>
+              )}
             </div>
 
             <div className="flex justify-end gap-3 mt-4">
