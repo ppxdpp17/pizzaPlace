@@ -7,8 +7,26 @@ import { useCarrinhoStore } from "../stores/useCarrinhoStore";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
-const CartaoProduto = ({ product, produto, especial = false, hideActions = false, hidePrice = false, animate = true }) => {
-  // aceitar product ou produto (compatibilidade)
+/**
+ * CartaoProduto
+ * Props extras:
+ * - hideActions (boolean)
+ * - hidePrice (boolean)
+ * - especial (boolean)
+ * - ctaLabel (string) -> se fornecido, mostra botão com esse label dentro do cartão
+ * - onCta (fn) -> callback do botão cta
+ * - animate (boolean)
+ */
+const CartaoProduto = ({
+  product,
+  produto,
+  especial = false,
+  hideActions = false,
+  hidePrice = false,
+  ctaLabel,
+  onCta,
+  animate = true,
+}) => {
   const p = product ?? produto ?? {};
   const { user } = useUserStore();
   const { adicionarAoCarrinho } = useCarrinhoStore();
@@ -26,7 +44,7 @@ const CartaoProduto = ({ product, produto, especial = false, hideActions = false
     toast.success("Produto adicionado ao carrinho!");
   };
 
-  // ingredientes: construir string apenas se existirem e forem úteis
+  // ingredientes -> string (quando aplicável)
   let ingredientesTexto = "";
   if (Array.isArray(p.ingredientes) && p.ingredientes.length > 0) {
     const partes = p.ingredientes
@@ -39,7 +57,8 @@ const CartaoProduto = ({ product, produto, especial = false, hideActions = false
     ingredientesTexto = partes.join(", ");
   }
 
-  const precoNumero = typeof p.preco === "number" ? p.preco : (p.preco !== undefined ? Number(p.preco) || 0 : undefined);
+  const precoNumero =
+    typeof p.preco === "number" ? p.preco : p.preco !== undefined ? Number(p.preco) || 0 : undefined;
   const imagemSrc = p.imagem || "/makeYourOwnpng.png" || "/placeholder.png";
 
   const root = (
@@ -52,8 +71,9 @@ const CartaoProduto = ({ product, produto, especial = false, hideActions = false
       <div className="mt-4 px-5 pb-5">
         <h5 className="text-xl font-semibold tracking-tight text-white">{p.nome ?? "Produto"}</h5>
 
-        {especial ? (
-          <p className="text-sm text-gray-300">{p.descricao ?? "Personalize a sua pizza escolhendo massa, molho e toppings."}</p>
+        {/* descrição tem prioridade */}
+        {p.descricao ? (
+          <p className="text-sm text-gray-300">{p.descricao}</p>
         ) : (
           ingredientesTexto ? <p className="text-sm text-gray-300">{ingredientesTexto}</p> : null
         )}
@@ -71,7 +91,7 @@ const CartaoProduto = ({ product, produto, especial = false, hideActions = false
           </div>
         )}
 
-        {/* Banner de login (aparece quando user tenta adicionar sem estar logado) */}
+        {/* Banner de login */}
         {showLoginPrompt && !user && (
           <div className="mb-3 rounded-md bg-yellow-900/60 px-4 py-2 text-yellow-100 text-sm">
             Por favor, faça login para adicionar produtos ao carrinho.
@@ -87,25 +107,39 @@ const CartaoProduto = ({ product, produto, especial = false, hideActions = false
           </div>
         )}
 
-        {/* Ações (respeita hideActions) */}
+        {/* Ações */}
         {!hideActions && (
           <>
-            {especial ? (
+            {/* Se ctaLabel for fornecido, mostramos esse botão (usa onCta quando clicado) */}
+            {ctaLabel ? (
               <button
-                onClick={() => navigate("/pizza/customizar")}
-                className="flex items-center justify-center rounded-lg bg-indigo-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-300"
+                onClick={() => {
+                  if (typeof onCta === "function") onCta();
+                }}
+                className="w-full flex items-center justify-center rounded-lg bg-emerald-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-300"
               >
-                Personalizar 🍕
+                {ctaLabel}
               </button>
             ) : (
-              <button
-                className="flex items-center justify-center rounded-lg bg-emerald-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-300"
-                onClick={gerirAdicionarCarrinho}
-                disabled={!p || !p._id}
-              >
-                <ShoppingCart size={22} className="mr-2" />
-                Adicionar ao carrinho
-              </button>
+              <>
+                {especial ? (
+                  <button
+                    onClick={() => navigate("/pizza/customizar")}
+                    className="flex items-center justify-center rounded-lg bg-indigo-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-300"
+                  >
+                    Personalizar 🍕
+                  </button>
+                ) : (
+                  <button
+                    className="flex items-center justify-center rounded-lg bg-emerald-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-300"
+                    onClick={gerirAdicionarCarrinho}
+                    disabled={!p || !p._id}
+                  >
+                    <ShoppingCart size={22} className="mr-2" />
+                    Adicionar ao carrinho
+                  </button>
+                )}
+              </>
             )}
           </>
         )}
@@ -113,10 +147,8 @@ const CartaoProduto = ({ product, produto, especial = false, hideActions = false
     </div>
   );
 
-  // se animação desativada, apenas retorna
   if (!animate) return root;
 
-  // caso contrário, envolve em motion com animação consistente
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }}>
       {root}

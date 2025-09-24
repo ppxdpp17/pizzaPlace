@@ -1,3 +1,4 @@
+// src/pages/CategoriaPage.jsx
 import { useEffect, useMemo, useState } from "react";
 import { useProductStore } from "../stores/useProductStore";
 import { useCarrinhoStore } from "../stores/useCarrinhoStore";
@@ -6,7 +7,6 @@ import { motion } from "framer-motion";
 import CartaoProduto from "../components/CartaoProduto";
 import OptionDropdown from "../components/OptionDropdown";
 import toast from "react-hot-toast";
-
 
 const TAMANHOS = [
   { id: "small", label: "Pequena", multiplier: 1 },
@@ -72,13 +72,17 @@ const CategoriaPage = () => {
     const preco = +((precoA + precoB) * mult).toFixed(2);
 
     // ingredients combinados (sem duplicados)
-    const ingsA = Array.isArray(pA.ingredientes) ? pA.ingredientes.map(i => (typeof i === "string" ? i : (i._id ?? i.id ?? i))) : [];
-    const ingsB = Array.isArray(pB.ingredientes) ? pB.ingredientes.map(i => (typeof i === "string" ? i : (i._id ?? i.id ?? i))) : [];
+    const ingsA = Array.isArray(pA.ingredientes)
+      ? pA.ingredientes.map((i) => (typeof i === "string" ? i : i._id ?? i.id ?? i))
+      : [];
+    const ingsB = Array.isArray(pB.ingredientes)
+      ? pB.ingredientes.map((i) => (typeof i === "string" ? i : i._id ?? i.id ?? i))
+      : [];
     const uniqueIngIds = Array.from(new Set([...ingsA, ...ingsB]));
 
-    const combinedIngredients = uniqueIngIds.map(id => {
+    const combinedIngredients = uniqueIngIds.map((id) => {
       // tentar mapear à estrutura {_id, nome, icone} se existir nos produtos carregados
-      const found = (pA.ingredientes || []).concat(pB.ingredientes || []).find(i => String(i._id ?? i.id) === String(id));
+      const found = (pA.ingredientes || []).concat(pB.ingredientes || []).find((i) => String(i._id ?? i.id) === String(id));
       if (!found) return { _id: id, nome: "" };
       return { _id: found._id ?? found.id, nome: found.nome ?? "", icone: found.icone ?? "" };
     });
@@ -143,32 +147,22 @@ const CategoriaPage = () => {
                 especial
               />
 
-              {/* Mix 2 Pizzas — cartão + botão por baixo */}
-              <div className="flex flex-col items-center">
-                <CartaoProduto
-                  key="mix-2-pizzas"
-                  product={{
-                    _id: "mix-2-pizzas",
-                    nome: "Mix 2 Pizzas 🍕🍕",
-                    preco: 0,
-                    imagem: "/pizza2mix.png",
-                    descricao: "Escolhe duas pizzas e combina-as num só pedido",
-                    estaDisponivel: true,
-                    ingredientes: [],
-                  }}
-                  hideActions
-                  hidePrice
-                />
-
-                {/* botão custom para abrir modal */}
-                <button
-                  type="button"
-                  onClick={openModal}
-                  className="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-md bg-emerald-600 hover:bg-emerald-500 text-white font-medium"
-                >
-                  Escolher Pizzas
-                </button>
-              </div>
+              {/* Mix 2 Pizzas — agora com botão dentro do cartão e descrição */}
+              <CartaoProduto
+                key="mix-2-pizzas"
+                product={{
+                  _id: "mix-2-pizzas",
+                  nome: "Mix 2 Pizzas 🍕🍕",
+                  preco: 0,
+                  imagem: "/pizza2mix.png",
+                  descricao: "Junta duas pizzas à tua escolha para máximo sabor",
+                  estaDisponivel: true,
+                  ingredientes: [],
+                }}
+                hidePrice
+                ctaLabel="Escolher Pizzas"
+                onCta={openModal}
+              />
             </>
           )}
 
@@ -211,11 +205,10 @@ const CategoriaPage = () => {
             </div>
 
             <div className="flex justify-end gap-3 mt-4">
-              <button onClick={closeModal} className="px-4 py-2 rounded bg-gray-700 hover:bg-gray-600 text-white">Anular</button>
-              <button
-                onClick={handleAddMixToCart}
-                className="px-4 py-2 rounded bg-emerald-600 hover:bg-emerald-500 text-white"
-              >
+              <button onClick={closeModal} className="px-4 py-2 rounded bg-gray-700 hover:bg-gray-600 text-white">
+                Anular
+              </button>
+              <button onClick={handleAddMixToCart} className="px-4 py-2 rounded bg-emerald-600 hover:bg-emerald-500 text-white">
                 Adicionar ao carrinho
               </button>
             </div>
