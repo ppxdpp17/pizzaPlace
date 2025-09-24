@@ -85,7 +85,7 @@ const CartaoProduto = ({
               {!especial && precoNumero !== undefined && precoNumero > 0 ? (
                 <span className="text-3xl font-bold text-emerald-400">€{precoNumero.toFixed(2)}</span>
               ) : (
-                especial ? null : (precoNumero === 0 ? <span className="text-sm text-gray-400">Grátis</span> : null)
+                especial ? null : (precoNumero === 0 ? <span className="text-sm text-gray-400"></span> : null)
               )}
             </p>
           </div>

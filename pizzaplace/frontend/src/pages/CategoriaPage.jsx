@@ -147,22 +147,22 @@ const CategoriaPage = () => {
                 especial
               />
 
-              {/* Mix 2 Pizzas — agora com botão dentro do cartão e descrição */}
+              {/*Mix 2 Pizzas*/}
               <CartaoProduto
-                key="mix-2-pizzas"
-                product={{
-                  _id: "mix-2-pizzas",
-                  nome: "Mix 2 Pizzas 🍕🍕",
-                  preco: 0,
-                  imagem: "/pizza2mix.png",
-                  descricao: "Junta duas pizzas à tua escolha para máximo sabor",
-                  estaDisponivel: true,
-                  ingredientes: [],
-                }}
-                hidePrice
-                ctaLabel="Escolher Pizzas"
-                onCta={openModal}
-              />
+              key="mix-2-pizzas"
+              product={{
+                _id: "mix-2-pizzas",
+                nome: "Mix 2 Pizzas 🍕🍕",
+                preco: 0,
+                imagem: "/pizza2mix.png",
+                descricao: "Junta duas pizzas à tua escolha para máximo sabor",
+                estaDisponivel: true,
+                ingredientes: [],
+              }}
+              ctaLabel="Escolher Pizzas"
+              onCta={openModal}
+            />
+
             </>
           )}
 
