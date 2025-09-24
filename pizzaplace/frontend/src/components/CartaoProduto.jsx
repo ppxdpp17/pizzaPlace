@@ -7,7 +7,16 @@ import { useCarrinhoStore } from "../stores/useCarrinhoStore";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
-const CartaoProduto = ({ product, produto, especial = false, hideActions = false, hidePrice = false, animate = true, onPersonalizar }) => {
+const CartaoProduto = ({
+  product,
+  produto,
+  especial = false,
+  hideActions = false,
+  hidePrice = false,
+  animate = true,
+  onPersonalizar,
+  especialLabel = "Personalizar 🍕",
+}) => {
   // aceitar product ou produto (compatibilidade)
   const p = product ?? produto ?? {};
   const { user } = useUserStore();
@@ -101,7 +110,7 @@ const CartaoProduto = ({ product, produto, especial = false, hideActions = false
                 }}
                 className="flex items-center justify-center rounded-lg bg-indigo-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-300"
               >
-                Personalizar 🍕
+                {especialLabel} {/* <- usa a prop aqui */}
               </button>
             ) : (
               <button

@@ -150,10 +150,8 @@ const CategoriaPage = () => {
                   ingredientes: [],
                 }}
                 especial
-                hidePrice={false}
-                hideActions={false}
-                // quando o botão Personalizar for clicado, abre o modal
                 onPersonalizar={() => setModalOpen(true)}
+                especialLabel="Escolher Pizzas  🍕🍕"
               />
             </>
           )}
@@ -181,24 +179,24 @@ const CategoriaPage = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
               <div>
-                <label className="text-sm text-gray-300 mb-1 block">Pizza A</label>
+                <label className="text-sm text-gray-300 mb-1 block">Primeira Pizza</label>
                 {OptionDropdown ? (
-                  <OptionDropdown options={pizzaOptions} value={pizzaA} onChange={setPizzaA} placeholder="Escolher Pizza A" />
+                  <OptionDropdown options={pizzaOptions} value={pizzaA} onChange={setPizzaA} placeholder="Escolher Primeira Pizza" />
                 ) : (
                   <select className="w-full p-2 rounded bg-gray-800 text-white" value={pizzaA || ""} onChange={(e) => setPizzaA(e.target.value)}>
-                    <option value="">Escolher Pizza A</option>
+                    <option value="">Escolher Primeira Pizza</option>
                     {pizzaOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
                   </select>
                 )}
               </div>
 
               <div>
-                <label className="text-sm text-gray-300 mb-1 block">Pizza B</label>
+                <label className="text-sm text-gray-300 mb-1 block">Segunda Pizza</label>
                 {OptionDropdown ? (
-                  <OptionDropdown options={pizzaOptions} value={pizzaB} onChange={setPizzaB} placeholder="Escolher Pizza B" />
+                  <OptionDropdown options={pizzaOptions} value={pizzaB} onChange={setPizzaB} placeholder="Escolher Segunda Pizza" />
                 ) : (
                   <select className="w-full p-2 rounded bg-gray-800 text-white" value={pizzaB || ""} onChange={(e) => setPizzaB(e.target.value)}>
-                    <option value="">Escolher Pizza B</option>
+                    <option value="">Escolher Segunda Pizza</option>
                     {pizzaOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
                   </select>
                 )}
