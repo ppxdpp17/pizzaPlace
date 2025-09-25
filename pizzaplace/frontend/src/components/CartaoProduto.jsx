@@ -52,7 +52,7 @@ const CartaoProduto = ({
   const imagemSrc = p.imagem || "/makeYourOwnpng.png" || "/placeholder.png";
 
   const root = (
-    <div className="flex w-full relative flex-col overflow-hidden rounded-lg border border-gray-700 shadow-lg bg-gray-800">
+    <div className="flex w-72 h-[28rem] relative flex-col overflow-hidden rounded-lg border border-gray-700 shadow-lg bg-gray-800">
       <div className="relative mx-3 mt-3 flex h-60 overflow-hidden rounded-xl">
         <img className="object-cover w-full" src={imagemSrc} alt={p.nome || "Produto"} />
         <div className="absolute inset-0 bg-black bg-opacity-20" />
