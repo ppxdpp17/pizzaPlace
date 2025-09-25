@@ -59,9 +59,9 @@ const ListaProdutos = () => {
                   className="p-1 rounded-full transition-colors duration-200"
                 >
                   {product.estaDisponivel ? (
-                    <CheckCircle className="h-6 w-6 text-green-500" /> // Disponível
+                    <CheckCircle className="h-6 w-6 text-green-500" /> //Disponível
                   ) : (
-                    <Circle className="h-6 w-6 text-gray-400" /> // Indisponível
+                    <Circle className="h-6 w-6 text-gray-400" /> //Indisponível
                   )}
                 </button>
               </td>

@@ -21,11 +21,11 @@ const CriarPizzaForm = () => {
     ingredientes: []
   });
 
-  const [showIngredientes, setShowIngredientes] = useState(false); // toggle para mostrar selector
+  const [showIngredientes, setShowIngredientes] = useState(false); //Toggle para mostrar selector
 
   const { criarProduto, loading } = useProductStore();
 
-  // Quando a categoria muda, por defeito mostrar ingredientes só se for "pizzas"
+  //Quando a categoria muda, por defeito mostrar ingredientes só se for "pizzas"
   useEffect(() => {
     if (novoProduto.categoria === "pizzas") {
       setShowIngredientes(true);
@@ -38,7 +38,7 @@ const CriarPizzaForm = () => {
     e.preventDefault();
 
     try {
-      // Montar payload: só inclui ingredientes se o toggle estiver activo
+      //Montar payload: só inclui ingredientes se o toggle estiver activo
       const payload = {
         nome: novoProduto.nome,
         preco: Number(novoProduto.preco),
@@ -49,7 +49,7 @@ const CriarPizzaForm = () => {
       if (showIngredientes && Array.isArray(novoProduto.ingredientes) && novoProduto.ingredientes.length > 0) {
         payload.ingredientes = novoProduto.ingredientes;
       }
-      // opcional: se houver uma descrição, inclui-a (se quiseres)
+      //Opcional: se houver uma descrição, inclui-a (se quiseres)
       if (novoProduto.descricao) payload.descricao = novoProduto.descricao;
 
       await criarProduto(payload);
@@ -95,7 +95,7 @@ const CriarPizzaForm = () => {
           />
         </div>
 
-        {/* Ingredients selector toggle */}
+        {/*Ingredients selector toggle*/}
         <div>
           <label htmlFor="categoria" className="block text-sm font-medium text-gray-300">Categoria</label>
           <select
@@ -123,7 +123,7 @@ const CriarPizzaForm = () => {
           />
         </div>
 
-        {/* Toggle para ingredients (opcional) */}
+        {/*Toggle para ingredients (opcional)*/}
         <div className="flex items-center gap-3">
           <input
             id="toggle-ings"
@@ -137,7 +137,7 @@ const CriarPizzaForm = () => {
           </label>
         </div>
 
-        {/* Ingredients selector — só renderiza se showIngredientes for true */}
+        {/*Ingredients selector — só renderiza se showIngredientes for true*/}
         {showIngredientes && (
           <div>
             <label className="block text-sm font-medium text-gray-300">Ingredientes (opcional)</label>
@@ -149,7 +149,7 @@ const CriarPizzaForm = () => {
           </div>
         )}
 
-        {/* Escolher imagem */}
+        {/*Escolher imagem*/}
         <div className="flex flex-col items-center">
           <input type="file" id="imagem" className="sr-only" accept="image/*" onChange={gerirMudancaImagem} />
           <label htmlFor="imagem" className="cursor-pointer bg-gray-700 py-2 px-4 border border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-300 hover:bg-gray-600">

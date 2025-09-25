@@ -1,4 +1,3 @@
-// src/components/CartaoProduto.jsx
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { ShoppingCart } from "lucide-react";
@@ -17,7 +16,7 @@ const CartaoProduto = ({
   onPersonalizar,
   especialLabel = "Personalizar 🍕",
 }) => {
-  // aceitar product ou produto (compatibilidade)
+  //Aceitar product ou produto (compatibilidade)
   const p = product ?? produto ?? {};
   const { user } = useUserStore();
   const { adicionarAoCarrinho } = useCarrinhoStore();
@@ -35,7 +34,7 @@ const CartaoProduto = ({
     toast.success("Produto adicionado ao carrinho!");
   };
 
-  // ingredientes: construir string apenas se existirem e forem úteis
+  //Ingredientes: construir string apenas se existirem e forem úteis
   let ingredientesTexto = "";
   if (Array.isArray(p.ingredientes) && p.ingredientes.length > 0) {
     const partes = p.ingredientes
@@ -67,7 +66,7 @@ const CartaoProduto = ({
           ingredientesTexto ? <p className="text-sm text-gray-300">{ingredientesTexto}</p> : null
         )}
 
-        {/* preço (respeita hidePrice) */}
+        {/*Preço (respeita hidePrice)*/}
         {!hidePrice && (
           <div className="mt-2 mb-5 flex items-center justify-between">
             <p>
@@ -80,7 +79,7 @@ const CartaoProduto = ({
           </div>
         )}
 
-        {/* Banner de login (aparece quando user tenta adicionar sem estar logado) */}
+        {/*Banner de login (aparece quando user tenta adicionar sem estar logado)*/}
         {showLoginPrompt && !user && (
           <div className="mb-3 rounded-md bg-yellow-900/60 px-4 py-2 text-yellow-100 text-sm">
             Por favor, faça login para adicionar produtos ao carrinho.
@@ -96,7 +95,7 @@ const CartaoProduto = ({
           </div>
         )}
 
-        {/* Ações (respeita hideActions) */}
+        {/*Ações (respeita hideActions)*/}
         {!hideActions && (
           <>
             {especial ? (
@@ -110,7 +109,7 @@ const CartaoProduto = ({
                 }}
                 className="flex items-center justify-center rounded-lg bg-indigo-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-300"
               >
-                {especialLabel} {/* <- usa a prop aqui */}
+                {especialLabel}
               </button>
             ) : (
               <button
@@ -128,10 +127,10 @@ const CartaoProduto = ({
     </div>
   );
 
-  // se animação desativada, apenas retorna
+  //Se animação desativada, apenas retorna
   if (!animate) return root;
 
-  // caso contrário, envolve em motion com animação consistente
+  //Caso contrário, envolve em motion com animação consistente
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }}>
       {root}
