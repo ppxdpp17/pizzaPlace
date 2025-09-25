@@ -151,7 +151,7 @@ const EditProductPage = () => {
         </div>
 
         <div>
-          <label htmlFor="descricao" className="block text-sm font-medium text-gray-300">Descrição</label>
+          <label htmlFor="descricao" className="block text-sm font-medium text-gray-300">Descrição (opcional)</label>
           <textarea
             id="descricao"
             name="descricao"
@@ -241,7 +241,7 @@ const EditProductPage = () => {
         )}
 
         {/* Upload / preview de imagem */}
-        <div className="flex flex-col items-start gap-3">
+        <div className="flex flex-col items-center   gap-3">
           <div>
             <input id="imagem-file" type="file" accept="image/*" className="sr-only" onChange={gerirMudancaImagem} />
             <label htmlFor="imagem-file" className="inline-flex items-center gap-2 cursor-pointer bg-gray-700 py-2 px-4 border border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-300 hover:bg-gray-600">
@@ -251,21 +251,12 @@ const EditProductPage = () => {
 
           {form.imagem ? (
             <div className="flex items-center gap-4">
+              <div className="text-sm text-gray-300">Imagem carregada</div>
               <img src={form.imagem} alt="preview" className="h-20 w-20 object-cover rounded-md border border-gray-600" />
-              <div className="text-sm text-gray-300">Imagem carregada (pode ser URL ou dataURL).</div>
             </div>
           ) : (
             <div className="text-sm text-gray-400">Nenhuma imagem definida</div>
           )}
-          <p className="text-xs text-gray-400">Se preferires colar um URL, usa o campo de imagem abaixo.</p>
-
-          <input
-            name="imagem"
-            value={form.imagem}
-            onChange={onChange}
-            placeholder="URL da imagem ou DataURL (opcional)"
-            className="mt-2 block w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-          />
         </div>
 
         {/* Ações */}
@@ -277,7 +268,7 @@ const EditProductPage = () => {
           >
             {saving ? (
               <>
-                <Loader className="mr-2 h-5 w-5 animate-spin" /> A salvar...
+                <Loader className="mr-2 h-5 w-5 animate-spin" /> A guardar...
               </>
             ) : (
               <>
