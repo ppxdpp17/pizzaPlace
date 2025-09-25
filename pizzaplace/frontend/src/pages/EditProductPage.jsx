@@ -1,20 +1,31 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { PlusCircle, Upload, Loader, Save } from "lucide-react";
+import toast from "react-hot-toast";
 import axios from "../lib/axios";
 import { useProductStore } from "../stores/useProductStore";
-import toast from "react-hot-toast";
+import IngredientsSelector from "../components/IngredientsSelector";
+
+const categorias = [
+  { value: "pizzas", label: "Pizzas" },
+  { value: "bebidas", label: "Bebidas" },
+  { value: "entradas", label: "Entradas & Sobremesas" }
+];
 
 const EditProductPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { editarProduto } = useProductStore();
-
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [ingredientesList, setIngredientesList] = useState([]);
+
+  const [showIngredientes, setShowIngredientes] = useState(false);
   const [form, setForm] = useState({
     nome: "",
     descricao: "",
-    preco: 0,
+    preco: "",
     imagem: "",
     categoria: "",
     ingredientes: []
@@ -31,17 +42,20 @@ const EditProductPage = () => {
         if (!mounted) return;
         const produto = prodRes.data;
         setForm({
-          nome: produto.nome || "",
-          descricao: produto.descricao || "",
-          preco: produto.preco || 0,
-          imagem: produto.imagem || "",
-          categoria: produto.categoria || "",
-          ingredientes: (produto.ingredientes || []).map(i => i._id || i.id)
+          nome: produto.nome ?? "",
+          descricao: produto.descricao ?? "",
+          preco: produto.preco ?? "",
+          imagem: produto.imagem ?? "",
+          categoria: produto.categoria ?? "",
+          // normaliza ingredientes para array de ids
+          ingredientes: (produto.ingredientes || []).map(i => i._id ?? i.id ?? i)
         });
-        setIngredientesList(ingRes.data.ingredientes ?? ingRes.data);
+        setIngredientesList(ingRes.data.ingredientes ?? ingRes.data ?? []);
+        // por defeito, se categoria for pizzas mostra selector
+        setShowIngredientes((produto.categoria ?? "").toLowerCase() === "pizzas");
       } catch (err) {
         console.error(err);
-        toast.error("Falha ao carregar produto.");
+        toast.error("Falha ao carregar dados do produto.");
       } finally {
         setLoading(false);
       }
@@ -53,8 +67,27 @@ const EditProductPage = () => {
   const onChange = (e) => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
+    if (name === "categoria") {
+      setShowIngredientes(value === "pizzas");
+    }
   };
 
+  const gerirMudancaImagem = (e) => {
+    const ficheiro = e.target.files?.[0];
+    if (!ficheiro) return;
+    const leitor = new FileReader();
+    leitor.onloadend = () => {
+      setForm((s) => ({ ...s, imagem: leitor.result }));
+    };
+    leitor.readAsDataURL(ficheiro);
+  };
+
+  const onIngredientsChange = (ings) => {
+    // aceita array de ids
+    setForm(prev => ({ ...prev, ingredientes: ings }));
+  };
+
+  // Fallback simpler: checkbox grid (usado apenas se não houver IngredientsSelector)
   const toggleIngrediente = (idIng) => {
     setForm(prev => {
       const exists = prev.ingredientes.includes(idIng);
@@ -64,75 +97,205 @@ const EditProductPage = () => {
 
   const onSubmit = async (e) => {
     e.preventDefault();
+    setSaving(true);
     try {
-      // enviar dados ao backend
       const payload = {
         nome: form.nome,
         descricao: form.descricao,
         preco: Number(form.preco),
-        imagem: form.imagem, // aceitar URL ou dataURL (se fizeres upload)
+        imagem: form.imagem || "", // pode ser dataURL ou URL
         categoria: form.categoria,
-        ingredientes: form.ingredientes
+        ingredientes: Array.isArray(form.ingredientes) ? form.ingredientes : []
       };
+
       await editarProduto(id, payload);
       toast.success("Produto atualizado!");
-      navigate("/admin/produtos"); // volta para lista
+      navigate("/admin/produtos");
     } catch (err) {
       console.error(err);
-      toast.error(err.response?.data?.msg || "Erro ao atualizar produto.");
+      toast.error(err?.response?.data?.msg || "Erro ao atualizar produto.");
+    } finally {
+      setSaving(false);
     }
   };
 
-  if (loading) return <div>Carregando...</div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-gray-300">A carregar produto...</div>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-4">Editar Produto</h1>
-      <form onSubmit={onSubmit} className="space-y-4">
+    <motion.div
+      className="bg-gray-800 shadow-lg rounded-lg p-8 mb-8 max-w-3xl mx-auto mt-8"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+    >
+      <h2 className="text-2xl font-semibold mb-4 text-emerald-300">Editar Produto</h2>
+
+      <form onSubmit={onSubmit} className="space-y-6">
         <div>
-          <label className="block text-sm text-gray-300">Nome</label>
-          <input name="nome" value={form.nome} onChange={onChange} className="w-full mt-1 p-2 rounded bg-gray-700 text-white" />
+          <label htmlFor="nome" className="block text-sm font-medium text-gray-300">Nome</label>
+          <input
+            id="nome"
+            name="nome"
+            type="text"
+            value={form.nome}
+            onChange={onChange}
+            className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            required
+          />
         </div>
 
         <div>
-          <label className="block text-sm text-gray-300">Descrição</label>
-          <textarea name="descricao" value={form.descricao} onChange={onChange} className="w-full mt-1 p-2 rounded bg-gray-700 text-white" />
+          <label htmlFor="descricao" className="block text-sm font-medium text-gray-300">Descrição</label>
+          <textarea
+            id="descricao"
+            name="descricao"
+            value={form.descricao}
+            onChange={onChange}
+            rows={3}
+            className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          />
         </div>
 
-        <div>
-          <label className="block text-sm text-gray-300">Preço</label>
-          <input name="preco" type="number" step="0.01" value={form.preco} onChange={onChange} className="w-full mt-1 p-2 rounded bg-gray-700 text-white" />
-        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="categoria" className="block text-sm font-medium text-gray-300">Categoria</label>
+            <select
+              id="categoria"
+              name="categoria"
+              value={form.categoria}
+              onChange={onChange}
+              className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              required
+            >
+              <option value="">Selecione uma categoria</option>
+              {categorias.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+            </select>
+          </div>
 
-        <div>
-          <label className="block text-sm text-gray-300">Categoria</label>
-          <input name="categoria" value={form.categoria} onChange={onChange} className="w-full mt-1 p-2 rounded bg-gray-700 text-white" />
-        </div>
-
-        <div>
-          <label className="block text-sm text-gray-300">Imagem (URL ou dataURL)</label>
-          <input name="imagem" value={form.imagem} onChange={onChange} className="w-full mt-1 p-2 rounded bg-gray-700 text-white" />
-          <p className="text-xs text-gray-400 mt-1">Se quiseres upload de ficheiro, posso adicionar suporte a file input e converter para dataURL.</p>
-        </div>
-
-        <div>
-          <label className="block text-sm text-gray-300 mb-1">Ingredientes</label>
-          <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
-            {ingredientesList.map(ing => (
-              <label key={ing._id || ing.id} className="flex items-center gap-2 text-sm text-gray-300">
-                <input type="checkbox" checked={form.ingredientes.includes(ing._id)} onChange={() => toggleIngrediente(ing._id)} />
-                <span>{ing.icone ? ing.icone + " " : ""}{ing.nome}</span>
-              </label>
-            ))}
+          <div>
+            <label htmlFor="preco" className="block text-sm font-medium text-gray-300">Preço</label>
+            <input
+              id="preco"
+              name="preco"
+              type="number"
+              step="0.01"
+              value={form.preco}
+              onChange={onChange}
+              className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              required
+            />
           </div>
         </div>
 
-        <div className="flex gap-2">
-          <button type="submit" className="bg-emerald-600 px-4 py-2 rounded text-white">Guardar</button>
-          <button type="button" onClick={() => navigate(-1)} className="bg-gray-700 px-4 py-2 rounded text-white">Cancelar</button>
+        {/* Toggle para mostrar selector de ingredientes se for pizzas */}
+        <div className="flex items-center gap-3">
+          <input
+            id="toggle-ings"
+            type="checkbox"
+            checked={showIngredientes}
+            onChange={(e) => setShowIngredientes(e.target.checked)}
+            className="h-4 w-4 rounded bg-gray-700 border-gray-600 text-emerald-500 focus:ring-emerald-400"
+          />
+          <label htmlFor="toggle-ings" className="text-sm text-gray-300">
+            Editar ingredientes deste produto
+          </label>
+        </div>
+
+        {/* Ingredients selector — usa componente se existir, senão fallback */}
+        {showIngredientes && (
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Ingredientes (opcional)</label>
+
+            {typeof IngredientsSelector === "function" ? (
+              <IngredientsSelector
+                value={form.ingredientes}
+                onChange={onIngredientsChange}
+                options={ingredientesList}
+              />
+            ) : (
+              <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-2 bg-gray-900 rounded">
+                {ingredientesList.map(ing => {
+                  const idKey = ing._id ?? ing.id;
+                  return (
+                    <label key={idKey} className="flex items-center gap-2 text-sm text-gray-300">
+                      <input
+                        type="checkbox"
+                        checked={form.ingredientes.includes(idKey)}
+                        onChange={() => toggleIngrediente(idKey)}
+                        className="h-4 w-4 rounded bg-gray-700 border-gray-600 text-emerald-500"
+                      />
+                      <span>{ing.icone ? ing.icone + " " : ""}{ing.nome}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            )}
+            <p className="text-xs text-gray-400 mt-2">Se ficar vazio, o produto ficará sem ingredientes.</p>
+          </div>
+        )}
+
+        {/* Upload / preview de imagem */}
+        <div className="flex flex-col items-start gap-3">
+          <div>
+            <input id="imagem-file" type="file" accept="image/*" className="sr-only" onChange={gerirMudancaImagem} />
+            <label htmlFor="imagem-file" className="inline-flex items-center gap-2 cursor-pointer bg-gray-700 py-2 px-4 border border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-300 hover:bg-gray-600">
+              <Upload className="h-5 w-5" /> Escolher Imagem
+            </label>
+          </div>
+
+          {form.imagem ? (
+            <div className="flex items-center gap-4">
+              <img src={form.imagem} alt="preview" className="h-20 w-20 object-cover rounded-md border border-gray-600" />
+              <div className="text-sm text-gray-300">Imagem carregada (pode ser URL ou dataURL).</div>
+            </div>
+          ) : (
+            <div className="text-sm text-gray-400">Nenhuma imagem definida</div>
+          )}
+          <p className="text-xs text-gray-400">Se preferires colar um URL, usa o campo de imagem abaixo.</p>
+
+          <input
+            name="imagem"
+            value={form.imagem}
+            onChange={onChange}
+            placeholder="URL da imagem ou DataURL (opcional)"
+            className="mt-2 block w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          />
+        </div>
+
+        {/* Ações */}
+        <div className="flex gap-3">
+          <button
+            type="submit"
+            disabled={saving}
+            className="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-60"
+          >
+            {saving ? (
+              <>
+                <Loader className="mr-2 h-5 w-5 animate-spin" /> A salvar...
+              </>
+            ) : (
+              <>
+                <Save className="mr-2 h-5 w-5" /> Guardar Alterações
+              </>
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="px-4 py-2 rounded-md bg-gray-700 hover:bg-gray-600 text-white"
+          >
+            Cancelar
+          </button>
         </div>
       </form>
-    </div>
+    </motion.div>
   );
 };
 
