@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Trash, CheckCircle, Circle } from "lucide-react";  
+import { Trash, CheckCircle, Circle, Edit2 } from "lucide-react";  
 import { useProductStore } from "../stores/useProductStore";
 import { useNavigate } from "react-router-dom";
 
