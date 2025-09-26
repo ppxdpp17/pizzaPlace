@@ -6,7 +6,7 @@ import ProdutosRecomendados from "../components/ProdutosRecomendados";
 const categorias = [
   { href: "/pizzas", nome: "Pizzas", imageUrl: "/pizzaICON.png" },
   { href: "/bebidas", nome: "Bebidas", imageUrl: "/drinksICON.png" },
-  { href: "/entradas", nome: "Entradas & Sobremesas", imageUrl: "/sobremesaICON.avif" }
+  { href: "/entradas", nome: "Entradas & Sobremesas", imageUrl: "/sobremesaICON.png" }
 ]
 
 const HomePage = () => {

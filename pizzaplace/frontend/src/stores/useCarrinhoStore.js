@@ -28,14 +28,14 @@ export const useCarrinhoStore = create((set, get) => {
       }
     },
     adicionarAoCarrinho: async(product) => {
-    try {
+      try {
         const res = await axios.post("/carrinho", { productId: product._id });
         const itens = res.data; 
         set({ carrinho: itens });
         get().calcularTotal();
-    } catch (error) {
+      } catch (error) {
         toast.error(error.response?.data?.message || "Ocorreu um erro.");
-    }
+      }
     },
     calcularTotal: () => {
         const {carrinho, cupao} = get();
@@ -105,6 +105,46 @@ export const useCarrinhoStore = create((set, get) => {
         return { carrinho: newCart };
         });
         get().calcularTotal();
+    },
+        adicionarAoCarrinhoComTamanho: (product, tamanho = "media") => {
+      // Ajustes de preço por tamanho (podes alterar os multiplicadores)
+      const PRICE_MULTIPLIERS = {
+        pequena: 1.0,    // preço base
+        media: 1.2,      // média = +20%
+        grande: 1.4      // grande = +40%
+      };
+
+      const multiplier = PRICE_MULTIPLIERS[tamanho] ?? 1.0;
+      const precoBase = typeof product.preco === "number" ? product.preco : Number(product.preco) || 0;
+      const precoAjustado = Number((precoBase * multiplier).toFixed(2));
+
+      const customId = `${product._id}_t_${tamanho}_${Date.now()}`;
+
+      const itemParaAdicionar = {
+        ...product,
+        _id: customId,
+        quantidade: 1,
+        preco: precoAjustado,
+        meta: {
+          ...(product.meta || {}),
+          tamanho
+        },
+        nome: `${product.nome} (${tamanho === "pequena" ? "Peq." : tamanho === "media" ? "Méd." : "Grd."})`
+      };
+
+      set((prev) => {
+        // se já existir o mesmo item (mesmo _id), apenas incrementa quantidade
+        const exists = prev.carrinho.find(i => i._id === itemParaAdicionar._id);
+        const newCart = exists
+          ? prev.carrinho.map(i => i._id === itemParaAdicionar._id ? { ...i, quantidade: (i.quantidade || 1) + 1 } : i)
+          : [...prev.carrinho, itemParaAdicionar];
+
+        return { carrinho: newCart };
+      });
+
+      // recalcular totais
+      get().calcularTotal();
+      toast.success("Produto adicionado ao carrinho!");
     },
 
 }
