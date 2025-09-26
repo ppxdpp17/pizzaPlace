@@ -1,15 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { AnimatePresence, motion as m } from "framer-motion";
 
-/**
- * OptionDropdown
- * Props:
- * - options: array de { id, label } ou strings
- * - value: current value (id or label)
- * - onChange: fn(newValue)
- * - placeholder: string
- * - Icon: componente opcional (ex: MapPin)
- */
 export default function OptionDropdown({ options = [], value, onChange, placeholder = "-- Selecionar --", Icon = null }) {
   const [open, setOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);

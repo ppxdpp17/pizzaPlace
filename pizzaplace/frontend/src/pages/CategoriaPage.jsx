@@ -1,4 +1,3 @@
-// src/pages/CategoriaPage.jsx
 import { useEffect, useMemo, useState } from "react";
 import { useProductStore } from "../stores/useProductStore";
 import { useParams, useNavigate } from "react-router-dom";
@@ -7,8 +6,7 @@ import CartaoProduto from "../components/CartaoProduto";
 import { useCarrinhoStore } from "../stores/useCarrinhoStore";
 import { useUserStore } from "../stores/useUserStore";
 import toast from "react-hot-toast";
-import OptionDropdown from "../components/OptionDropdown"; // se já tens este componente
-// Se não tens OptionDropdown, substitui por <select> simples abaixo.
+import OptionDropdown from "../components/OptionDropdown";
 
 const TAMANHOS = [
   { value: "pequena", label: "Pequena" },
@@ -28,13 +26,13 @@ const CategoriaPage = () => {
     getProdutosCategoria(categoria);
   }, [getProdutosCategoria, categoria]);
 
-  // Modal state e selecções
+  //Modal state e selecções
   const [modalOpen, setModalOpen] = useState(false);
   const [pizzaA, setPizzaA] = useState(null);
   const [pizzaB, setPizzaB] = useState(null);
   const [tamanho, setTamanho] = useState(null);
 
-  // Opções derivadas dos products (segura se products undefined)
+  //Opções derivadas dos products
   const pizzaOptions = useMemo(() => {
     if (!Array.isArray(products)) return [];
     return products.map((p) => ({ value: p._id, label: p.nome }));
@@ -70,7 +68,7 @@ const CategoriaPage = () => {
       return;
     }
 
-    // Exemplo de calculo de preço: soma dos preços (podes adaptar)
+    //Exemplo de calculo de preço: soma dos preços
     const precoA = typeof pA.preco === "number" ? pA.preco : Number(pA.preco) || 0;
     const precoB = typeof pB.preco === "number" ? pB.preco : Number(pB.preco) || 0;
     const preco = precoA + precoB;
@@ -119,10 +117,10 @@ const CategoriaPage = () => {
             </h2>
           )}
 
-          {/* Cartões fixos: apenas na categoria "pizzas" */}
+          {/*Cartões fixos: apenas na categoria "pizzas"*/}
           {categoria?.toLowerCase() === "pizzas" && (
             <>
-              {/* Make Your Own Pizza — mantém o comportamento "especial" (botão Personalizar) */}
+              {/*Make Your Own Pizza — mantém o comportamento "especial" (botão Personalizar)*/}
               <CartaoProduto
                 key="make-your-own"
                 product={{
@@ -137,7 +135,7 @@ const CategoriaPage = () => {
                 especial
               />
 
-              {/* Mix 2 Pizzas — agora é "especial" com descrição e abre modal */}
+              {/*Mix 2 Pizzas — "especial" com descrição e abre modal*/}
               <CartaoProduto
                 key="mix-2-pizzas"
                 product={{
@@ -162,10 +160,10 @@ const CategoriaPage = () => {
         </motion.div>
       </div>
 
-      {/* Modal Mix 2 Pizzas */}
+      {/*Modal Mix 2 Pizzas*/}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-          {/* overlay */}
+          {/*overlay*/}
           <div className="absolute inset-0 bg-black/60" onClick={closeModal} />
 
           <motion.div

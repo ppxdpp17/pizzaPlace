@@ -49,7 +49,7 @@ const CriarPizzaForm = () => {
       if (showIngredientes && Array.isArray(novoProduto.ingredientes) && novoProduto.ingredientes.length > 0) {
         payload.ingredientes = novoProduto.ingredientes;
       }
-      //Opcional: se houver uma descrição, inclui-a (se quiseres)
+      //Incluir descrição (opcional)
       if (novoProduto.descricao) payload.descricao = novoProduto.descricao;
 
       await criarProduto(payload);

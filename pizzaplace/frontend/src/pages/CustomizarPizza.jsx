@@ -1,4 +1,3 @@
-// src/pages/CustomizarPizza.jsx
 import { useEffect, useMemo, useState } from "react";
 import axios from "../lib/axios";
 import { useUserStore } from "../stores/useUserStore";
@@ -158,7 +157,7 @@ export default function CustomizarPizza() {
           </div>
 
           <div className="bg-gray-800 rounded-lg p-6 flex flex-col justify-between shadow-sm">
-            {/*preço no topo da coluna*/}
+            {/*Preço no topo da coluna*/}
             <div className="mb-4">
               <div className="text-sm text-gray-300">Preço estimado</div>
               <div className="text-2xl font-bold text-emerald-400">€{preco.toFixed(2)}</div>

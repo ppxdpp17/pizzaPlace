@@ -52,7 +52,7 @@ const ListaProdutos = () => {
                 <div className="text-sm text-gray-300">{product.categoria}</div>
               </td>
 
-              {/* Disponibilidade */}
+              {/*Disponibilidade*/}
               <td className="px-6 py-4 whitespace-nowrap">
                 <button
                   onClick={() => disponibilizarProduto(product._id)}

@@ -47,11 +47,11 @@ const EditProductPage = () => {
           preco: produto.preco ?? "",
           imagem: produto.imagem ?? "",
           categoria: produto.categoria ?? "",
-          // normaliza ingredientes para array de ids
+          //Normaliza ingredientes para array de ids
           ingredientes: (produto.ingredientes || []).map(i => i._id ?? i.id ?? i)
         });
         setIngredientesList(ingRes.data.ingredientes ?? ingRes.data ?? []);
-        // por defeito, se categoria for pizzas mostra selector
+        //Por defeito, se categoria for pizzas mostra selector
         setShowIngredientes((produto.categoria ?? "").toLowerCase() === "pizzas");
       } catch (err) {
         console.error(err);
@@ -83,11 +83,11 @@ const EditProductPage = () => {
   };
 
   const onIngredientsChange = (ings) => {
-    // aceita array de ids
+    //Aceita array de ids
     setForm(prev => ({ ...prev, ingredientes: ings }));
   };
 
-  // Fallback simpler: checkbox grid (usado apenas se não houver IngredientsSelector)
+  //Fallback simpler: checkbox grid (usado apenas se não houver IngredientsSelector)
   const toggleIngrediente = (idIng) => {
     setForm(prev => {
       const exists = prev.ingredientes.includes(idIng);
@@ -103,7 +103,7 @@ const EditProductPage = () => {
         nome: form.nome,
         descricao: form.descricao,
         preco: Number(form.preco),
-        imagem: form.imagem || "", // pode ser dataURL ou URL
+        imagem: form.imagem || "",
         categoria: form.categoria,
         ingredientes: Array.isArray(form.ingredientes) ? form.ingredientes : []
       };
@@ -193,7 +193,7 @@ const EditProductPage = () => {
           </div>
         </div>
 
-        {/* Toggle para mostrar selector de ingredientes se for pizzas */}
+        {/*Toggle para mostrar selector de ingredientes se for pizzas*/}
         <div className="flex items-center gap-3">
           <input
             id="toggle-ings"
@@ -207,7 +207,7 @@ const EditProductPage = () => {
           </label>
         </div>
 
-        {/* Ingredients selector — usa componente se existir, senão fallback */}
+        {/*Ingredients selector — usa componente se existir, senão fallback*/}
         {showIngredientes && (
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">Ingredientes (opcional)</label>
@@ -240,7 +240,7 @@ const EditProductPage = () => {
           </div>
         )}
 
-        {/* Upload / preview de imagem */}
+        {/*Upload/preview de imagem*/}
         <div className="flex flex-col items-center   gap-3">
           <div>
             <input id="imagem-file" type="file" accept="image/*" className="sr-only" onChange={gerirMudancaImagem} />
@@ -259,7 +259,7 @@ const EditProductPage = () => {
           )}
         </div>
 
-        {/* Ações */}
+        {/*Ações*/}
         <div className="flex gap-3">
           <button
             type="submit"
