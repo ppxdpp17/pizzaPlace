@@ -3,10 +3,8 @@ import axios from "../lib/axios";
 import { toast } from "react-hot-toast";
 
 export const useCarrinhoStore = create((set, get) => {
-  // Adicionar listener uma vez, apenas no browser
   if (typeof window !== "undefined") {
     window.addEventListener("produtos:updated", () => {
-      // Recarrega o carrinho do servidor (melhor que filtrar localmente)
       get().getItensCarrinho();
     });
   }
@@ -21,7 +19,7 @@ export const useCarrinhoStore = create((set, get) => {
     getItensCarrinho: async () => {
       try {
         const res = await axios.get("/carrinho");
-        const itens = res.data; // server devolve array de produtos com quantidade
+        const itens = res.data; //Server devolve array de produtos com quantidade
         set({ carrinho: itens });
         get().calcularTotal();
       } catch (error) {
@@ -32,9 +30,8 @@ export const useCarrinhoStore = create((set, get) => {
     adicionarAoCarrinho: async(product) => {
     try {
         const res = await axios.post("/carrinho", { productId: product._id });
-        const itens = res.data; // server now returns array populado com quantidade
+        const itens = res.data; 
         set({ carrinho: itens });
-        toast.success("Produto adicionado ao carrinho.");
         get().calcularTotal();
     } catch (error) {
         toast.error(error.response?.data?.message || "Ocorreu um erro.");
@@ -101,14 +98,12 @@ export const useCarrinhoStore = create((set, get) => {
     },
     adicionarAoCarrinhoCustom: (customProduct) => {
         set((prev) => {
-            // verifica se já existe item igual (por _id)
             const exists = prev.carrinho.find(item => item._id === customProduct._id);
             const newCart = exists
                 ? prev.carrinho.map(item => item._id === customProduct._id ? { ...item, quantidade: (item.quantidade || 1) + 1 } : item)
                 : [...prev.carrinho, { ...customProduct, quantidade: customProduct.quantidade ?? 1 }];
         return { carrinho: newCart };
         });
-        // recalcula total
         get().calcularTotal();
     },
 

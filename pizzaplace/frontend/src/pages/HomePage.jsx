@@ -4,9 +4,9 @@ import { useProductStore } from "../stores/useProductStore";
 import ProdutosRecomendados from "../components/ProdutosRecomendados";
 
 const categorias = [
-  { href: "/pizzas", nome: "Pizzas", imageUrl: "/calcas.avif" },
-  { href: "/bebidas", nome: "Bebidas", imageUrl: "/tshirt.jpg" },
-  { href: "/entradas", nome: "Entradas & Sobremesas", imageUrl: "/tilhas.avif" }
+  { href: "/pizzas", nome: "Pizzas", imageUrl: "/pizzaICON.png" },
+  { href: "/bebidas", nome: "Bebidas", imageUrl: "/drinksICON.png" },
+  { href: "/entradas", nome: "Entradas & Sobremesas", imageUrl: "/sobremesaICON.avif" }
 ]
 
 const HomePage = () => {

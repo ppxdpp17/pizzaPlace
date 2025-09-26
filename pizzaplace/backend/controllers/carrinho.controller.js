@@ -7,21 +7,21 @@ export const getProdutosCarrinho = async (req, res) => {
     const user = await User.findById(req.user._id).lean();
     if (!user) return res.status(404).json({ msg: "User not found" });
 
-    const itens = user.itensCarrinho || []; // [{ produto: ObjectId, quantidade }]
+    const itens = user.itensCarrinho || [];
 
     if (itens.length === 0) return res.json([]);
 
     const ids = itens.map(i => i.produto);
 
-    // Buscar produtos (apenas existentes) e popular ingredientes
+    //Fetch produtos (apenas existentes) e popular ingredientes
     const produtos = await Produto.find({ _id: { $in: ids }, estaDisponivel: true })
       .populate("ingredientes", "nome icone")
       .lean();
 
-    // Map de produtos por _id para fácil lookup
+    //Map de produtos por _id para fácil lookup
     const map = new Map(produtos.map(p => [String(p._id), p]));
 
-    // Reconstruir itens com quantidade — mantém apenas os que existem e estão disponíveis
+    //Reconstruir itens com quantidade — mantém apenas os que existem e estão disponíveis
     const itensCarrinho = itens
       .map(i => {
         const prod = map.get(String(i.produto));
@@ -30,7 +30,7 @@ export const getProdutosCarrinho = async (req, res) => {
       })
       .filter(Boolean);
 
-    // Se removemos itens (produtos indisponíveis), atualiza o user.itensCarrinho e persiste
+    //Se removemos itens (produtos indisponíveis), atualiza o user.itensCarrinho e persiste
     const removedCount = itens.length - itensCarrinho.length;
     if (removedCount > 0) {
       const novoItens = itensCarrinho.map(i => ({ produto: i._id, quantidade: i.quantidade }));
@@ -52,7 +52,7 @@ export const adicionarAoCarrinho = async (req, res) => {
     const user = await User.findById(req.user._id);
     if (!user) return res.status(404).json({ msg: "User not found" });
 
-    // procura por produto já no carrinho
+    //Procura por produto já no carrinho
     const existing = user.itensCarrinho.find(item => String(item.produto) === String(productId));
     if (existing) {
       existing.quantidade += 1;
@@ -62,8 +62,7 @@ export const adicionarAoCarrinho = async (req, res) => {
 
     await user.save();
 
-    // Retornar o cart atualizado (populado)
-    // Reusar a lógica de getProdutosCarrinho: buscar produtos populados
+    //Retornar o cart atualizado (populado)
     const itens = user.itensCarrinho;
     const ids = itens.map(i => i.produto);
     const produtos = await Produto.find({ _id: { $in: ids }, estaDisponivel: true })
@@ -79,7 +78,7 @@ export const adicionarAoCarrinho = async (req, res) => {
       })
       .filter(Boolean);
 
-    // Se tiver objetos removidos (inexistentes ou indisponíveis), sincroniza o user
+    //Se tiver objetos removidos (inexistentes ou indisponíveis), sincroniza o user
     if (itensCarrinho.length !== itens.length) {
       const novoItens = itensCarrinho.map(i => ({ produto: i._id, quantidade: i.quantidade }));
       user.itensCarrinho = novoItens;
@@ -107,8 +106,7 @@ export const removerTodosDoCarrinho = async (req, res) => {
 
     await user.save();
 
-    // Retorna o cart (vazio ou atualizado)
-    // Opcional: devolver o array populado; aqui devolvo o array simples:
+    //Retorna o cart (vazio ou atualizado)
     const ids = user.itensCarrinho.map(i => i.produto);
     const produtos = await Produto.find({ _id: { $in: ids }, estaDisponivel: true })
       .populate("ingredientes", "nome icone")
@@ -149,7 +147,7 @@ export const atualizarQuantidade = async (req, res) => {
       await user.save();
     }
 
-    // Retornar cart atualizado (populate)
+    //Retornar cart atualizado (populate)
     const ids = user.itensCarrinho.map(i => i.produto);
     const produtos = await Produto.find({ _id: { $in: ids }, estaDisponivel: true })
       .populate("ingredientes", "nome icone")
@@ -164,7 +162,7 @@ export const atualizarQuantidade = async (req, res) => {
       })
       .filter(Boolean);
 
-    // Persistir se removemos itens indisponíveis
+    //Persistir se removemos itens indisponíveis
     if (itensCarrinho.length !== user.itensCarrinho.length) {
       const novoItens = itensCarrinho.map(i => ({ produto: i._id, quantidade: i.quantidade }));
       user.itensCarrinho = novoItens;
