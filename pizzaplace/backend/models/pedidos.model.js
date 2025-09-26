@@ -10,6 +10,34 @@ const addressSchema = new mongoose.Schema({
   country:     { type: String, required: true }
 }, { _id: false });
 
+const productEntrySchema = new mongoose.Schema({
+  produto: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Produto",
+    required: [true, "O produto é obrigatório."],
+  },
+  quantidade: {
+    type: Number,
+    required: [true, "A quantidade é obrigatória."],
+    min: 1
+  },
+  preco: {
+    type: Number,
+    required: [true, "O preco é obrigatório."],
+    min: 0
+  },
+  // novo: tamanho (opcional) — "pequena" | "media" | "grande"
+  tamanho: {
+    type: String,
+    enum: ["pequena", "media", "grande"],
+    required: false
+  },
+  // novo: meta livre (objeto) para extensibilidade
+  meta: {
+    type: Object,
+    default: undefined
+  }
+}, { _id: false });
 
 const pedidoSchema = new mongoose.Schema({
     user: {
@@ -17,25 +45,7 @@ const pedidoSchema = new mongoose.Schema({
         ref: "User",
         required: [true, "O id do user é obrigatório."],
     },
-    produtos: [
-        {
-            produto: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "Produto",
-                required: [true, "O produto é obrigatório."],
-            },
-            quantidade: {
-                type: Number,
-                required: [true, "A quantidade é obrigatória."],
-                min: 1
-            },
-            preco: {
-                type: Number,
-                required: [true, "O preco é obrigatório."],
-                min: 0
-            }
-        }
-    ],
+    produtos: [productEntrySchema],
     total: {
         type: Number,
         required: [true, "O total é obrigatório."],
