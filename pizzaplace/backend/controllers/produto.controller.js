@@ -143,14 +143,17 @@ export const apagarProduto = async (req, res) => {
 export const getProdutosRecomendados = async (req, res) => {
   try {
     const size = Math.min(Math.max(parseInt(req.query.size || "6", 10), 1), 20); //Default 6, cap 20
-    const excludeIds = (req.query.excludeIds || "")
+    const rawExclude = (req.query.excludeIds || "")
       .split(",")
       .map(s => s.trim())
       .filter(Boolean);
 
+    // filtrar apenas ObjectIds válidos (prevenir 500 do mongoose)
+    const validExcludeIds = rawExclude.filter(id => mongoose.Types.ObjectId.isValid(id));
+
     const match = { estaDisponivel: true };
-    if (excludeIds.length > 0) {
-      match._id = { $nin: excludeIds.map(id => new mongoose.Types.ObjectId(id)) };
+    if (validExcludeIds.length > 0) {
+      match._id = { $nin: validExcludeIds.map(id => new mongoose.Types.ObjectId(id)) };
     }
 
     const pipeline = [
