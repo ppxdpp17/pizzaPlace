@@ -11,6 +11,17 @@ function calcularEstado(createdAt) {
   return "Entregue!";
 }
 
+/* --- NOVO: helper para formatar o tamanho (abreviado) --- */
+function formatTamanhoLabel(tamanhoRaw) {
+  if (!tamanhoRaw) return null;
+  const t = String(tamanhoRaw).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // remove acentos
+  if (t === "pequena" || t === "peq" || t === "peq.") return "Peq.";
+  if (t === "media" || t === "média" || t === "med" || t === "med.") return "Méd.";
+  if (t === "grande" || t === "grd" || t === "grd.") return "Grd.";
+  // fallback: capitaliza a primeira letra e encurta
+  return t.charAt(0).toUpperCase() + t.slice(1);
+}
+
 function ImagemCollage({ imagens = [], altBase = "Produto" }) {
   //Mostra até 4 imagens; se houver mais, o último mostra +N
   const count = imagens.length;
@@ -42,10 +53,10 @@ function ImagemCollage({ imagens = [], altBase = "Produto" }) {
   return (
     <div className="grid grid-cols-2 grid-rows-2 gap-1 w-24 h-24">
       <img src={imagens[0]} alt={`${altBase} 1`} className="object-cover w-full h-full rounded-tl-md" />
-      <img src={imagens[1]} alt={`${altBase} 2`} className="object-cover w-full h-full rounded-tr-md" />
-      <img src={imagens[2]} alt={`${altBase} 3`} className="object-cover w-full h-full rounded-bl-md" />
+      <img src={imagens[1]} alt={`${altBase} 2`} className="object-cover w-full h/full rounded-tr-md" />
+      <img src={imagens[2]} alt={`${altBase} 3`} className="object-cover w/full h/full rounded-bl-md" />
       <div className="relative w-full h-full rounded-br-md overflow-hidden">
-        <img src={imagens[3] ?? imagens[0]} alt={`${altBase} 4`} className="object-cover w-full h-full" />
+        <img src={imagens[3] ?? imagens[0]} alt={`${altBase} 4`} className="object-cover w-full h/full" />
         {extra > 0 && (
           <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white text-sm font-semibold">
             +{extra}
@@ -57,7 +68,6 @@ function ImagemCollage({ imagens = [], altBase = "Produto" }) {
 }
 
 const Pedidos = () => {
-
   //Verificar se é administrador
   const { user } = useUserStore();
   const isAdmin = user?.cargo === "admin";
@@ -89,7 +99,6 @@ const Pedidos = () => {
     }, 30000); //30s
     return () => clearInterval(intervalRef.current);
   }, []);
-
 
   if (loading) return <p className="p-4 text-center">Carregando pedidos...</p>;
   if (error) return <p className="p-4 text-center text-red-400">Erro: {error}</p>;
@@ -143,7 +152,7 @@ const Pedidos = () => {
                   <div className="mt-1">
                     <EstadoDropdown
                       value={pedido.estado}
-                      compact={true} 
+                      compact={true}
                       onChange={async (novoEstado) => {
                         //Atualiza UI
                         setPedidos(prev => prev.map(p => p._id === pedido._id ? { ...p, estado: novoEstado } : p));
@@ -192,15 +201,22 @@ const Pedidos = () => {
                   Pagamento: <span className="font-medium text-white">{pedido.metodoPagamento}</span>
                 </div>
                 <div className="mt-2 text-sm text-gray-300">
-                  {pedido.produtos?.map((p, idx) => (
-                    <div key={idx} className="flex justify-between">
-                      <div>
-                        <span className="font-medium text-white">{p.produto?.nome ?? "Produto"}</span>
-                        <span className="text-gray-400"> × {p.quantidade}</span>
+                  {pedido.produtos?.map((p, idx) => {
+                    // tentar obter tamanho de várias fontes (campo direto, meta, ou produto.embedded)
+                    const tamanhoRaw = p.tamanho ?? p.meta?.tamanho ?? p.produto?.tamanho;
+                    const tamanhoLabel = formatTamanhoLabel(tamanhoRaw);
+
+                    return (
+                      <div key={idx} className="flex justify-between">
+                        <div>
+                          <span className="font-medium text-white">{p.produto?.nome ?? "Produto"}</span>
+                          {tamanhoLabel && <span className="text-gray-400 ml-2">({tamanhoLabel})</span>}
+                          <span className="text-gray-400"> × {p.quantidade}</span>
+                        </div>
+                        <div className="text-gray-400">€{(p.preco).toFixed(2)}</div>
                       </div>
-                      <div className="text-gray-400">€{(p.preco).toFixed(2)}</div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </div>
