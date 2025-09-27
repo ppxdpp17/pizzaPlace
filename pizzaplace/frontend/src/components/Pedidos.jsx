@@ -11,14 +11,13 @@ function calcularEstado(createdAt) {
   return "Entregue!";
 }
 
-/* --- NOVO: helper para formatar o tamanho (abreviado) --- */
 function formatTamanhoLabel(tamanhoRaw) {
   if (!tamanhoRaw) return null;
-  const t = String(tamanhoRaw).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // remove acentos
+  const t = String(tamanhoRaw).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); //Remove acentos
   if (t === "pequena" || t === "peq" || t === "peq.") return "Peq.";
   if (t === "media" || t === "média" || t === "med" || t === "med.") return "Méd.";
   if (t === "grande" || t === "grd" || t === "grd.") return "Grd.";
-  // fallback: capitaliza a primeira letra e encurta
+  //Fallback: capitaliza a primeira letra e encurta
   return t.charAt(0).toUpperCase() + t.slice(1);
 }
 
@@ -202,7 +201,6 @@ const Pedidos = () => {
                 </div>
                 <div className="mt-2 text-sm text-gray-300">
                   {pedido.produtos?.map((p, idx) => {
-                    // tentar obter tamanho de várias fontes (campo direto, meta, ou produto.embedded)
                     const tamanhoRaw = p.tamanho ?? p.meta?.tamanho ?? p.produto?.tamanho;
                     const tamanhoLabel = formatTamanhoLabel(tamanhoRaw);
 

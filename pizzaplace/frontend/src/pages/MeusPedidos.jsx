@@ -44,7 +44,6 @@ function ImagemCollage({ imagens = [], altBase = "Produto" }) {
   );
 }
 
-/* --- helper: formatar tamanho para label curta --- */
 function formatTamanhoLabel(tamanhoRaw) {
   if (!tamanhoRaw) return null;
   const t = String(tamanhoRaw).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -175,7 +174,6 @@ export default function MeusPedidos() {
 
                   <div className="mt-2 text-sm text-gray-300">
                     {pedido.produtos?.map((p, idx) => {
-                      // tentar obter tamanho de várias fontes (campo direto, meta, ou produto.embedded)
                       const tamanhoRaw = p.tamanho ?? p.meta?.tamanho ?? p.produto?.tamanho;
                       const tamanhoLabel = formatTamanhoLabel(tamanhoRaw);
 
