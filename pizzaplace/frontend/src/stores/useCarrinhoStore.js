@@ -2,9 +2,6 @@ import { create } from "zustand";
 import axios from "../lib/axios";
 import { toast } from "react-hot-toast";
 
-/**
- * Helper: testa se um id parece um ObjectId MongoDB válido.
- */
 const isObjectIdLike = (id) => typeof id === "string" && /^[a-fA-F0-9]{24}$/.test(id);
 
 export const useCarrinhoStore = create((set, get) => {
@@ -21,17 +18,15 @@ export const useCarrinhoStore = create((set, get) => {
     subTotal: 0,
     cupaoAplicado: false,
 
-    /**
-     * GET cart from server but MERGE any local/custom items (IDs that are NOT valid ObjectId).
-     */
+    //GET carrinho do server mas fazer merge com qualquer local/custom items 
     getItensCarrinho: async () => {
       try {
         const res = await axios.get("/carrinho");
         const serverItems = Array.isArray(res.data) ? res.data : (res.data.itens || res.data);
 
-        // preserve local custom items that are not present on server (IDs not ObjectId-like)
+        //Preserve local custom items that are not present on server
         const localCustom = get().carrinho.filter(i => !isObjectIdLike(i._id));
-        // avoid duplicates (if server already contains an item with same _id)
+        //Avoid duplicates
         const merged = [
           ...serverItems,
           ...localCustom.filter(local => !serverItems.find(si => si._id === local._id))
@@ -40,25 +35,20 @@ export const useCarrinhoStore = create((set, get) => {
         set({ carrinho: merged });
         get().calcularTotal();
       } catch (error) {
-        // fallback: keep local cart as-is but show message
+        //Fallback: keep local cart as-is but show message
         set({ carrinho: get().carrinho || [] });
         toast.error(error.response?.data?.msg || error.response?.data?.message || "Um erro ocorreu, tente novamente mais tarde.");
       }
     },
 
-    /**
-     * Server-backed add (persistido). Mostra toast de sucesso.
-     * Depois de receber a lista do servidor, mescla com itens locais/custom.
-     */
+    //Server-backed add (persistido). Mostra toast de sucesso. Depois de receber a lista do servidor, mescla com itens locais/custom
     adicionarAoCarrinho: async(product) => {
       try {
-        // snapshot local custom items antes de sobrescrever
         const localCustom = get().carrinho.filter(i => !isObjectIdLike(i._id));
 
         const res = await axios.post("/carrinho", { productId: product._id });
         const itens = Array.isArray(res.data) ? res.data : (res.data.itens || res.data);
 
-        // conservar custom locais que não existam já no server response
         const merged = [
           ...itens,
           ...localCustom.filter(local => !itens.find(si => si._id === local._id))
@@ -72,10 +62,7 @@ export const useCarrinhoStore = create((set, get) => {
       }
     },
 
-    /**
-     * Versão local/custom: adiciona produto com tamanho ao carrinho LOCALMENTE
-     * (gera um _id não ObjectId para o item). Mantém estes itens ao fazer chamadas server.
-     */
+    //Versão local/custom: adiciona produto com tamanho ao carrinho localmente
     adicionarAoCarrinhoComTamanho: (product, tamanho = "media") => {
       const PRICE_MULTIPLIERS = {
         pequena: 1.0,
@@ -87,7 +74,6 @@ export const useCarrinhoStore = create((set, get) => {
       const precoBase = typeof product.preco === "number" ? product.preco : Number(product.preco) || 0;
       const precoAjustado = Number((precoBase * multiplier).toFixed(2));
 
-      // _id intencionalmente NÃO é um ObjectId (para distinguir local/custom)
       const customId = `${product._id}_t_${tamanho}_${Date.now()}`;
 
       const itemParaAdicionar = {
@@ -118,7 +104,7 @@ export const useCarrinhoStore = create((set, get) => {
     calcularTotal: () => {
       const { carrinho, cupao } = get();
 
-      // soma em cêntimos inteiros
+      //Soma em cêntimos inteiros
       const subTotalCents = carrinho.reduce((sum, item) => {
         const precoNum = typeof item.preco === "number" ? item.preco : Number(item.preco) || 0;
         const precoCents = Math.round(precoNum * 100);
@@ -132,7 +118,7 @@ export const useCarrinhoStore = create((set, get) => {
         totalCents = subTotalCents - descontoCents;
       }
 
-      // gravar como euros (float com 2 decimais exatas)
+      //Gravar como euros (float com 2 decimais exatas)
       const subTotal = subTotalCents / 100;
       const total = totalCents / 100;
 
@@ -140,14 +126,10 @@ export const useCarrinhoStore = create((set, get) => {
     },
 
 
-    /**
-     * Apagar item do carrinho.
-     * Se o productId parecer 'local/custom' (não ObjectId), apenas remove localmente sem chamar o servidor.
-     */
+    //Apagar item do carrinho.
     apagarDoCarrinho: async (productId) => {
       try {
         if (!isObjectIdLike(productId)) {
-          // remover local custom item
           set((prev) => ({ carrinho: prev.carrinho.filter(i => i._id !== productId) }));
           get().calcularTotal();
           return;
@@ -156,7 +138,6 @@ export const useCarrinhoStore = create((set, get) => {
         const res = await axios.delete(`/carrinho`, { data: { produtoID: productId } });
         const itens = Array.isArray(res.data) ? res.data : (res.data.itens || res.data);
 
-        // mesclar com locais/custom
         const localCustom = get().carrinho.filter(i => !isObjectIdLike(i._id));
         const merged = [
           ...itens,
@@ -170,13 +151,11 @@ export const useCarrinhoStore = create((set, get) => {
       }
     },
 
-    /**
-     * Atualizar quantidade (local or server)
-     */
+    //Atualizar quantidade (local or server)
     atualizarQuantidade: async (productId, quantidade) => {
       try {
         if (!isObjectIdLike(productId)) {
-          // local item -> update locally
+          //Local item -> update locally
           set((prev) => ({
             carrinho: prev.carrinho.map(i => i._id === productId ? { ...i, quantidade: Math.max(1, quantidade) } : i)
           }));
@@ -187,7 +166,6 @@ export const useCarrinhoStore = create((set, get) => {
         const res = await axios.put(`/carrinho/${productId}`, { quantidade });
         const itens = Array.isArray(res.data) ? res.data : (res.data.itens || res.data);
 
-        // mesclar com locais/custom
         const localCustom = get().carrinho.filter(i => !isObjectIdLike(i._id));
         const merged = [
           ...itens,
