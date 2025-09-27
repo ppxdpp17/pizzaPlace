@@ -31,7 +31,7 @@ function ImagemCollage({ imagens = [], altBase = "Produto" }) {
     <div className="grid grid-cols-2 grid-rows-2 gap-1 w-16 h-16">
       <img src={imagens[0]} alt={`${altBase} 1`} className="object-cover w-full h-full rounded-tl-md" />
       <img src={imagens[1]} alt={`${altBase} 2`} className="object-cover w-full h/full rounded-tr-md" />
-      <img src={imagens[2]} alt={`${altBase} 3`} className="object-cover w-full h/full rounded-bl-md" />
+      <img src={imagens[2]} alt={`${altBase} 3`} className="object-cover w/full h/full rounded-bl-md" />
       <div className="relative w-full h-full rounded-br-md overflow-hidden">
         <img src={imagens[3] ?? imagens[0]} alt={`${altBase} 4`} className="object-cover w-full h-full" />
         {extra > 0 && (
@@ -42,6 +42,16 @@ function ImagemCollage({ imagens = [], altBase = "Produto" }) {
       </div>
     </div>
   );
+}
+
+/* --- helper: formatar tamanho para label curta --- */
+function formatTamanhoLabel(tamanhoRaw) {
+  if (!tamanhoRaw) return null;
+  const t = String(tamanhoRaw).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  if (t === "pequena" || t === "peq" || t === "peq.") return "Peq.";
+  if (t === "media" || t === "média" || t === "med" || t === "med.") return "Méd.";
+  if (t === "grande" || t === "grd" || t === "grd.") return "Grd.";
+  return t.charAt(0).toUpperCase() + t.slice(1);
 }
 
 const MeusPedidosVazio = () => (
@@ -164,15 +174,22 @@ export default function MeusPedidos() {
                   </div>
 
                   <div className="mt-2 text-sm text-gray-300">
-                    {pedido.produtos?.map((p, idx) => (
-                      <div key={idx} className="flex justify-between">
-                        <div>
-                          <span className="font-medium text-white">{p.produto?.nome ?? "Produto"}</span>
-                          <span className="text-gray-400"> × {p.quantidade}</span>
+                    {pedido.produtos?.map((p, idx) => {
+                      // tentar obter tamanho de várias fontes (campo direto, meta, ou produto.embedded)
+                      const tamanhoRaw = p.tamanho ?? p.meta?.tamanho ?? p.produto?.tamanho;
+                      const tamanhoLabel = formatTamanhoLabel(tamanhoRaw);
+
+                      return (
+                        <div key={idx} className="flex justify-between">
+                          <div>
+                            <span className="font-medium text-white">{p.produto?.nome ?? "Produto"}</span>
+                            {tamanhoLabel && <span className="text-gray-400 ml-2">({tamanhoLabel})</span>}
+                            <span className="text-gray-400"> × {p.quantidade}</span>
+                          </div>
+                          <div className="text-gray-400">€{(p.preco).toFixed(2)}</div>
                         </div>
-                        <div className="text-gray-400">€{(p.preco).toFixed(2)}</div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               </div>
