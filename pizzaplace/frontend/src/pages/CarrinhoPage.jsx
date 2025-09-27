@@ -29,7 +29,7 @@ const CarrinhoPage = () => {
               )}
             {carrinho.length > 0 && (
               <Recomendacoes
-                excludeIds={carrinho.map(i => i._id)}
+                excludeIds={carrinho.map(i => i._id).filter(id => /^[a-fA-F0-9]{24}$/.test(id))}
                 size={3}
               />
             )}
