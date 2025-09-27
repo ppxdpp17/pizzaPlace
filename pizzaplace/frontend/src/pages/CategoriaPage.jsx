@@ -104,7 +104,7 @@ const CategoriaPage = () => {
         nome: `Mix 2 Pizzas — ${pA.nome} + ${pB.nome} (${tamanhoVal})`,
         descricao: "Junta duas pizzas à tua escolha para máximo sabor!",
         preco: precoArredondado,
-        imagem: "/pizza2MIX.png", // força a imagem da public
+        imagem: "/pizza2mix.png", // força a imagem da public
         estaDisponivel: true,
         quantidade: 1,
         meta: {

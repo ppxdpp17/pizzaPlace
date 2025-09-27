@@ -116,18 +116,29 @@ export const useCarrinhoStore = create((set, get) => {
     },
 
     calcularTotal: () => {
-      const {carrinho, cupao} = get();
-      const subTotal = carrinho.reduce((sum, item) => sum + (Number(item.preco) || 0) * (item.quantidade || 1), 0);
-      let total = subTotal;
+      const { carrinho, cupao } = get();
 
-      if(cupao)
-      {
-        const desconto = subTotal * (cupao.percentagemDesconto / 100);
-        total = subTotal - desconto;
+      // soma em cêntimos inteiros
+      const subTotalCents = carrinho.reduce((sum, item) => {
+        const precoNum = typeof item.preco === "number" ? item.preco : Number(item.preco) || 0;
+        const precoCents = Math.round(precoNum * 100);
+        return sum + precoCents * (item.quantidade || 1);
+      }, 0);
+
+      let totalCents = subTotalCents;
+
+      if (cupao) {
+        const descontoCents = Math.round(subTotalCents * (cupao.percentagemDesconto / 100));
+        totalCents = subTotalCents - descontoCents;
       }
 
-      set({subTotal, total});
+      // gravar como euros (float com 2 decimais exatas)
+      const subTotal = subTotalCents / 100;
+      const total = totalCents / 100;
+
+      set({ subTotal, total });
     },
+
 
     /**
      * Apagar item do carrinho.
