@@ -19,7 +19,7 @@ const CategoriaPage = () => {
   const { categoria } = useParams();
   const navigate = useNavigate();
 
-  const { adicionarAoCarrinho } = useCarrinhoStore();
+  const { adicionarAoCarrinho, adicionarAoCarrinhoCustom } = useCarrinhoStore();
   const { user } = useUserStore();
 
   useEffect(() => {
@@ -46,52 +46,127 @@ const CategoriaPage = () => {
   };
 
   const handleAddMixToCart = () => {
-    if (!user) {
-      toast.error("Por favor, faça login para adicionar produtos ao carrinho.");
-      navigate("/login");
-      return;
+    try {
+      // helpers
+      const strip = (s) =>
+        String(s ?? "")
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .trim()
+          .toLowerCase();
+
+      const isObjectIdLike = (s) => /^[a-fA-F0-9]{24}$/.test(String(s));
+
+      // extrai um identificador útil do selection (string ou object)
+      const normalizeSel = (sel) => {
+        if (!sel && sel !== 0) return null;
+        if (typeof sel === "object") {
+          // prefer value, depois _id, depois id, depois label
+          return sel.value ?? sel._id ?? sel.id ?? sel.label ?? null;
+        }
+        return String(sel);
+      };
+
+      const rawA = normalizeSel(pizzaA);
+      const rawB = normalizeSel(pizzaB);
+      const tamanhoVal = typeof tamanho === "object" ? (tamanho.value ?? tamanho) : tamanho;
+
+      console.log("Mix selection debug:", { pizzaA, pizzaB, tamanho, rawA, rawB, productsCount: products?.length });
+
+      if (!user) {
+        toast.error("Por favor, faça login para adicionar produtos ao carrinho.");
+        navigate("/login");
+        return;
+      }
+      if (!rawA || !rawB) {
+        toast.error("Escolha as duas pizzas.");
+        return;
+      }
+      if (!tamanhoVal) {
+        toast.error("Escolha um tamanho.");
+        return;
+      }
+
+      if (!Array.isArray(products) || products.length === 0) {
+        toast.error("Produtos ainda não carregados. Tente novamente em alguns segundos.");
+        console.warn("Tentar criar mix mas products vazio ou indefinido", products);
+        return;
+      }
+
+      // tenta vários métodos para encontrar o produto
+      const findByAny = (raw) => {
+        if (!raw) return null;
+        // 1) se for objectId-like -> buscar por _id
+        if (isObjectIdLike(raw)) {
+          const byId = products.find((p) => String(p._id) === String(raw));
+          if (byId) return byId;
+        }
+        // 2) buscar por _id exato (caso raw seja string com id)
+        let byIdExact = products.find((p) => String(p._id) === String(raw));
+        if (byIdExact) return byIdExact;
+
+        // 3) tentar correspondência por nome/label (case-insensitive, sem acentos)
+        const rawNorm = strip(raw);
+        const byName = products.find((p) => strip(p.nome ?? p.name ?? "") === rawNorm);
+        if (byName) return byName;
+
+        // 4) tentar correspondência por label caso p tenha label (rare)
+        const byLabel = products.find((p) => strip(p.label ?? p.nome ?? "") === rawNorm);
+        if (byLabel) return byLabel;
+
+        // 5) fallback: tentar inclusão (raw é substring do nome)
+        const byIncludes = products.find((p) => strip((p.nome ?? "")).includes(rawNorm));
+        if (byIncludes) return byIncludes;
+
+        return null;
+      };
+
+      const pA = findByAny(rawA);
+      const pB = findByAny(rawB);
+
+      if (!pA || !pB) {
+        console.warn("Mix selection: produto não encontrado", { rawA, rawB, foundA: !!pA, foundB: !!pB, sampleProducts: products.slice(0,5) });
+        toast.error("Seleção inválida das pizzas.");
+        return;
+      }
+
+      // cálculo de preço (pode ajustar com tamanhos se preferires)
+      const precoA = typeof pA.preco === "number" ? pA.preco : Number(pA.preco) || 0;
+      const precoB = typeof pB.preco === "number" ? pB.preco : Number(pB.preco) || 0;
+      const preco = precoA + precoB;
+
+      const mixProduct = {
+        _id: `mix-2-${Date.now()}`,
+        nome: `Mix 2 Pizzas — ${pA.nome} + ${pB.nome} (${tamanhoVal})`,
+        descricao: "Junta duas pizzas à tua escolha para máximo sabor!",
+        preco,
+        imagem: pA.imagem || pB.imagem || "/pizza2mix.png",
+        estaDisponivel: true,
+        quantidade: 1,
+        meta: {
+          tipo: "mix-2",
+          pizzaA: String(pA._id),
+          pizzaB: String(pB._id),
+          tamanho: tamanhoVal,
+        },
+      };
+
+      // adicionar client-side (não faz POST ao servidor)
+      if (typeof adicionarAoCarrinhoCustom === "function") {
+        adicionarAoCarrinhoCustom(mixProduct);
+      } else if (typeof adicionarAoCarrinho === "function") {
+        adicionarAoCarrinho(mixProduct); // fallback: mas isto pode tentar POST e falhar
+      }
+
+      toast.success("Mix 2 Pizzas adicionado ao carrinho!");
+      closeModal();
+    } catch (err) {
+      console.error("Erro em handleAddMixToCart:", err);
+      toast.error("Erro interno ao adicionar Mix. Verifica a consola.");
     }
-    if (!pizzaA || !pizzaB) {
-      toast.error("Escolha as duas pizzas.");
-      return;
-    }
-    if (!tamanho) {
-      toast.error("Escolha um tamanho.");
-      return;
-    }
-
-    const pA = products.find((p) => p._id === pizzaA);
-    const pB = products.find((p) => p._id === pizzaB);
-
-    if (!pA || !pB) {
-      toast.error("Seleção inválida das pizzas.");
-      return;
-    }
-
-    //Exemplo de calculo de preço: soma dos preços
-    const precoA = typeof pA.preco === "number" ? pA.preco : Number(pA.preco) || 0;
-    const precoB = typeof pB.preco === "number" ? pB.preco : Number(pB.preco) || 0;
-    const preco = precoA + precoB;
-
-    const mixProduct = {
-      _id: `mix-2-${Date.now()}`,
-      nome: `Mix 2 Pizzas — ${pA.nome} + ${pB.nome} (${tamanho})`,
-      descricao: "Junta duas pizzas à tua escolha para máximo sabor!",
-      preco,
-      imagem: pA.imagem || pB.imagem || "/pizza2mix.png",
-      estaDisponivel: true,
-      meta: {
-        tipo: "mix-2",
-        pizzaA: pA._id,
-        pizzaB: pB._id,
-        tamanho,
-      },
-    };
-
-    adicionarAoCarrinho(mixProduct);
-    toast.success("Mix 2 Pizzas adicionado ao carrinho!");
-    closeModal();
   };
+
+
 
   return (
     <div className="min-h-screen">
