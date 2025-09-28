@@ -1,5 +1,27 @@
-import mongoose, { mongo } from "mongoose";
+// models/user.model.js
+import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
+
+const itemCarrinhoSchema = new mongoose.Schema({
+  produto: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Produto",
+    required: true
+  },
+  quantidade: {
+    type: Number,
+    default: 1,
+    min: 1
+  },
+  preco: {
+    type: Number,
+    default: 0
+  },
+  meta: {
+    type: mongoose.Schema.Types.Mixed,
+    default: undefined
+  }
+}, { _id: true });
 
 const userSchema = new mongoose.Schema({
     nome:{
@@ -18,18 +40,10 @@ const userSchema = new mongoose.Schema({
         required: [true, "O campo da password é obrigatório."],
         minlength: [6, "A password deve ter no mínimo 6 caracteres"] 
     },
-    itensCarrinho:[
-        {
-            quantidade:{
-                type: Number,
-                default: 1
-            },
-            produto: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "Produto"
-            }
-        }
-    ],
+    itensCarrinho: {
+      type: [itemCarrinhoSchema],
+      default: []
+    },
     cargo:{
         type: String,
         enum: ["cliente", "admin"],
@@ -51,8 +65,7 @@ const userSchema = new mongoose.Schema({
     timestamps: true
 });
 
-
-//Hashar a password antes de a guardar na bd
+// Hash password
 userSchema.pre("save", async function(next){
     if(!this.isModified("password")) return next();
 
