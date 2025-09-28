@@ -49,38 +49,33 @@ export const getProdutosCarrinho = async (req, res) => {
     const itens = user.itensCarrinho || [];
     if (itens.length === 0) return res.json([]);
 
-    // buscar apenas produtos existentes por objectId
+    // Mantém os ids como strings (apenas os válidos)
     const ids = itens
       .map(i => i.produto)
       .filter(id => mongoose.Types.ObjectId.isValid(String(id)))
-      .map(id => mongoose.Types.ObjectId(String(id)));
+      .map(id => String(id));
 
+    // Query aceita strings — Mongoose faz o cast
     const produtos = await Produto.find({ _id: { $in: ids }, estaDisponivel: true })
       .populate("ingredientes", "nome icone")
       .lean();
 
     const map = new Map(produtos.map(p => [String(p._id), p]));
 
-    // reconstruir itens: combinar dados do produto com a entrada do user (quantidade, preco, meta)
-    const itensCarrinho = itens.map(i => {
-      const prod = map.get(String(i.produto));
-      if (!prod) {
-        // produto não existe/disponível -> será filtrado abaixo
-        return null;
-      }
+    const itensCarrinho = itens
+      .map(i => {
+        const prod = map.get(String(i.produto));
+        if (!prod) return null;
+        return {
+          ...prod,
+          quantidade: i.quantidade ?? 1,
+          meta: i.meta ?? undefined,
+          preco: i.preco ?? Number(prod.preco ?? 0)
+        };
+      })
+      .filter(Boolean);
 
-      // usar preco guardado no user.itensCarrinho (se existir) para garantir que o cliente vê o preço que foi reservado
-      const precoUnit = (i.preco !== undefined && i.preco !== null) ? Number(i.preco) : Number(prod.preco ?? 0);
-
-      return {
-        ...prod,
-        quantidade: i.quantidade ?? 1,
-        meta: i.meta ?? undefined,
-        preco: precoUnit,
-      };
-    }).filter(Boolean);
-
-    // sincronizar se removemos itens
+    // Se removemos itens (produtos indisponíveis), atualiza o user.itensCarrinho
     if (itensCarrinho.length !== itens.length) {
       const novoItens = itensCarrinho.map(i => ({ produto: i._id, quantidade: i.quantidade, preco: i.preco, meta: i.meta }));
       await User.findByIdAndUpdate(req.user._id, { itensCarrinho: novoItens });
@@ -88,8 +83,8 @@ export const getProdutosCarrinho = async (req, res) => {
 
     return res.json(itensCarrinho);
   } catch (error) {
-    console.log("Error in getCartProducts controller", error.message);
-    res.status(500).json({ message: "Server error", error: error.message });
+    console.log("Error in getCartProducts controller", error);
+    res.status(500).json({ message: "Server error", error: error.message || String(error) });
   }
 };
 
@@ -134,7 +129,7 @@ export const adicionarAoCarrinho = async (req, res) => {
       found.preco = precoUnit;
     } else {
       user.itensCarrinho.push({
-        produto: mongoose.Types.ObjectId(String(productId)),
+        produto: String(productId), // Mongoose irá converter ao salvar
         quantidade: Number(quantidade),
         preco: precoUnit,
         meta: meta ?? undefined
