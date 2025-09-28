@@ -22,41 +22,24 @@ export const useCarrinhoStore = create((set, get) => {
     getItensCarrinho: async () => {
       try {
         const res = await axios.get("/carrinho");
-        const serverItems = Array.isArray(res.data) ? res.data : (res.data.itens || res.data);
-
-        //Preserve local custom items that are not present on server
-        const localCustom = get().carrinho.filter(i => !isObjectIdLike(i._id));
-        //Avoid duplicates
-        const merged = [
-          ...serverItems,
-          ...localCustom.filter(local => !serverItems.find(si => si._id === local._id))
-        ];
-
-        set({ carrinho: merged });
+        const itens = res.data; // já no formato client (tem _id do cart item, preco, meta)
+        set({ carrinho: itens });
         get().calcularTotal();
       } catch (error) {
-        //Fallback: keep local cart as-is but show message
-        set({ carrinho: get().carrinho || [] });
-        toast.error(error.response?.data?.msg || error.response?.data?.message || "Um erro ocorreu, tente novamente mais tarde.");
+        set({ carrinho: [] });
+        toast.error(error.response?.data?.msg || "Erro a obter carrinho.");
       }
     },
 
     //Server-backed add (persistido). Mostra toast de sucesso. Depois de receber a lista do servidor, mescla com itens locais/custom
-    adicionarAoCarrinho: async(product) => {
+    adicionarAoCarrinho: async (product, meta = undefined) => {
       try {
-        const localCustom = get().carrinho.filter(i => !isObjectIdLike(i._id));
-
-        const res = await axios.post("/carrinho", { productId: product._id });
-        const itens = Array.isArray(res.data) ? res.data : (res.data.itens || res.data);
-
-        const merged = [
-          ...itens,
-          ...localCustom.filter(local => !itens.find(si => si._id === local._id))
-        ];
-
-        set({ carrinho: merged });
+        const payload = { productId: product._id, quantidade: product.quantidade ?? 1 };
+        if (meta) payload.meta = meta;
+        const res = await axios.post("/carrinho", payload);
+        const itens = res.data;
+        set({ carrinho: itens });
         get().calcularTotal();
-        toast.success("Produto adicionado ao carrinho!");
       } catch (error) {
         toast.error(error.response?.data?.message || "Ocorreu um erro.");
       }
@@ -127,24 +110,12 @@ export const useCarrinhoStore = create((set, get) => {
 
 
     //Apagar item do carrinho.
-    apagarDoCarrinho: async (productId) => {
+    apagarDoCarrinho: async (cartItemId) => {
       try {
-        if (!isObjectIdLike(productId)) {
-          set((prev) => ({ carrinho: prev.carrinho.filter(i => i._id !== productId) }));
-          get().calcularTotal();
-          return;
-        }
-
-        const res = await axios.delete(`/carrinho`, { data: { produtoID: productId } });
-        const itens = Array.isArray(res.data) ? res.data : (res.data.itens || res.data);
-
-        const localCustom = get().carrinho.filter(i => !isObjectIdLike(i._id));
-        const merged = [
-          ...itens,
-          ...localCustom.filter(local => !itens.find(si => si._id === local._id))
-        ];
-
-        set({ carrinho: merged });
+        // cartItemId = item._id do subdoc retornado pelo GET /carrinho
+        const res = await axios.delete(`/carrinho/${cartItemId}`);
+        const itens = res.data;
+        set({ carrinho: itens });
         get().calcularTotal();
       } catch (err) {
         toast.error(err.response?.data?.msg || "Erro ao apagar do carrinho");
@@ -152,27 +123,11 @@ export const useCarrinhoStore = create((set, get) => {
     },
 
     //Atualizar quantidade (local or server)
-    atualizarQuantidade: async (productId, quantidade) => {
+    atualizarQuantidade: async (cartItemId, quantidade) => {
       try {
-        if (!isObjectIdLike(productId)) {
-          //Local item -> update locally
-          set((prev) => ({
-            carrinho: prev.carrinho.map(i => i._id === productId ? { ...i, quantidade: Math.max(1, quantidade) } : i)
-          }));
-          get().calcularTotal();
-          return;
-        }
-
-        const res = await axios.put(`/carrinho/${productId}`, { quantidade });
-        const itens = Array.isArray(res.data) ? res.data : (res.data.itens || res.data);
-
-        const localCustom = get().carrinho.filter(i => !isObjectIdLike(i._id));
-        const merged = [
-          ...itens,
-          ...localCustom.filter(local => !itens.find(si => si._id === local._id))
-        ];
-
-        set({ carrinho: merged });
+        const res = await axios.put(`/carrinho/${cartItemId}`, { quantidade });
+        const itens = res.data;
+        set({ carrinho: itens });
         get().calcularTotal();
       } catch (err) {
         toast.error(err.response?.data?.msg || "Erro ao atualizar quantidade");
@@ -180,7 +135,13 @@ export const useCarrinhoStore = create((set, get) => {
     },
 
     limparCarrinho: async () => {
-      set({ carrinho: [], cupao: null, total: 0, subTotal: 0 });
+      try {
+        await axios.delete("/carrinho");
+        set({ carrinho: [], cupao: null, total: 0, subTotal: 0 });
+      } catch (err) {
+        console.warn("Falha ao limpar carrinho:", err.message);
+        set({ carrinho: [], cupao: null, total: 0, subTotal: 0 });
+      }
     },
 
     getMeuCupao: async () => {
