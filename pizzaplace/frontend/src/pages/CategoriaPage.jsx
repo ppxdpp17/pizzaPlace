@@ -19,7 +19,7 @@ const CategoriaPage = () => {
   const { categoria } = useParams();
   const navigate = useNavigate();
 
-  const { adicionarAoCarrinho, adicionarAoCarrinhoCustom } = useCarrinhoStore();
+  const { adicionarAoCarrinho } = useCarrinhoStore();
   const { user } = useUserStore();
 
   useEffect(() => {
@@ -115,14 +115,8 @@ const CategoriaPage = () => {
         },
       };
 
-      // adicionar client-side (usa a função que já tens)
-      if (typeof adicionarAoCarrinhoCustom === "function") {
-        adicionarAoCarrinhoCustom(mixProduct);
-      } else {
-        // fallback: apenas em caso extremo
-        adicionarAoCarrinho(mixProduct);
-      }
-
+      adicionarAoCarrinho(pA, { tipo: "mix-2", pizzaA: pA._id, pizzaB: pB._id, tamanho: tamanhoVal }, 1);
+      
       toast.success("Mix 2 Pizzas adicionado ao carrinho!");
       closeModal();
     } catch (err) {

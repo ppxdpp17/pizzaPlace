@@ -1,158 +1,256 @@
-// controllers/carrinho.controller.js
 import Produto from "../models/produto.model.js";
 import User from "../models/user.model.js";
 import mongoose from "mongoose";
 
-const PRICE_MULTIPLIERS = { pequena: 1.0, media: 1.2, grande: 1.4 };
+const PRICE_MULTIPLIERS = {
+  pequena: 1.0,
+  media: 1.2,
+  grande: 1.4
+};
 
-function calcPrecoProduto(produtoDoc, meta = {}) {
-  let preco = Number(produtoDoc.preco ?? 0);
-  const tamanho = meta?.tamanho;
-  if (tamanho && PRICE_MULTIPLIERS[tamanho]) {
-    preco = Number((preco * PRICE_MULTIPLIERS[tamanho]).toFixed(2));
+// Util: calcula preço final dado produtoDoc e meta
+async function calcularPrecoServidor(produtoId, meta = {}) {
+  // produtoId é ObjectId/string válida
+  const produtoDoc = await Produto.findById(produtoId).lean();
+  if (!produtoDoc) throw new Error("Produto não existe");
+
+  let precoBase = Number(produtoDoc.preco ?? 0);
+
+  // Caso especial: meta.tipo === 'mix-2' -> espera meta.pizzaA e meta.pizzaB
+  if (meta && meta.tipo === "mix-2") {
+    // buscar os dois produtos
+    const pA = await Produto.findById(meta.pizzaA).lean();
+    const pB = await Produto.findById(meta.pizzaB).lean();
+    if (!pA || !pB) throw new Error("Uma das pizzas do mix não existe");
+    const precoA = Number(pA.preco ?? 0);
+    const precoB = Number(pB.preco ?? 0);
+    const soma = precoA + precoB;
+    const mult = PRICE_MULTIPLIERS[meta.tamanho] ?? 1.0;
+    return Number((soma * mult).toFixed(2));
   }
-  return preco;
+
+  // Caso normal: aplicar multiplicador por tamanho se houver
+  if (meta && meta.tamanho) {
+    const mult = PRICE_MULTIPLIERS[meta.tamanho] ?? 1.0;
+    return Number((precoBase * mult).toFixed(2));
+  }
+
+  return Number(precoBase);
 }
 
-function buildClientItem(subdoc) {
-  // subdoc: { _id, produto: populated doc | ObjectId, quantidade, preco, meta }
-  const produto = subdoc.produto || {};
-  return {
-    _id: String(subdoc._id),                // id do item no carrinho (subdocument)
-    produtoId: produto._id ? String(produto._id) : undefined,
-    nome: produto.nome ?? subdoc.nome ?? "Produto",
-    imagem: produto.imagem ?? subdoc.imagem ?? "/placeholder.png",
-    ingredientes: produto.ingredientes ?? [],
-    quantidade: subdoc.quantidade ?? 1,
-    preco: typeof subdoc.preco === "number" ? subdoc.preco : Number(produto.preco ?? subdoc.preco ?? 0),
-    meta: subdoc.meta ?? undefined,
-  };
-}
-
+/**
+ * GET /carrinho
+ */
 export const getProdutosCarrinho = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id)
-      .populate("itensCarrinho.produto", "nome imagem preco ingredientes")
-      .lean();
-
+    const user = await User.findById(req.user._id).lean();
     if (!user) return res.status(404).json({ msg: "User not found" });
 
-    const itens = (user.itensCarrinho || []).map(buildClientItem).filter(Boolean);
+    const itens = user.itensCarrinho || [];
+    if (itens.length === 0) return res.json([]);
 
-    return res.json(itens);
+    // buscar apenas produtos existentes por objectId
+    const ids = itens
+      .map(i => i.produto)
+      .filter(id => mongoose.Types.ObjectId.isValid(String(id)))
+      .map(id => mongoose.Types.ObjectId(String(id)));
+
+    const produtos = await Produto.find({ _id: { $in: ids }, estaDisponivel: true })
+      .populate("ingredientes", "nome icone")
+      .lean();
+
+    const map = new Map(produtos.map(p => [String(p._id), p]));
+
+    // reconstruir itens: combinar dados do produto com a entrada do user (quantidade, preco, meta)
+    const itensCarrinho = itens.map(i => {
+      const prod = map.get(String(i.produto));
+      if (!prod) {
+        // produto não existe/disponível -> será filtrado abaixo
+        return null;
+      }
+
+      // usar preco guardado no user.itensCarrinho (se existir) para garantir que o cliente vê o preço que foi reservado
+      const precoUnit = (i.preco !== undefined && i.preco !== null) ? Number(i.preco) : Number(prod.preco ?? 0);
+
+      return {
+        ...prod,
+        quantidade: i.quantidade ?? 1,
+        meta: i.meta ?? undefined,
+        preco: precoUnit,
+      };
+    }).filter(Boolean);
+
+    // sincronizar se removemos itens
+    if (itensCarrinho.length !== itens.length) {
+      const novoItens = itensCarrinho.map(i => ({ produto: i._id, quantidade: i.quantidade, preco: i.preco, meta: i.meta }));
+      await User.findByIdAndUpdate(req.user._id, { itensCarrinho: novoItens });
+    }
+
+    return res.json(itensCarrinho);
   } catch (error) {
-    console.error("Error in getCarrinho:", error);
-    return res.status(500).json({ message: "Server error", error: error.message });
+    console.log("Error in getCartProducts controller", error.message);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
+/**
+ * POST /carrinho
+ * body: { productId, quantidade = 1, meta = {} }
+ */
 export const adicionarAoCarrinho = async (req, res) => {
   try {
-    const { productId, quantidade = 1, meta } = req.body;
-    if (!productId || !mongoose.Types.ObjectId.isValid(String(productId))) {
-      return res.status(400).json({ msg: "productId inválido" });
-    }
-
-    const produtoDoc = await Produto.findById(productId).lean();
-    if (!produtoDoc) return res.status(404).json({ msg: "Produto não encontrado." });
+    const { productId, quantidade = 1, meta = undefined } = req.body;
+    if (!productId) return res.status(400).json({ msg: "productId required" });
+    if (!mongoose.Types.ObjectId.isValid(String(productId))) return res.status(400).json({ msg: "productId inválido" });
 
     const user = await User.findById(req.user._id);
     if (!user) return res.status(404).json({ msg: "User not found" });
 
-    // Procurar um item existente com MESMO produto e MESMA meta.tamanho (se houver meta)
-    const existeIdx = user.itensCarrinho.findIndex(it => {
-      if (!it.produto) return false;
-      if (String(it.produto) !== String(productId)) return false;
-      // comparar meta.tamanho se ambos existirem (suficiente para o caso de tamanhos)
-      const t1 = it.meta?.tamanho ?? null;
-      const t2 = meta?.tamanho ?? null;
-      return String(t1) === String(t2);
-    });
+    // calcular preço final no servidor (garante integridade)
+    const precoUnit = await calcularPrecoServidor(productId, meta);
 
-    const precoCalculado = calcPrecoProduto(produtoDoc, meta);
+    // identificar se já existe item com mesmo produto e mesma meta (comparar por tamanho / tipo)
+    const equalsMeta = (a, b) => {
+      // comparação simples: se ambos undefined -> equal
+      if (!a && !b) return true;
+      try {
+        return JSON.stringify(a ?? {}) === JSON.stringify(b ?? {});
+      } catch {
+        return false;
+      }
+    };
 
-    if (existeIdx !== -1) {
-      user.itensCarrinho[existeIdx].quantidade = (user.itensCarrinho[existeIdx].quantidade || 0) + Number(quantidade);
-      // actualiza o preço (útil se preços mudarem)
-      user.itensCarrinho[existeIdx].preco = precoCalculado;
+    let found = null;
+    for (const it of user.itensCarrinho) {
+      if (String(it.produto) === String(productId) && equalsMeta(it.meta, meta)) {
+        found = it;
+        break;
+      }
+    }
+
+    if (found) {
+      found.quantidade = (found.quantidade || 1) + Number(quantidade);
+      // actualizar preco se quiseres (ou deixar o preco guardado)
+      found.preco = precoUnit;
     } else {
       user.itensCarrinho.push({
-        produto: produtoDoc._id,
+        produto: mongoose.Types.ObjectId(String(productId)),
         quantidade: Number(quantidade),
-        preco: precoCalculado,
+        preco: precoUnit,
         meta: meta ?? undefined
       });
     }
 
     await user.save();
 
-    // Recarregar e povoar para devolver ao cliente
-    const populated = await User.findById(req.user._id).populate("itensCarrinho.produto", "nome imagem preco ingredientes").lean();
-    const itens = (populated.itensCarrinho || []).map(buildClientItem).filter(Boolean);
-    return res.json(itens);
+    // retornar cart populado (reusar getProdutosCarrinho logic)
+    // Nota: podemos chamar a função acima ou repetir o fetch
+    const updatedUser = await User.findById(req.user._id).lean();
+    const itens = updatedUser.itensCarrinho || [];
+    const ids = itens.map(i => i.produto).filter(id => mongoose.Types.ObjectId.isValid(String(id)));
+    const produtos = await Produto.find({ _id: { $in: ids }, estaDisponivel: true }).populate("ingredientes", "nome icone").lean();
+    const map = new Map(produtos.map(p => [String(p._id), p]));
+    const itensCarrinho = itens.map(i => {
+      const prod = map.get(String(i.produto)); if (!prod) return null;
+      return { ...prod, quantidade: i.quantidade ?? 1, meta: i.meta ?? undefined, preco: i.preco ?? Number(prod.preco ?? 0) };
+    }).filter(Boolean);
+
+    // sincronizar caso itens removidos
+    if (itensCarrinho.length !== itens.length) {
+      const novoItens = itensCarrinho.map(i => ({ produto: i._id, quantidade: i.quantidade, preco: i.preco, meta: i.meta }));
+      await User.findByIdAndUpdate(req.user._id, { itensCarrinho: novoItens });
+    }
+
+    return res.json(itensCarrinho);
   } catch (error) {
-    console.error("Erro adicionarAoCarrinho:", error);
-    return res.status(500).json({ msg: "Erro no servidor", error: error.message });
+    console.log("Erro no controller de adicionarAoCarrinho", error);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
-export const removerItemDoCarrinho = async (req, res) => {
+/**
+ * DELETE /carrinho  (body: { produtoID } )  => apagar item específico ou limpar se sem produtoID
+ * DELETE /carrinho/:id  (param)  => apagar item específico (compatibilidade)
+ */
+export const removerTodosDoCarrinho = async (req, res) => {
   try {
-    const cartItemId = req.params.id; // id do subdoc
+    const produtoID = req.params.id ?? req.body.produtoID;
     const user = await User.findById(req.user._id);
     if (!user) return res.status(404).json({ msg: "User not found" });
 
-    user.itensCarrinho = user.itensCarrinho.filter(it => String(it._id) !== String(cartItemId));
-    await user.save();
-
-    const populated = await User.findById(req.user._id).populate("itensCarrinho.produto", "nome imagem preco ingredientes").lean();
-    const itens = (populated.itensCarrinho || []).map(buildClientItem).filter(Boolean);
-    return res.json(itens);
-  } catch (error) {
-    console.error("Erro removerItemDoCarrinho:", error);
-    return res.status(500).json({ msg: "Erro no servidor", error: error.message });
-  }
-};
-
-export const limparCarrinho = async (req, res) => {
-  try {
-    const user = await User.findById(req.user._id);
-    if (!user) return res.status(404).json({ msg: "User not found" });
-    user.itensCarrinho = [];
-    await user.save();
-    return res.json([]);
-  } catch (error) {
-    console.error("Erro limparCarrinho:", error);
-    return res.status(500).json({ msg: "Erro no servidor", error: error.message });
-  }
-};
-
-export const atualizarQuantidade = async (req, res) => {
-  try {
-    const cartItemId = req.params.id; // id do subdoc
-    let { quantidade } = req.body;
-    quantidade = Number(quantidade ?? 1);
-    if (isNaN(quantidade) || quantidade < 0) return res.status(400).json({ msg: "Quantidade inválida" });
-
-    const user = await User.findById(req.user._id);
-    if (!user) return res.status(404).json({ msg: "User not found" });
-
-    const item = user.itensCarrinho.id(cartItemId);
-    if (!item) return res.status(404).json({ msg: "Item nao encontrado" });
-
-    if (quantidade === 0) {
-      item.remove();
+    if (!produtoID) {
+      // limpar tudo
+      user.itensCarrinho = [];
     } else {
-      item.quantidade = quantidade;
+      // remover todas as entradas que coincidam com esse produtoId (ignorar meta)
+      user.itensCarrinho = user.itensCarrinho.filter(item => String(item.produto) !== String(produtoID));
     }
 
     await user.save();
 
-    const populated = await User.findById(req.user._id).populate("itensCarrinho.produto", "nome imagem preco ingredientes").lean();
-    const itens = (populated.itensCarrinho || []).map(buildClientItem).filter(Boolean);
-    return res.json(itens);
+    // devolver cart atualizado (populado)
+    const updatedUser = await User.findById(req.user._id).lean();
+    const itens = updatedUser.itensCarrinho || [];
+    const ids = itens.map(i => i.produto).filter(id => mongoose.Types.ObjectId.isValid(String(id)));
+    const produtos = await Produto.find({ _id: { $in: ids }, estaDisponivel: true }).populate("ingredientes", "nome icone").lean();
+    const map = new Map(produtos.map(p => [String(p._id), p]));
+    const itensCarrinho = itens.map(i => {
+      const prod = map.get(String(i.produto)); if (!prod) return null;
+      return { ...prod, quantidade: i.quantidade ?? 1, meta: i.meta ?? undefined, preco: i.preco ?? Number(prod.preco ?? 0) };
+    }).filter(Boolean);
+
+    return res.json(itensCarrinho);
   } catch (error) {
-    console.error("Erro ao atualizar quantidade", error);
-    return res.status(500).json({ msg: "Erro no servidor", error: error.message });
+    console.log("Erro ao remover do carrinho", error.message);
+    res.status(500).json({ msg: "Erro no servidor", error: error.message });
+  }
+};
+
+/**
+ * PUT /carrinho/:id => atualizar quantidade para o produto id (id = produto._id)
+ * corpo { quantidade }
+ */
+export const atualizarQuantidade = async (req, res) => {
+  try {
+    const { id: produtoID } = req.params;
+    const { quantidade } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(String(produtoID))) return res.status(400).json({ msg: "ID inválido" });
+
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ msg: "User not found" });
+
+    const item = user.itensCarrinho.find(i => String(i.produto) === String(produtoID));
+    if (!item) return res.status(404).json({ msg: "Item nao encontrado" });
+
+    if (Number(quantidade) <= 0) {
+      user.itensCarrinho = user.itensCarrinho.filter(i => String(i.produto) !== String(produtoID));
+    } else {
+      item.quantidade = Number(quantidade);
+    }
+
+    await user.save();
+
+    // devolver cart atualizado (populado)
+    const updatedUser = await User.findById(req.user._id).lean();
+    const itens = updatedUser.itensCarrinho || [];
+    const ids = itens.map(i => i.produto).filter(id => mongoose.Types.ObjectId.isValid(String(id)));
+    const produtos = await Produto.find({ _id: { $in: ids }, estaDisponivel: true }).populate("ingredientes", "nome icone").lean();
+    const map = new Map(produtos.map(p => [String(p._id), p]));
+    const itensCarrinho = itens.map(i => {
+      const prod = map.get(String(i.produto)); if (!prod) return null;
+      return { ...prod, quantidade: i.quantidade ?? 1, meta: i.meta ?? undefined, preco: i.preco ?? Number(prod.preco ?? 0) };
+    }).filter(Boolean);
+
+    // sincronizar caso removidos
+    if (itensCarrinho.length !== itens.length) {
+      const novoItens = itensCarrinho.map(i => ({ produto: i._id, quantidade: i.quantidade, preco: i.preco, meta: i.meta }));
+      await User.findByIdAndUpdate(req.user._id, { itensCarrinho: novoItens });
+    }
+
+    return res.json(itensCarrinho);
+  } catch (error) {
+    console.log("Erro ao atualizar quantidade", error.message);
+    res.status(500).json({ msg: "Erro no servidor", error: error.message });
   }
 };

@@ -1,20 +1,13 @@
 import express from "express";
-import { adicionarAoCarrinho, getProdutosCarrinho, limparCarrinho, removerItemDoCarrinho, atualizarQuantidade }
-from "../controllers/carrinho.controller.js";
+import { adicionarAoCarrinho, getProdutosCarrinho, removerTodosDoCarrinho, atualizarQuantidade } from "../controllers/carrinho.controller.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
 router.get("/", protectRoute, getProdutosCarrinho);
 router.post("/", protectRoute, adicionarAoCarrinho);
-
-// remover item específico
-router.delete("/:id", protectRoute, removerItemDoCarrinho);
-
-// limpar carrinho completo
-router.delete("/", protectRoute, limparCarrinho);
-
-// atualizar quantidade por cartItemId (subdoc _id)
+router.delete("/", protectRoute, removerTodosDoCarrinho);       // limpa ou body.produtoID
+router.delete("/:id", protectRoute, removerTodosDoCarrinho);    // remove by param
 router.put("/:id", protectRoute, atualizarQuantidade);
 
 export default router;

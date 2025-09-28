@@ -32,16 +32,20 @@ export const useCarrinhoStore = create((set, get) => {
     },
 
     //Server-backed add (persistido). Mostra toast de sucesso. Depois de receber a lista do servidor, mescla com itens locais/custom
-    adicionarAoCarrinho: async (product, meta = undefined) => {
+    adicionarAoCarrinho: async (product, meta = undefined, quantidade = 1) => {
       try {
-        const payload = { productId: product._id, quantidade: product.quantidade ?? 1 };
+        // product deve ser o produto do DB (tem _id válido)
+        const payload = { productId: product._id, quantidade: Number(quantidade ?? 1) };
         if (meta) payload.meta = meta;
+
         const res = await axios.post("/carrinho", payload);
         const itens = res.data;
         set({ carrinho: itens });
         get().calcularTotal();
+        toast.success("Produto adicionado ao carrinho!");
       } catch (error) {
-        toast.error(error.response?.data?.message || "Ocorreu um erro.");
+        console.error("Erro adicionarAoCarrinho:", error);
+        toast.error(error.response?.data?.msg || "Ocorreu um erro ao adicionar ao carrinho.");
       }
     },
 
@@ -112,11 +116,19 @@ export const useCarrinhoStore = create((set, get) => {
     //Apagar item do carrinho.
     apagarDoCarrinho: async (cartItemId) => {
       try {
-        // cartItemId = item._id do subdoc retornado pelo GET /carrinho
-        const res = await axios.delete(`/carrinho/${cartItemId}`);
-        const itens = res.data;
-        set({ carrinho: itens });
-        get().calcularTotal();
+        if (isObjectIdLike(cartItemId)) {
+          const res = await axios.delete(`/carrinho/${cartItemId}`);
+          const itens = res.data;
+          set({ carrinho: itens });
+          get().calcularTotal();
+        } else {
+          // local custom item id -> remover localmente
+          set(prev => {
+            const newCart = prev.carrinho.filter(i => i._id !== cartItemId);
+            return { carrinho: newCart };
+          });
+          get().calcularTotal();
+        }
       } catch (err) {
         toast.error(err.response?.data?.msg || "Erro ao apagar do carrinho");
       }

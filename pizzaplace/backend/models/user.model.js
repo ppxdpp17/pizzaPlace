@@ -40,10 +40,26 @@ const userSchema = new mongoose.Schema({
         required: [true, "O campo da password é obrigatório."],
         minlength: [6, "A password deve ter no mínimo 6 caracteres"] 
     },
-    itensCarrinho: {
-      type: [itemCarrinhoSchema],
-      default: []
-    },
+    itensCarrinho:[
+    {
+        quantidade:{
+        type: Number,
+        default: 1
+        },
+        produto: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Produto"
+        },
+        preco: {
+        type: Number, // preco final por unidade (em euros, ex: 9.99). Guardado no momento do add.
+        default: 0
+        },
+        meta: {
+        type: mongoose.Schema.Types.Mixed,
+        default: undefined
+        }
+    }
+    ],
     cargo:{
         type: String,
         enum: ["cliente", "admin"],

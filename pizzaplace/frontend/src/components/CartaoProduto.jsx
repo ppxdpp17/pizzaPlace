@@ -25,7 +25,7 @@ const CartaoProduto = ({
 }) => {
   const p = product ?? produto ?? {};
   const { user } = useUserStore();
-  const { adicionarAoCarrinho, adicionarAoCarrinhoComTamanho } = useCarrinhoStore(); // novo método
+  const { adicionarAoCarrinho } = useCarrinhoStore(); // novo método
   const navigate = useNavigate();
 
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
@@ -61,7 +61,7 @@ const CartaoProduto = ({
       return;
     }
     // usar o novo método local que adiciona item com tamanho e preço ajustado
-    adicionarAoCarrinhoComTamanho(p, selectedSize);
+    adicionarAoCarrinho(p, { tamanho: selectedSize }, 1);
     setSizeModalOpen(false);
   };
 
