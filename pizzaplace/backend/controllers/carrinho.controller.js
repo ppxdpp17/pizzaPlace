@@ -169,15 +169,14 @@ export const adicionarAoCarrinho = async (req, res) => {
  */
 export const removerTodosDoCarrinho = async (req, res) => {
   try {
-    const produtoID = req.params.id ?? req.body.produtoID;
+   const { produtoID } = req.body || {};
+
     const user = await User.findById(req.user._id);
     if (!user) return res.status(404).json({ msg: "User not found" });
 
     if (!produtoID) {
-      // limpar tudo
       user.itensCarrinho = [];
     } else {
-      // remover todas as entradas que coincidam com esse produtoId (ignorar meta)
       user.itensCarrinho = user.itensCarrinho.filter(item => String(item.produto) !== String(produtoID));
     }
 
