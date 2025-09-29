@@ -79,13 +79,12 @@ export const criarSessaoCheckout = async (req, res) => {
                 codigoCupao: codigoCupao || "",
                 tipoEntrega: tipoEntrega,
                 metodoPagamento: "cartao",
-                produtos: JSON.stringify(
-                    produtos.map((p) => ({
-                        id: p._id,
-                        quantidade: p.quantidade,
-                        preco: p.preco,
-                    })
-                )),
+                produtos: JSON.stringify(produtos.map(p => ({
+                  id: p._id,
+                  quantidade: p.quantidade,
+                  preco: p.preco,
+                  tamanho: p.meta?.tamanho ?? p.tamanho ?? null
+                }))),
                 pedidoLocation: pedidoLocation,
             }
         });
