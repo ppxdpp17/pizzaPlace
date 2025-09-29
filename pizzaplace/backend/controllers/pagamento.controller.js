@@ -174,38 +174,65 @@ export const sucessoCheckout = async(req, res) => {
       }
 
       // normalizar produtos do metadata (pode conter ids custom)
+      // --> garantir que passamos tamanho dentro de meta para normalizeProdutosForPedido
       const produtosRaw = JSON.parse(sessao.metadata.produtos || "[]");
-      const produtos = await normalizeProdutosForPedido(
-        produtosRaw.map(p => ({ produto: p.id ?? p._id ?? p, quantidade: p.quantidade, meta: p.meta ?? undefined }))
-      );
+
+      const produtosParaNormalizar = produtosRaw.map(p => ({
+        produto: p.id ?? p._id ?? p,
+        quantidade: p.quantidade ?? 1,
+        // preservar meta e tamanho explicitamente
+        meta: {
+          ...(p.meta || {}),
+          ...(p.tamanho ? { tamanho: p.tamanho } : {})
+        }
+      }));
+
+      const produtos = await normalizeProdutosForPedido(produtosParaNormalizar);
 
       const total = produtos.reduce((s, it) => s + (it.preco * (it.quantidade || 1)), 0);
 
-      const novoPedido = new Pedido({
-        user: sessao.metadata.userId,
-        produtos,
-        tipoEntrega: sessao.metadata.tipoEntrega,
-        total,
-        stripeSessionID: sessaoId,
-        metodoPagamento: sessao.metadata.metodoPagamento,
-        shippingAddress,
-        estado: "A Cozinhar",
-        localizacao: sessao.metadata.pedidoLocation,
-      });
+      // Usar upsert atómico para evitar race conditions / duplicados
+      const filter = { stripeSessionID: sessaoId };
+      const update = {
+        $setOnInsert: {
+          user: sessao.metadata.userId,
+          produtos,
+          tipoEntrega: sessao.metadata.tipoEntrega,
+          total,
+          stripeSessionID: sessaoId,
+          metodoPagamento: sessao.metadata.metodoPagamento,
+          shippingAddress,
+          estado: "A Cozinhar",
+          localizacao: sessao.metadata.pedidoLocation,
+        }
+      };
+      const options = {
+        upsert: true,
+        new: true,
+        setDefaultsOnInsert: true,
+      };
 
-      await User.findByIdAndUpdate(
+      // Faz o upsert — se já existir, retorna o documento existente sem duplicar
+      const savedPedido = await Pedido.findOneAndUpdate(filter, update, options);
+
+      // Limpar itensCarrinho do user (defensivo — não falhar se já limpou)
+      try {
+        await User.findByIdAndUpdate(
           sessao.metadata.userId,
           { $set: { itensCarrinho: [] } },
           { new: true }
-      );
+        );
+      } catch (err) {
+        console.warn("Falha ao limpar itensCarrinho do user (prosseguir):", err.message);
+      }
 
-      await novoPedido.save();
-
+      // Respondemos com o pedido (novo ou existente)
       return res.status(200).json({
         success: true,
         msg: "Pagamento efetuado com sucesso, pedido feito e cupão desativado (se usado)",
-        pedidoId: novoPedido._id
+        pedidoId: savedPedido._id
       });
+
     }
 
     return res.status(400).json({ msg: "Pagamento não finalizado." });
