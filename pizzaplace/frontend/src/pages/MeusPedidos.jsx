@@ -174,17 +174,30 @@ export default function MeusPedidos() {
 
                   <div className="mt-2 text-sm text-gray-300">
                     {pedido.produtos?.map((p, idx) => {
-                      const tamanhoRaw = p.tamanho ?? p.meta?.tamanho ?? p.produto?.tamanho;
+                      // tentar extrair o tamanho de várias possíveis localizações
+                      const tamanhoRaw =
+                        p.tamanho ??
+                        p.meta?.tamanho ??
+                        p.produto?.tamanho ??
+                        p.produto?.meta?.tamanho ??
+                        (p.produto && typeof p.produto === "object" ? p.produto.meta?.tamanho : undefined);
+
                       const tamanhoLabel = formatTamanhoLabel(tamanhoRaw);
+
+                      // nome do produto (se produto estiver populado use p.produto.nome, senão p.nome)
+                      const nomeProduto = p.produto?.nome ?? p.nome ?? "Produto";
+
+                      // preço: garantir .toFixed(2) sem erro
+                      const preco = Number(p.preco ?? 0).toFixed(2);
 
                       return (
                         <div key={idx} className="flex justify-between">
                           <div>
-                            <span className="font-medium text-white">{p.produto?.nome ?? "Produto"}</span>
+                            <span className="font-medium text-white">{nomeProduto}</span>
                             {tamanhoLabel && <span className="text-gray-400 ml-2">({tamanhoLabel})</span>}
-                            <span className="text-gray-400"> × {p.quantidade}</span>
+                            <span className="text-gray-400 ml-2">× {p.quantidade}</span>
                           </div>
-                          <div className="text-gray-400">€{(p.preco).toFixed(2)}</div>
+                          <div className="text-gray-400">€{preco}</div>
                         </div>
                       );
                     })}
