@@ -14,6 +14,45 @@ const safeNomeSemTamanho = (nome = "") => {
   return String(nome).trim();
 };
 
+const ImagemCollageSmall = ({ imagens = [] }) => {
+  const count = imagens.length;
+  if (count === 0) {
+    return (
+      <div className="w-20 h-20 rounded bg-gray-700 flex items-center justify-center text-sm text-gray-400">
+        Sem imagem
+      </div>
+    );
+  }
+  if (count === 1) {
+    return <img src={imagens[0]} alt="produto" className="w-20 h-20 rounded object-cover" />;
+  }
+  if (count === 2) {
+    return (
+      <div className="w-20 h-20 grid grid-cols-2 gap-1">
+        <img src={imagens[0]} alt="" className="w-full h-full object-cover rounded-l-md" />
+        <img src={imagens[1]} alt="" className="w-full h-full object-cover rounded-r-md" />
+      </div>
+    );
+  }
+  const extra = count - 3;
+  return (
+    <div className="w-20 h-20 grid grid-cols-2 grid-rows-2 gap-1">
+      <img src={imagens[0]} alt="" className="object-cover w-full h-full rounded-tl-md" />
+      <img src={imagens[1]} alt="" className="object-cover w-full h-full rounded-tr-md" />
+      <img src={imagens[2]} alt="" className="object-cover w-full h-full rounded-bl-md" />
+      <div className="relative w-full h-full rounded-br-md overflow-hidden">
+        <img src={imagens[3] ?? imagens[0]} alt="" className="object-cover w-full h-full" />
+        {extra > 0 && (
+          <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white text-xs font-semibold">
+            +{extra}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+
 const CarrinhoItem = ({ item }) => {
   const { apagarDoCarrinho, atualizarQuantidade } = useCarrinhoStore();
 
@@ -47,11 +86,15 @@ const CarrinhoItem = ({ item }) => {
     <div className="rounded-lg border p-4 shadow-sm border-gray-700 bg-gray-800 md:p-6">
       <div className="space-y-4 md:flex md:items-center md:justify-between md:gap-6 md:space-y-0">
         <div className="shrink-0 md:order-1">
-          <img
-            className="h-20 md:h-32 rounded object-cover"
-            src={imagemSrc}
-            alt={displayNome}
-          />
+          {item.imagens && item.imagens.length ? (
+            <ImagemCollageSmall imagens={item.imagens} />
+          ) : item.imagem ? (
+            <img className="h-20 md:h-32 rounded object-cover" src={item.imagem} alt={item.nome} />
+          ) : item.meta?.tipo === 'mix-2' ? (
+            <img className="h-20 md:h-32 rounded object-cover" src="/pizza2mix.png" alt="Mix 2 Pizzas" />
+          ) : (
+            <img className="h-20 md:h-32 rounded object-cover" src="/placeholder.png" alt="Produto" />
+          )}
         </div>
 
         <label className="sr-only">Escolher a quantidade:</label>
