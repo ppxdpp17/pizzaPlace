@@ -117,8 +117,9 @@ const CategoriaPage = () => {
       };
 
       adicionarAoCarrinhoCustom(mixProduct);
+      toast.success("Mix 2 Pizzas adicionada ao carrinho!")
       closeModal();
-      
+
     } catch (err) {
       console.error("Erro em handleAddMixToCart:", err);
       toast.error("Erro interno ao adicionar Mix. Verifica a consola.");

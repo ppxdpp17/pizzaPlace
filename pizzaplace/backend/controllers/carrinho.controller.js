@@ -167,16 +167,27 @@ export const adicionarAoCarrinho = async (req, res) => {
  * DELETE /carrinho  (body: { produtoID } )  => apagar item específico ou limpar se sem produtoID
  * DELETE /carrinho/:id  (param)  => apagar item específico (compatibilidade)
  */
+/**
+ * DELETE /carrinho  (body: { produtoID } )  => apagar item específico ou limpar se sem produtoID
+ * DELETE /carrinho/:id  (param)  => apagar item específico (compatibilidade)
+ */
 export const removerTodosDoCarrinho = async (req, res) => {
   try {
-   const { produtoID } = req.body || {};
+    // aceitar param primeiro (DELETE /carrinho/:id) ou body.produtoID (DELETE /carrinho with body)
+    const produtoID = req.params?.id ?? req.body?.produtoID ?? undefined;
 
     const user = await User.findById(req.user._id);
     if (!user) return res.status(404).json({ msg: "User not found" });
 
     if (!produtoID) {
+      // sem produtoID -> limpar tudo
       user.itensCarrinho = [];
     } else {
+      // se foi passado um id, valida antes de filtrar
+      if (!mongoose.Types.ObjectId.isValid(String(produtoID))) {
+        return res.status(400).json({ msg: "produtoID inválido" });
+      }
+
       user.itensCarrinho = user.itensCarrinho.filter(item => String(item.produto) !== String(produtoID));
     }
 
@@ -185,18 +196,31 @@ export const removerTodosDoCarrinho = async (req, res) => {
     // devolver cart atualizado (populado)
     const updatedUser = await User.findById(req.user._id).lean();
     const itens = updatedUser.itensCarrinho || [];
-    const ids = itens.map(i => i.produto).filter(id => mongoose.Types.ObjectId.isValid(String(id)));
-    const produtos = await Produto.find({ _id: { $in: ids }, estaDisponivel: true }).populate("ingredientes", "nome icone").lean();
+
+    const ids = itens
+      .map(i => i.produto)
+      .filter(id => mongoose.Types.ObjectId.isValid(String(id)));
+
+    const produtos = await Produto.find({ _id: { $in: ids }, estaDisponivel: true })
+      .populate("ingredientes", "nome icone")
+      .lean();
+
     const map = new Map(produtos.map(p => [String(p._id), p]));
     const itensCarrinho = itens.map(i => {
-      const prod = map.get(String(i.produto)); if (!prod) return null;
-      return { ...prod, quantidade: i.quantidade ?? 1, meta: i.meta ?? undefined, preco: i.preco ?? Number(prod.preco ?? 0) };
+      const prod = map.get(String(i.produto));
+      if (!prod) return null;
+      return {
+        ...prod,
+        quantidade: i.quantidade ?? 1,
+        meta: i.meta ?? undefined,
+        preco: i.preco ?? Number(prod.preco ?? 0)
+      };
     }).filter(Boolean);
 
     return res.json(itensCarrinho);
   } catch (error) {
-    console.log("Erro ao remover do carrinho", error.message);
-    res.status(500).json({ msg: "Erro no servidor", error: error.message });
+    console.log("Erro ao remover do carrinho", error.message || error);
+    res.status(500).json({ msg: "Erro no servidor", error: error.message ?? String(error) });
   }
 };
 
