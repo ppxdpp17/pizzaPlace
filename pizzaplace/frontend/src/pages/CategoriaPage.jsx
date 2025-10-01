@@ -19,7 +19,7 @@ const CategoriaPage = () => {
   const { categoria } = useParams();
   const navigate = useNavigate();
 
-  const { adicionarAoCarrinho } = useCarrinhoStore();
+  const { adicionarAoCarrinho, adicionarAoCarrinhoCustom } = useCarrinhoStore();
   const { user } = useUserStore();
 
   useEffect(() => {
@@ -104,7 +104,8 @@ const CategoriaPage = () => {
         nome: `Mix 2 Pizzas — ${pA.nome} + ${pB.nome} (${tamanhoVal})`,
         descricao: "Junta duas pizzas à tua escolha para máximo sabor!",
         preco: precoArredondado,
-        imagem: "/pizza2mix.png", // força a imagem da public
+        imagem: "/pizza2mix.png", // fallback
+        imagens: [pA.imagem || "/placeholder.png", pB.imagem || "/placeholder.png"], // <-- útil para collage
         estaDisponivel: true,
         quantidade: 1,
         meta: {
@@ -115,8 +116,9 @@ const CategoriaPage = () => {
         },
       };
 
-      adicionarAoCarrinho(pA, { tipo: "mix-2", pizzaA: pA._id, pizzaB: pB._id, tamanho: tamanhoVal }, 1);
+      adicionarAoCarrinhoCustom(mixProduct);
       closeModal();
+      
     } catch (err) {
       console.error("Erro em handleAddMixToCart:", err);
       toast.error("Erro interno ao adicionar Mix. Verifica a consola.");
