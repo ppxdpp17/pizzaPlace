@@ -89,7 +89,7 @@ export default function CustomizarPizza() {
       nome: nomePadrao,
       descricao: `${massa} · ${molho} · ${selecionados.length} toppings`,
       preco,
-      imagem: "/makeYourOwnpng.png",
+      imagem: "/makeYourOwn.png",
       categoria: "pizza",
       estaDisponivel: true,
       ingredientes: chosenIngredients,

@@ -116,8 +116,6 @@ const CategoriaPage = () => {
       };
 
       adicionarAoCarrinho(pA, { tipo: "mix-2", pizzaA: pA._id, pizzaB: pB._id, tamanho: tamanhoVal }, 1);
-      
-      toast.success("Mix 2 Pizzas adicionado ao carrinho!");
       closeModal();
     } catch (err) {
       console.error("Erro em handleAddMixToCart:", err);
