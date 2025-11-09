@@ -4,6 +4,14 @@ import { toast } from "react-hot-toast";
 
 const isObjectIdLike = (id) => typeof id === "string" && /^[a-fA-F0-9]{24}$/.test(id);
 
+const isLocalItem = (item) => {
+  if (!item) return false;
+  const id = typeof item === "string" ? item : item._id;
+  // local se não for ObjectId-like ou se tiver flag explícita isCustom
+  if (item && item.isCustom === true) return true;
+  return !isObjectIdLike(id);
+};
+
 export const useCarrinhoStore = create((set, get) => {
   if (typeof window !== "undefined") {
     window.addEventListener("produtos:updated", () => {
