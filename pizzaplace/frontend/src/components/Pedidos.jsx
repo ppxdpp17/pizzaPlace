@@ -4,6 +4,7 @@ import axios from "../lib/axios";
 import { useUserStore } from "../stores/useUserStore.js";
 import EstadoDropdown from "./EstadoDropdown.jsx";
 
+// Função auxiliar para calcular estado se não vier do backend
 function calcularEstado(createdAt) {
   const minutes = (Date.now() - new Date(createdAt).getTime()) / 60000;
   if (minutes < 5) return "A Cozinhar...";
@@ -11,23 +12,24 @@ function calcularEstado(createdAt) {
   return "Entregue!";
 }
 
+// Formatar Labels de Tamanho (Pequena -> Peq., etc)
 function formatTamanhoLabel(tamanhoRaw) {
   if (!tamanhoRaw) return null;
-  const t = String(tamanhoRaw).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); //Remove acentos
+  const t = String(tamanhoRaw).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   if (t === "pequena" || t === "peq" || t === "peq.") return "Peq.";
   if (t === "media" || t === "média" || t === "med" || t === "med.") return "Méd.";
   if (t === "grande" || t === "grd" || t === "grd.") return "Grd.";
-  //Fallback: capitaliza a primeira letra e encurta
   return t.charAt(0).toUpperCase() + t.slice(1);
 }
 
+// Componente para mostrar colagem de imagens
 function ImagemCollage({ imagens = [], altBase = "Produto" }) {
-  //Mostra até 4 imagens; se houver mais, o último mostra +N
   const count = imagens.length;
+
   if (count === 0) {
     return (
       <div className="w-24 h-24 rounded-md bg-gray-700 flex items-center justify-center text-sm text-gray-400">
-        Sem imagem
+        Sem img
       </div>
     );
   }
@@ -48,6 +50,7 @@ function ImagemCollage({ imagens = [], altBase = "Produto" }) {
       </div>
     );
   }
+
   const extra = count - 3;
   return (
     <div className="grid grid-cols-2 grid-rows-2 gap-1 w-24 h-24">
@@ -67,7 +70,6 @@ function ImagemCollage({ imagens = [], altBase = "Produto" }) {
 }
 
 const Pedidos = () => {
-  //Verificar se é administrador
   const { user } = useUserStore();
   const isAdmin = user?.cargo === "admin";
 
@@ -80,7 +82,10 @@ const Pedidos = () => {
     try {
       setLoading(true);
       setError(null);
-      const res = await axios.get("/pedidos");
+      // Se for Admin busca tudo, se for cliente busca só os seus (/me)
+      const endpoint = isAdmin ? "/pedidos" : "/pedidos/me";
+      const res = await axios.get(endpoint);
+
       const data = res.data.pedidos ?? res.data;
       setPedidos(data);
     } catch (err) {
@@ -93,40 +98,41 @@ const Pedidos = () => {
 
   useEffect(() => {
     fetchPedidos();
-    intervalRef.current = setInterval(() => {
-      fetchPedidos();
-    }, 30000); //30s
+    // Atualiza a cada 30 segundos
+    intervalRef.current = setInterval(fetchPedidos, 30000);
     return () => clearInterval(intervalRef.current);
-  }, []);
+  }, [isAdmin]); // Recarrega se o cargo mudar (login/logout)
 
-  if (loading) return <p className="p-4 text-center">Carregando pedidos...</p>;
+  if (loading) return <p className="p-4 text-center text-gray-300">Carregando pedidos...</p>;
   if (error) return <p className="p-4 text-center text-red-400">Erro: {error}</p>;
-  if (!pedidos.length) return <p className="p-4 text-center">Nenhum pedido encontrado.</p>;
+  if (!pedidos.length) return <p className="p-4 text-center text-gray-400">Nenhum pedido encontrado.</p>;
 
   return (
     <div className="space-y-4">
       {pedidos.map((pedido) => {
-        //Extrair imagens de todos os produtos do pedido
+        // --- LÓGICA DE IMAGENS ---
+        // 1. Tenta imagem guardada no pedido (p.imagem)
+        // 2. Se não existir, tenta no produto populado (p.produto.imagem)
         const imagens = (pedido.produtos ?? [])
-          .map((p) => p.produto?.imagem)
+          .map((p) => p.imagem || p.produto?.imagem)
           .filter(Boolean);
-        //Fallback: se não houver imagens, usar placeholder
+
         const imagensFinal = imagens.length ? imagens : ["/placeholder.png"];
 
-        //Título: se houver só um produto, usa o seu nome, senão concatena nomes
-        const nomes = (pedido.produtos ?? []).map((p) => p.produto?.nome ?? "Produto");
+        // --- LÓGICA DE NOMES ---
+        // 1. Tenta nome guardado no pedido (p.nome)
+        // 2. Se não existir, tenta no produto populado (p.produto.nome)
+        // 3. Fallback
+        const nomes = (pedido.produtos ?? []).map((p) => p.nome || p.produto?.nome || "Produto Removido");
         const nomePedido = nomes.length === 1 ? nomes[0] : `${nomes[0]} +${Math.max(0, nomes.length - 1)}`;
 
         const address = pedido.shippingAddress || {};
         const total = Number(pedido.total ?? 0).toFixed(2);
         const estado = pedido.estado || calcularEstado(pedido.createdAt);
 
-        const estadoColor =
-          estado === "A Cozinhar" ? "text-yellow-300" :
-          estado === "Em entrega" ? "text-amber-300" : "text-emerald-400";
-
-        const userNome = pedido.user?.nome ?? "Cliente";
-        const userEmail = pedido.user?.email ?? "";
+        // Tratamento de User nulo (caso o user tenha sido apagado)
+        const userNome = pedido.user?.name || pedido.user?.nome || "Cliente (Desconhecido)";
+        const userEmail = pedido.user?.email || "";
 
         return (
           <motion.div
@@ -137,7 +143,7 @@ const Pedidos = () => {
             exit={{ opacity: 0 }}
             className="flex items-stretch bg-gray-800/60 rounded-xl p-4 shadow-sm"
           >
-            {/*Coluna esquerda: total + estado*/}
+            {/* COLUNA ESQUERDA: PREÇO E ESTADO */}
             <div className="w-40 flex-shrink-0 flex flex-col items-end pr-4 border-r border-gray-700">
               <div className="text-right">
                 <div className="text-sm text-gray-400">Total</div>
@@ -153,63 +159,89 @@ const Pedidos = () => {
                       value={pedido.estado}
                       compact={true}
                       onChange={async (novoEstado) => {
-                        //Atualiza UI
+                        // Atualização Otimista
                         setPedidos(prev => prev.map(p => p._id === pedido._id ? { ...p, estado: novoEstado } : p));
                         try {
                           await axios.patch(`/pedidos/${pedido._id}/estado`, { estado: novoEstado });
                         } catch (err) {
-                          //Reverter em caso de erro
+                          // Reverter em caso de erro
                           setPedidos(prev => prev.map(p => p._id === pedido._id ? { ...p, estado: pedido.estado } : p));
-                          console.error("Erro ao atualizar estado:", err);
-                          alert("Erro ao atualizar estado. Tente novamente.");
+                          console.error("Erro estado:", err);
                         }
                       }}
                     />
                   </div>
                 ) : (
-                  //Mostrar normalmente para utilizadores não admin
-                  <div className={`mt-1 text-sm font-semibold ${
-                      pedido.estado === "A Cozinhar" ? "text-yellow-300" :
-                      pedido.estado === "A Caminho" ? "text-amber-300" : "text-emerald-400"
-                  }`}>
-                    {pedido.estado === "A Cozinhar" ? "A cozinhar..." : pedido.estado === "A Caminho" ? "A caminho" : "Entregue!"}
+                  <div className={`mt-1 text-sm font-semibold ${estado === "A Cozinhar" || estado === "Aguardando Pagamento" ? "text-yellow-300" :
+                    estado === "A Caminho" ? "text-amber-300" : "text-emerald-400"
+                    }`}>
+                    {estado === "A Cozinhar" ? "A cozinhar..." :
+                      estado === "Aguardando Pagamento" ? "Aguardando..." :
+                        estado === "A Caminho" ? "A caminho" :
+                          estado === "Entregue" ? "Entregue!" : estado}
                   </div>
                 )}
               </div>
             </div>
-            {/*Conteúdo principal: imagens + infos*/}
+
+            {/* CONTEÚDO PRINCIPAL: INFO PEDIDO */}
             <div className="flex items-center gap-4 pl-4 flex-1">
               <ImagemCollage imagens={imagensFinal} altBase={nomePedido} />
+
               <div className="flex-1">
+                {/* CABEÇALHO DO ITEM */}
                 <div className="flex items-center justify-between gap-4">
                   <div>
                     <div className="text-lg font-semibold text-white">{nomePedido}</div>
-                    <div className="text-sm text-gray-300">{userNome} {userEmail && <span className="text-xs text-gray-500">• {userEmail}</span>}</div>
+                    <div className="text-sm text-gray-300">
+                      {userNome} {userEmail && <span className="text-xs text-gray-500">• {userEmail}</span>}
+                    </div>
                   </div>
-                  <div className="text-sm text-gray-400">{pedido.createdAt ? new Date(pedido.createdAt).toLocaleString() : ""}</div>
+                  <div className="text-sm text-gray-400">
+                    {pedido.createdAt ? new Date(pedido.createdAt).toLocaleString() : ""}
+                  </div>
                 </div>
-                {/*Morada*/}
+
+                {/* MORADA E LOCALIZAÇÃO */}
                 <div className="text-sm text-gray-300 mt-2">
-                  <div className="font-medium text-white">{address.name}</div>
-                  <div>{address.line1}{address.line2 ? `, ${address.line2}` : ""}</div>
-                  <div>{address.city} • {address.postal_code} • {address.country}</div>
+                  {pedido.tipoEntrega === 'delivery' ? (
+                    <>
+                      <div className="font-medium text-white">{address.name}</div>
+                      <div>{address.line1}{address.line2 ? `, ${address.line2}` : ""}</div>
+                      <div>{address.city} {address.postal_code && `• ${address.postal_code}`} {address.country && `• ${address.country}`}</div>
+                    </>
+                  ) : (
+                    <div className="font-medium text-yellow-400">
+                      Takeaway • Levantamento em: {pedido.localizacao}
+                    </div>
+                  )}
                 </div>
+
+                {/* DETALHES DE PAGAMENTO */}
                 <div className="text-sm text-gray-400 mt-2">
-                  Entrega: <span className="font-medium text-white">{pedido.tipoEntrega}</span>
-                  {"  •  "}
-                  Pagamento: <span className="font-medium text-white">{pedido.metodoPagamento}</span>
+                  Entrega: <span className="font-medium text-white capitalize">{pedido.tipoEntrega}</span>
+                  {" • "}
+                  Pagamento: <span className="font-medium text-white capitalize">{pedido.metodoPagamento === 'stripe' ? 'Cartão (Stripe)' : pedido.metodoPagamento}</span>
                 </div>
-                <div className="mt-2 text-sm text-gray-300">
+
+                {/* LISTA DE PRODUTOS */}
+                <div className="mt-3 space-y-1 text-sm text-gray-300 border-t border-gray-700/50 pt-2">
                   {pedido.produtos?.map((p, idx) => {
+                    // Fallback triplo para tamanho
                     const tamanhoRaw = p.tamanho ?? p.meta?.tamanho ?? p.produto?.tamanho;
                     const tamanhoLabel = formatTamanhoLabel(tamanhoRaw);
 
+                    // Fallback triplo para nome
+                    const nomeProduto = p.nome || p.produto?.nome || "Produto Removido";
+
                     return (
-                      <div key={idx} className="flex justify-between">
+                      <div key={idx} className="flex justify-between items-center">
                         <div>
-                          <span className="font-medium text-white">{p.produto?.nome ?? "Produto"}</span>
-                          {tamanhoLabel && <span className="text-gray-400 ml-2">({tamanhoLabel})</span>}
-                          <span className="text-gray-400"> × {p.quantidade}</span>
+                          <span className="font-medium text-white">{nomeProduto}</span>
+                          {tamanhoLabel && <span className="text-gray-400 ml-2 text-xs uppercase bg-gray-700 px-1.5 py-0.5 rounded">
+                            {tamanhoLabel}
+                          </span>}
+                          <span className="text-gray-400 text-xs"> × {p.quantidade}</span>
                         </div>
                         <div className="text-gray-400">€{(p.preco).toFixed(2)}</div>
                       </div>

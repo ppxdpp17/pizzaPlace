@@ -10,17 +10,25 @@ export default function TipoEntrega({ isOpen, onClose, onSelect }) {
   const [paymentType, setPaymentType] = useState(null);
   const [pedidoLocation, setPedidoLocation] = useState("");
 
-  //Só envia quando os 3 estiverem preenchidos
+  // O useEffect dispara quando os 3 estados estão preenchidos
   useEffect(() => {
     if (deliveryType && paymentType && pedidoLocation) {
-      onSelect({ tipoEntrega: deliveryType, paymentMethod: paymentType, pedidoLocation });
+      console.log("TipoEntrega: A enviar dados...", { deliveryType, paymentType, pedidoLocation });
+
+      onSelect({
+        tipoEntrega: deliveryType,
+        paymentMethod: paymentType,
+        pedidoLocation
+      });
+
+      // Resetar estados
       setDeliveryType(null);
       setPaymentType(null);
       setPedidoLocation("");
     }
   }, [deliveryType, paymentType, pedidoLocation, onSelect]);
 
-  const paymentDisabled = !pedidoLocation; //True se não houver localização
+  const paymentDisabled = !pedidoLocation; // Bloqueia pagamento se não houver loja selecionada
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
@@ -28,94 +36,66 @@ export default function TipoEntrega({ isOpen, onClose, onSelect }) {
         className="bg-gray-800 rounded-2xl p-6 space-y-4 max-w-sm w-full"
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.3 }}
       >
-        {/*Combobox para selecionar as localizações*/}
+        {/* 1. LOCALIZAÇÃO */}
         <div>
           <label className="block text-sm text-gray-300 mb-1">Localização / Loja <span className="text-red-400">*</span></label>
-          <div className="relative">
-            <LocationDropdown value={pedidoLocation} onChange={setPedidoLocation} />
-          </div>
+          <LocationDropdown value={pedidoLocation} onChange={setPedidoLocation} />
         </div>
 
-        {/*Escolha do tipo de entrega*/}
-        <h3 className="text-lg font-semibold text-white text-center">
-          Escolha uma forma de entrega
-        </h3>
+        {/* 2. TIPO DE ENTREGA */}
+        <h3 className="text-lg font-semibold text-white text-center">Forma de entrega</h3>
         <div className="flex justify-between gap-4">
-          <motion.button
-            onClick={() => setDeliveryType("takeaway")}
-            className={`flex-1 flex flex-col items-center p-4 rounded-xl hover:bg-gray-600 ${deliveryType === "takeaway" ? "bg-emerald-600" : "bg-gray-700"}`}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
+          <button
             type="button"
+            onClick={() => setDeliveryType("takeaway")}
+            className={`flex-1 flex flex-col items-center p-4 rounded-xl transition ${deliveryType === "takeaway" ? "bg-emerald-600" : "bg-gray-700 hover:bg-gray-600"}`}
           >
             <Utensils size={32} className="text-white mb-2" />
             <span className="text-sm text-white">Take-Away</span>
-          </motion.button>
+          </button>
 
-          <motion.button
-            onClick={() => setDeliveryType("delivery")}
-            className={`flex-1 flex flex-col items-center p-4 rounded-xl hover:bg-gray-600 ${deliveryType === "delivery" ? "bg-emerald-600" : "bg-gray-700"}`}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
+          <button
             type="button"
+            onClick={() => setDeliveryType("delivery")}
+            className={`flex-1 flex flex-col items-center p-4 rounded-xl transition ${deliveryType === "delivery" ? "bg-emerald-600" : "bg-gray-700 hover:bg-gray-600"}`}
           >
             <Bike size={32} className="text-white mb-2" />
-            <span className="text-sm text-white">Entrega em Casa</span>
-          </motion.button>
+            <span className="text-sm text-white">Entrega</span>
+          </button>
         </div>
 
-        {/*Escolha do tipo de pagamento*/}
-        <h3 className="text-lg font-semibold text-white text-center mt-4">
-          Selecione um método de pagamento
-        </h3>
+        {/* 3. PAGAMENTO */}
+        <h3 className="text-lg font-semibold text-white text-center mt-4">Método de Pagamento</h3>
         <div className="flex justify-between gap-4">
-          <motion.button
-            onClick={() => { if (!paymentDisabled) setPaymentType("dinheiro"); }}
-            className={`flex-1 flex flex-col items-center p-4 rounded-xl transition ${
-              paymentDisabled ? "opacity-50 cursor-not-allowed bg-gray-600" : (paymentType === "dinheiro" ? "bg-emerald-600" : "bg-gray-700 hover:bg-gray-600")
-            }`}
-            whileHover={paymentDisabled ? {} : { scale: 1.03 }}
-            whileTap={paymentDisabled ? {} : { scale: 0.97 }}
+          <button
             type="button"
-            aria-disabled={paymentDisabled}
+            disabled={paymentDisabled}
+            onClick={() => setPaymentType("dinheiro")}
+            className={`flex-1 flex flex-col items-center p-4 rounded-xl transition ${paymentDisabled ? "opacity-50 cursor-not-allowed bg-gray-600" : (paymentType === "dinheiro" ? "bg-emerald-600" : "bg-gray-700 hover:bg-gray-600")
+              }`}
           >
             <Coins size={32} className="text-white mb-2" />
             <span className="text-sm text-white">Dinheiro</span>
-          </motion.button>
+          </button>
 
-          <motion.button
-            onClick={() => { if (!paymentDisabled) setPaymentType("cartao"); }}
-            className={`flex-1 flex flex-col items-center p-4 rounded-xl transition ${
-              paymentDisabled ? "opacity-50 cursor-not-allowed bg-gray-600" : (paymentType === "cartao" ? "bg-emerald-600" : "bg-gray-700 hover:bg-gray-600")
-            }`}
-            whileHover={paymentDisabled ? {} : { scale: 1.03 }}
-            whileTap={paymentDisabled ? {} : { scale: 0.97 }}
+          <button
             type="button"
-            aria-disabled={paymentDisabled}
+            disabled={paymentDisabled}
+            onClick={() => setPaymentType("cartao")} // 🚨 AQUI: Garante que envia "cartao"
+            className={`flex-1 flex flex-col items-center p-4 rounded-xl transition ${paymentDisabled ? "opacity-50 cursor-not-allowed bg-gray-600" : (paymentType === "cartao" ? "bg-emerald-600" : "bg-gray-700 hover:bg-gray-600")
+              }`}
           >
             <CreditCard size={32} className="text-white mb-2" />
             <span className="text-sm text-white">Cartão</span>
-          </motion.button>
+          </button>
         </div>
 
         {!pedidoLocation && (
-          <div className="text-xs text-yellow-300 text-center mt-2">
-            Seleccione uma localização antes de escolher o método de pagamento.
-          </div>
+          <p className="text-xs text-center text-yellow-500">Selecione a loja primeiro.</p>
         )}
 
-        <button
-          onClick={() => {
-            setDeliveryType(null);
-            setPaymentType(null);
-            setPedidoLocation("");
-            onClose();
-          }}
-          className="w-full mt-4 block text-center text-sm text-red-400 hover:text-gray-200 font-bold"
-          type="button"
-        >
+        <button onClick={onClose} className="w-full mt-4 text-center text-red-400 font-bold hover:text-gray-200">
           Cancelar
         </button>
       </motion.div>

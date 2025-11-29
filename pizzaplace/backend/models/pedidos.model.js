@@ -1,93 +1,87 @@
 import mongoose from "mongoose";
 
-//Incluir a morada
-const addressSchema = new mongoose.Schema({
-  name:        { type: String, required: true },
-  line1:       { type: String, required: true },
-  line2:       { type: String },
-  city:        { type: String, required: true },
-  postal_code: { type: String, required: true },
-  country:     { type: String, required: true }
-}, { _id: false });
-
-const productEntrySchema = new mongoose.Schema({
-  produto: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Produto",
-    required: [true, "O produto é obrigatório."],
-  },
-  quantidade: {
-    type: Number,
-    required: [true, "A quantidade é obrigatória."],
-    min: 1
-  },
-  preco: {
-    type: Number,
-    required: [true, "O preco é obrigatório."],
-    min: 0
-  },
-  // novo: tamanho (opcional) — "pequena" | "media" | "grande"
-  tamanho: {
-    type: String,
-    enum: ["pequena", "media", "grande"],
-    required: false
-  },
-  // novo: meta livre (objeto) para extensibilidade
-  meta: {
-    type: Object,
-    default: undefined
-  }
-}, { _id: false });
-
-const pedidoSchema = new mongoose.Schema({
+const pedidoSchema = new mongoose.Schema(
+  {
     user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: [true, "O id do user é obrigatório."],
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
-    produtos: [productEntrySchema],
+    produtos: [
+      {
+        produto: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Produto",
+          required: true,
+        },
+        quantidade: {
+          type: Number,
+          required: true,
+          min: 1,
+        },
+        preco: {
+          type: Number,
+          required: true,
+          min: 0,
+        },
+        // --- NOVOS CAMPOS (SNAPSHOT) ---
+        // Guardam os dados como eram no momento da compra
+        nome: {
+          type: String
+        },
+        imagem: {
+          type: String
+        },
+        tamanho: {
+          type: String,
+        },
+        meta: {
+          type: Map,
+          of: String, // Flexibilidade para guardar cor, nota, etc.
+        },
+      },
+    ],
     total: {
-        type: Number,
-        required: [true, "O total é obrigatório."],
-        min: 0
+      type: Number,
+      required: true,
     },
     stripeSessionID: {
-        type: String,
-        default: undefined,
-    },
-    shippingAddress: {
-        type: addressSchema,
-        required: [true, "A morada é obrigatória."],
+      type: String,
+      unique: true, // Garante que não processamos o mesmo webhook duas vezes
+      sparse: true, // Permite null/undefined (para pagamentos em dinheiro)
     },
     tipoEntrega: {
-        type: String,
-        required: [true, "O tipo de entrega é obrigatório."],
-        enum: ["takeaway", "delivery"]
+      type: String,
+      enum: ["takeaway", "delivery"],
+      required: true,
     },
     metodoPagamento: {
-        type: String,
-        required: [true, "O metodo de pagamento é obrigatório."],
-        enum: ["dinheiro", "cartao"]
+      type: String,
+      enum: ["mbway", "dinheiro", "cartao", "stripe"],
+      required: true,
     },
-    localizacao: {
-        type: String,
-        default: undefined
+    shippingAddress: {
+      name: String,
+      line1: String,
+      line2: String,
+      city: String,
+      postal_code: String,
+      country: String,
     },
     estado: {
-        type: String,
-        required: [true, "O estado é obrigatório."],
-        enum: ["A Cozinhar", "A Caminho", "Entregue"],
-        default: "A Cozinhar"
-    }
+      type: String,
+      enum: ["Pendente", "Aguardando Pagamento", "A Cozinhar", "A Caminho", "Entregue", "Cancelado", "Falha Pagamento"],
+      default: "A Cozinhar",
     },
-    { timestamps: true }
+    paymentId: {
+      type: String,
+    },
+    localizacao: {
+      type: String, // Loja onde foi feito o pedido
+    },
+  },
+  { timestamps: true }
 );
 
-pedidoSchema.index(
-  { stripeSessionID: 1 },
-  { unique: true, partialFilterExpression: { stripeSessionID: { $type: "string" } } }
-);
-
-const Pedido = mongoose.models.Pedido || mongoose.model("Pedido", pedidoSchema);
-
+const Pedido = mongoose.model("Pedido", pedidoSchema);
 export default Pedido;

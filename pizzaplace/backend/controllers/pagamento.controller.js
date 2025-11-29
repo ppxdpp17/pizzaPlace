@@ -25,24 +25,22 @@ function parseCustomId(idStr) {
 export const criarSessaoCheckout = async (req, res) => {
   try {
     const { produtos, codigoCupao, tipoEntrega, pedidoLocation } = req.body;
-    console.log("criarSessaoCheckout payload:", { produtos: produtos?.length, codigoCupao, tipoEntrega, pedidoLocation });
 
     if (!Array.isArray(produtos) || produtos.length === 0) {
-      return res.status(400).json({ msg: "Conjunto de produtos vazio ou inválido" });
+      return res.status(400).json({ msg: "Carrinho vazio" });
     }
-
     if (!pedidoLocation) {
       return res.status(400).json({ msg: "A localização/loja é obrigatória." });
     }
 
-    // Normalizar produtos para calcular total corretamente
-    const items = await normalizeProdutosForPedido(
-      produtos.map(p => ({ produto: p.produto ?? p._id ?? p.id, quantidade: p.quantidade, meta: p.meta ?? undefined }))
-    );
+    // 1. Normalizar Produtos (Aqui obtemos Nome e Imagem da BD enquanto o produto existe)
+    const items = await normalizeProdutosForPedido(produtos, true); // true = Strict Mode (erro se não existir)
 
+    // Calcular Total
     let precoTotal = items.reduce((sum, i) => sum + i.preco * i.quantidade, 0);
-
     let cupao = null;
+
+    // 2. Processar Cupão
     if (codigoCupao) {
       cupao = await Cupao.findOne({ codigo: codigoCupao, userId: req.user._id, ativo: true });
       if (cupao) {
@@ -50,54 +48,90 @@ export const criarSessaoCheckout = async (req, res) => {
       }
     }
 
-    // Simulação MBWay - Retornar sucesso imediato com ID de pedido
-    // Na vida real, aqui chamaria a API da SIBS/MBWay
-
-    const pedido = await Pedido.create({
+    // 3. CRIAR PEDIDO NA BD (ESTADO: AGUARDANDO PAGAMENTO)
+    // Guardamos o "Snapshot" do nome e imagem AGORA.
+    const novoPedido = await Pedido.create({
       user: req.user._id,
-      produtos: items,
+      produtos: items, // Já contém nome e imagem
       total: precoTotal,
       tipoEntrega,
-      metodoPagamento: "mbway",
-      shippingAddress: {
-        name: req.user.name, // Simplificação
-        line1: "Online Payment",
+      metodoPagamento: "stripe",
+      // Para stripe checkout, o shippingAddress é atualizado depois, mas se for takeaway criamos dummy
+      shippingAddress: tipoEntrega === 'takeaway' ? {
+        name: req.user.name || "Cliente Takeaway",
+        line1: "Levantamento em Loja",
+        line2: pedidoLocation,
+        city: "Takeaway",
+        postal_code: "0000-000",
         country: "PT"
-      },
-      estado: "A Cozinhar",
+      } : undefined,
+      estado: "Aguardando Pagamento",
       localizacao: pedidoLocation
     });
 
+    // 4. Preparar Stripe
+    // Nota: O Stripe precisa de valores inteiros (cêntimos)
+    const lineItems = items.map((item) => ({
+      price_data: {
+        currency: "eur",
+        product_data: {
+          name: item.nome, // Nome correto
+          images: item.imagem ? [item.imagem] : [], // Imagem correta
+        },
+        unit_amount: Math.round(item.preco * 100),
+      },
+      quantity: item.quantidade,
+    }));
+
+    // Configurar desconto no Stripe
+    let discounts = [];
     if (cupao) {
-      await Cupao.findByIdAndUpdate(cupao._id, { ativo: false });
+      const stripeCoupon = await stripe.coupons.create({
+        percent_off: cupao.percentagemDesconto,
+        duration: 'once',
+        name: cupao.codigo
+      });
+      discounts.push({ coupon: stripeCoupon.id });
     }
 
-    // Se gastar mais de 100 euros
-    if (precoTotal >= 100) {
-      await criarNovoCupao(req.user._id);
-    }
-
-    // Limpar carrinho
-    try {
-      await User.findByIdAndUpdate(req.user._id, { $set: { itensCarrinho: [] } });
-    } catch (err) {
-      console.warn("Falha ao limpar carrinho", err);
-    }
-
-    res.status(200).json({
-      id: "mbway_sim_" + pedido._id,
-      url: `${process.env.CLIENT_URL}/purchase-success?session_id=mbway_sim_${pedido._id}&pedidoId=${pedido._id}`
+    // 5. Criar Sessão Stripe
+    const sessao = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: lineItems,
+      mode: "payment",
+      billing_address_collection: "required",
+      shipping_address_collection: {
+        allowed_countries: ["PT"]
+      },
+      success_url: `${process.env.CLIENT_URL}/purchase-success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.CLIENT_URL}/`,
+      discounts: discounts,
+      metadata: {
+        pedidoId: novoPedido._id.toString(), // CRÍTICO: Passamos o ID do pedido que já criámos
+        userId: req.user._id.toString(),
+        cupaoId: cupao ? cupao._id.toString() : ""
+      }
     });
 
+    // Guardar o ID da sessão no pedido para referência futura
+    novoPedido.stripeSessionID = sessao.id;
+    await novoPedido.save();
+
+    res.status(200).json({ id: sessao.id, url: sessao.url });
+
   } catch (error) {
-    console.log("Erro ao criar pagamento MBWay", error.message);
-    res.status(500).json({ msg: "Erro no servidor", error: error.message });
+    console.error("Erro checkout:", error);
+    res.status(500).json({ msg: "Erro servidor", error: error.message });
   }
 }
 
 async function criarCupaoStripe(percentagemDesconto) {
-  // Mock function or remove if not needed
-  return "mock_coupon_id";
+  const cupao = await stripe.coupons.create({
+    percent_off: percentagemDesconto,
+    duration: "once"
+  })
+
+  return cupao.id;
 }
 
 async function criarNovoCupao(userId) {
@@ -105,168 +139,97 @@ async function criarNovoCupao(userId) {
   const novoCupao = new Cupao({
     codigo: "GIFT" + Math.random().toString(36).substring(2, 8).toUpperCase(),
     percentagemDesconto: 10,
-    dataExpiracao: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), //Expira em 30 dias
+    dataExpiracao: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
     userId: userId
   })
-
   await novoCupao.save();
-
-  return novoCupao;
 }
+
 
 export const sucessoCheckout = async (req, res) => {
   try {
     const { sessaoId } = req.body;
+    const sessao = await stripe.checkout.sessions.retrieve(sessaoId);
 
-    // Se for simulação MBWay
-    if (sessaoId.startsWith("mbway_sim_")) {
-      const pedidoId = sessaoId.replace("mbway_sim_", "");
+    if (sessao.payment_status === "paid") {
+
+      const { pedidoId, userId, cupaoId } = sessao.metadata;
+
+      // 1. Buscar o pedido JÁ EXISTENTE
       const pedido = await Pedido.findById(pedidoId);
-      if (!pedido) return res.status(404).json({ msg: "Pedido não encontrado" });
+
+      if (!pedido) {
+        // Caso raro: pedido não encontrado (não devia acontecer neste fluxo)
+        return res.status(404).json({ msg: "Pedido não encontrado." });
+      }
+
+      // Se já estiver pago, retorna sucesso sem fazer nada
+      if (pedido.estado !== "Aguardando Pagamento") {
+        return res.status(200).json({ success: true, pedidoId: pedido._id });
+      }
+
+      // 2. Recolher Morada do Stripe
+      const ship = sessao.shipping_details || sessao.customer_details;
+      const shippingAddress = {
+        name: ship?.name || "Cliente",
+        line1: ship?.address?.line1 || "N/A",
+        line2: ship?.address?.line2 || "",
+        city: ship?.address?.city || "",
+        postal_code: ship?.address?.postal_code || "",
+        country: ship?.address?.country || "PT"
+      };
+
+      // 3. ATUALIZAR PEDIDO (Sem tocar no array 'produtos'!)
+      // Apenas mudamos o estado, a morada e o ID do pagamento.
+      // Os nomes e imagens dos produtos mantêm-se os originais (Snapshot).
+      pedido.estado = "A Cozinhar";
+      pedido.stripeSessionID = sessaoId;
+      pedido.paymentId = sessao.payment_intent;
+
+      // Só atualizamos a morada se for Delivery (se for takeaway já está certa)
+      if (pedido.tipoEntrega === 'delivery') {
+        pedido.shippingAddress = shippingAddress;
+      }
+
+      await pedido.save();
+
+      // 4. Consumir Cupão e Limpar Carrinho
+      if (cupaoId) {
+        await Cupao.findByIdAndUpdate(cupaoId, { ativo: false });
+      }
+
+      if (sessao.amount_total >= 10000) {
+        await criarNovoCupao(userId);
+      }
+
+      try {
+        await User.findByIdAndUpdate(userId, { $set: { itensCarrinho: [] } });
+      } catch (err) { console.warn(err); }
 
       return res.status(200).json({
         success: true,
-        msg: "Pagamento MBWay confirmado",
+        msg: "Pedido confirmado.",
         pedidoId: pedido._id
       });
     }
 
-    const sessao = await stripe.checkout.sessions.retrieve(sessaoId);
+    return res.status(400).json({ msg: "Pagamento não confirmado." });
 
-    if (sessao.payment_status === "paid") {
-      const pedidoExistente = await Pedido.findOne({ stripeSessionID: sessaoId });
-      if (pedidoExistente) {
-        return res.status(200).json({
-          success: true,
-          msg: "Pedido já foi criado anteriormente.",
-          pedidoId: pedidoExistente._id
-        });
-      }
-
-      if (sessao.metadata.codigoCupao) {
-        await Cupao.findOneAndUpdate({
-          codigo: sessao.metadata.codigoCupao, userId: sessao.metadata.userId
-        }, {
-          ativo: false
-        });
-      }
-
-      const ship = sessao.collected_information?.shipping_details;
-      if (!ship) {
-        return res.status(400).json({ msg: "Não foi possível ler a morada do cliente." });
-      }
-
-      const shippingAddress = {
-        name: ship.name,
-        line1: ship.address.line1,
-        line2: ship.address.line2,
-        city: ship.address.city,
-        postal_code: ship.address.postal_code,
-        country: ship.address.country
-      };
-
-      // evitar duplicados
-      const pedidoExistente2 = await Pedido.findOne({ stripeSessionID: sessaoId });
-      if (pedidoExistente2) {
-        return res.status(200).json({
-          success: true,
-          msg: "Pedido já existente",
-          pedidoId: pedidoExistente2._id
-        });
-      }
-
-      // normalizar produtos do metadata (pode conter ids custom)
-      // --> garantir que passamos tamanho dentro de meta para normalizeProdutosForPedido
-      const produtosRaw = JSON.parse(sessao.metadata.produtos || "[]");
-
-      const produtosParaNormalizar = produtosRaw.map(p => ({
-        produto: p.id ?? p._id ?? p,
-        quantidade: p.quantidade ?? 1,
-        // preservar meta e tamanho explicitamente
-        meta: {
-          ...(p.meta || {}),
-          ...(p.tamanho ? { tamanho: p.tamanho } : {})
-        }
-      }));
-
-      const produtos = await normalizeProdutosForPedido(produtosParaNormalizar);
-
-      const total = produtos.reduce((s, it) => s + (it.preco * (it.quantidade || 1)), 0);
-
-      // Usar upsert atómico para evitar race conditions / duplicados
-      const filter = { stripeSessionID: sessaoId };
-      const update = {
-        $setOnInsert: {
-          user: sessao.metadata.userId,
-          produtos,
-          tipoEntrega: sessao.metadata.tipoEntrega,
-          total,
-          stripeSessionID: sessaoId,
-          metodoPagamento: sessao.metadata.metodoPagamento,
-          shippingAddress,
-          estado: "A Cozinhar",
-          localizacao: sessao.metadata.pedidoLocation,
-        }
-      };
-      const options = {
-        upsert: true,
-        new: true,
-        setDefaultsOnInsert: true,
-      };
-
-      // Faz o upsert — se já existir, retorna o documento existente sem duplicar
-      const savedPedido = await Pedido.findOneAndUpdate(filter, update, options);
-
-      // Limpar itensCarrinho do user (defensivo — não falhar se já limpou)
-      try {
-        await User.findByIdAndUpdate(
-          sessao.metadata.userId,
-          { $set: { itensCarrinho: [] } },
-          { new: true }
-        );
-      } catch (err) {
-        console.warn("Falha ao limpar itensCarrinho do user (prosseguir):", err.message);
-      }
-
-      // Respondemos com o pedido (novo ou existente)
-      return res.status(200).json({
-        success: true,
-        msg: "Pagamento efetuado com sucesso, pedido feito e cupão desativado (se usado)",
-        pedidoId: savedPedido._id
-      });
-
-    }
-
-    return res.status(400).json({ msg: "Pagamento não finalizado." });
   } catch (error) {
-    console.error("Erro ao criar pedido (sucessoCheckout):", error);
-    return res.status(500).json({ msg: "Erro no servidor", error: error.message });
+    console.error("Erro sucessoCheckout:", error);
+    return res.status(500).json({ msg: "Erro ao processar sucesso", error: error.message });
   }
 };
 
+
 export const cashPayment = async (req, res) => {
   try {
-    const { produtos: rawProdutos, tipoEntrega, pedidoLocation, shippingAddress } = req.body;
-    console.log("cashPayment payload:", { produtos: rawProdutos?.length, tipoEntrega, pedidoLocation, shippingAddress });
+    const { produtos, tipoEntrega, pedidoLocation, shippingAddress } = req.body;
 
-    if (!Array.isArray(rawProdutos) || rawProdutos.length === 0) {
-      return res.status(400).json({ msg: "Carrinho vazio" });
-    }
-    if (!shippingAddress || !shippingAddress.line1) {
-      return res.status(400).json({ msg: "Morada obrigatória" });
-    }
+    if (!produtos?.length) return res.status(400).json({ msg: "Carrinho vazio" });
 
-    // --- CORREÇÃO AQUI ---
-    // Alterada a ordem: p.produto vem primeiro, depois p._id
-    const items = await normalizeProdutosForPedido(
-      rawProdutos.map(p => ({
-        produto: p.produto ?? p._id ?? p.id, // <--- AQUI ESTAVA O ERRO
-        quantidade: p.quantidade,
-        meta: p.meta ?? undefined
-      }))
-    );
-
-    // calcular total server-side
+    // Normaliza (Snapshot)
+    const items = await normalizeProdutosForPedido(produtos, true);
     const total = items.reduce((sum, i) => sum + i.preco * i.quantidade, 0);
 
     const pedido = await Pedido.create({
@@ -280,32 +243,24 @@ export const cashPayment = async (req, res) => {
       localizacao: pedidoLocation
     });
 
-    // limpar carrinho do user persistido (se aplicável)
-    try {
-      await User.findByIdAndUpdate(req.user._id, { $set: { itensCarrinho: [] } });
-    } catch (err) {
-      console.warn("Falha ao limpar itensCarrinho do user (prosseguir):", err.message);
-    }
-
+    await User.findByIdAndUpdate(req.user._id, { $set: { itensCarrinho: [] } });
     return res.status(201).json({ success: true, pedidoId: pedido._id });
+
   } catch (err) {
     console.error("Erro cashPayment:", err);
-    if (err?.status && err?.message) {
-      return res.status(err.status).json({ msg: err.message });
-    }
-    return res.status(500).json({ msg: "Erro no servidor", error: err.message ?? String(err) });
+    res.status(err.status || 500).json({ msg: err.message });
   }
 };
 
 
-async function normalizeProdutosForPedido(rawProdutos = []) {
+// Função auxiliar para validar e formatar produtos
+async function normalizeProdutosForPedido(rawProdutos = [], strictMode = true) {
   const normalized = [];
 
   for (const raw of rawProdutos) {
-    // Pode vir no shape { _id, quantidade, preco, meta } ou { produto, quantidade, preco, meta }
     let produtoField = raw.produto ?? raw._id ?? raw.productId ?? raw.product ?? raw;
-    // se for object com _id
-    if (typeof produtoField === "object" && produtoField !== null && produtoField._id) {
+
+    if (typeof produtoField === "object" && produtoField?._id) {
       produtoField = String(produtoField._id);
     } else {
       produtoField = String(produtoField ?? "");
@@ -315,38 +270,48 @@ async function normalizeProdutosForPedido(rawProdutos = []) {
     if (isNaN(quantidade) || quantidade < 1) quantidade = 1;
 
     let tamanho;
-    // Se o id não for um ObjectId válido, tenta parsear o custom id
     if (!mongoose.Types.ObjectId.isValid(produtoField)) {
       const parsed = parseCustomId(produtoField);
       if (parsed) {
         produtoField = parsed.baseId;
         tamanho = parsed.tamanho;
-      } else if (typeof raw.meta === "object" && raw.meta?.tamanho && mongoose.Types.ObjectId.isValid(String(raw.produto?._id ?? raw.produto))) {
-        // Caso cliente tenha enviado objecto produto com meta
+      } else if (raw.meta?.tamanho) {
         tamanho = raw.meta.tamanho;
-        produtoField = String(raw.produto._id ?? raw.produto);
-      } else {
-        throw { status: 400, message: `Produto inválido recebido: ${produtoField}` };
+        if (raw.produto && (raw.produto._id || mongoose.Types.ObjectId.isValid(raw.produto))) {
+          produtoField = String(raw.produto._id || raw.produto);
+        }
       }
+    } else if (raw.meta?.tamanho || raw.tamanho) {
+      tamanho = raw.meta?.tamanho || raw.tamanho;
     }
 
     if (!mongoose.Types.ObjectId.isValid(produtoField)) {
-      throw { status: 400, message: `Produto inválido recebido: ${produtoField}` };
+      if (strictMode) throw { status: 400, message: `ID inválido: ${produtoField}` };
     }
 
-    // buscar produto actual no DB para ter o preço canónico
+    // Buscar produto
     const produtoDoc = await Produto.findById(produtoField).lean();
+
     if (!produtoDoc) {
-      console.error(`Produto não encontrado: ${produtoField}`);
-      throw { status: 400, message: `Produto não existe ou foi removido.`, code: "INVALID_PRODUCT", invalidId: produtoField };
+      if (strictMode) {
+        throw { status: 400, message: `Produto não encontrado: ${produtoField}` };
+      } else {
+        // Fallback apenas para leituras legacy, não deve acontecer na criação
+        normalized.push({
+          produto: new mongoose.Types.ObjectId(produtoField),
+          quantidade,
+          preco: Number(raw.preco || 0),
+          nome: "Produto Removido/Descontinuado",
+          imagem: "",
+          tamanho: tamanho || null,
+          meta: raw.meta || {}
+        });
+        continue;
+      }
     }
 
-    // recalcular preço no servidor
-    // Se tiveres preço por tamanho armazenado no produto (ex: produto.preco_por_tamanho), usa-o;
-    // caso contrário aplica multiplicadores.
     let precoCalc = Number(produtoDoc.preco ?? 0);
     if (tamanho) {
-      // preferir campo explícito se existir
       const precoPorTamanho = produtoDoc.preco_por_tamanho ?? produtoDoc.precos_por_tamanho ?? null;
       if (precoPorTamanho && typeof precoPorTamanho === "object" && precoPorTamanho[tamanho] != null) {
         precoCalc = Number(precoPorTamanho[tamanho]);
@@ -354,21 +319,18 @@ async function normalizeProdutosForPedido(rawProdutos = []) {
         const mult = PRICE_MULTIPLIERS[tamanho] ?? 1.0;
         precoCalc = Number((precoCalc * mult).toFixed(2));
       }
-    } else {
-      precoCalc = Number(precoCalc);
     }
 
-    const entry = {
+    normalized.push({
       produto: new mongoose.Types.ObjectId(produtoField),
       quantidade,
-      preco: precoCalc
-    };
-
-    // opcional: guardar tamanho/meta se quiseres (se o schema aceitar)
-    if (tamanho) entry.tamanho = tamanho;
-    if (raw.meta) entry.meta = raw.meta;
-
-    normalized.push(entry);
+      preco: precoCalc,
+      // SNAPSHOT: Aqui garantimos que o nome e imagem são guardados
+      nome: produtoDoc.nome,
+      imagem: produtoDoc.imagem,
+      tamanho: tamanho || null,
+      meta: raw.meta || {}
+    });
   }
 
   return normalized;
