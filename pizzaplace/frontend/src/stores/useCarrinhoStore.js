@@ -30,10 +30,18 @@ export const useCarrinhoStore = create((set, get) => {
     getItensCarrinho: async () => {
       try {
         const res = await axios.get("/carrinho");
-        const itens = res.data; // já no formato client (tem _id do cart item, preco, meta)
-        set({ carrinho: itens });
+        const itens = res.data;
+        const currentLocalItems = get().carrinho.filter(i => isLocalItem(i));
+        set({ carrinho: [...itens, ...currentLocalItems] });
         get().calcularTotal();
       } catch (error) {
+        // Se falhar, talvez devêssemos manter os locais?
+        // Mas se falhar a auth, talvez limpar tudo.
+        // Vamos assumir que se falhar, limpamos apenas os do server (que não conseguimos obter)
+        // ou limpamos tudo. O código original limpava tudo.
+        // Vamos manter o comportamento de limpar tudo por segurança/simplicidade por enquanto,
+        // ou melhor, tentar manter os locais se for erro de rede.
+        // Mas para seguir o padrão anterior:
         set({ carrinho: [] });
         toast.error(error.response?.data?.msg || "Erro a obter carrinho.");
       }
@@ -48,7 +56,8 @@ export const useCarrinhoStore = create((set, get) => {
 
         const res = await axios.post("/carrinho", payload);
         const itens = res.data;
-        set({ carrinho: itens });
+        const currentLocalItems = get().carrinho.filter(i => isLocalItem(i));
+        set({ carrinho: [...itens, ...currentLocalItems] });
         get().calcularTotal();
         toast.success("Produto adicionado ao carrinho!");
       } catch (error) {
@@ -144,10 +153,34 @@ export const useCarrinhoStore = create((set, get) => {
 
     //Atualizar quantidade (local or server)
     atualizarQuantidade: async (cartItemId, quantidade) => {
+      if (!isObjectIdLike(cartItemId)) {
+        // Local item update
+        set((prev) => {
+          const newCart = prev.carrinho.map((item) =>
+            item._id === cartItemId ? { ...item, quantidade } : item
+          );
+          // Remove if quantity is 0? The UI usually handles this by calling apagarDoCarrinho if qty goes to 0, 
+          // but here we just set it. If 0, maybe we should remove? 
+          // The UI calls apagarDoCarrinho separately usually, or passes 0. 
+          // Let's assume 0 means remove or just set to 0. 
+          // However, the UI code does Math.max(0, ...). 
+          // If 0, we should probably remove it or let it stay as 0? 
+          // Standard behavior: if 0, remove.
+          if (quantidade <= 0) {
+            return { carrinho: prev.carrinho.filter(i => i._id !== cartItemId) };
+          }
+          return { carrinho: newCart };
+        });
+        get().calcularTotal();
+        return;
+      }
+
       try {
         const res = await axios.put(`/carrinho/${cartItemId}`, { quantidade });
         const itens = res.data;
-        set({ carrinho: itens });
+        // Merge with local items
+        const currentLocalItems = get().carrinho.filter(i => isLocalItem(i));
+        set({ carrinho: [...itens, ...currentLocalItems] });
         get().calcularTotal();
       } catch (err) {
         toast.error(err.response?.data?.msg || "Erro ao atualizar quantidade");
@@ -167,7 +200,7 @@ export const useCarrinhoStore = create((set, get) => {
     getMeuCupao: async () => {
       try {
         const response = await axios.get("/cupoes");
-        set({cupao: response.data});
+        set({ cupao: response.data });
       } catch (error) {
         console.log("Erro ao utilizar o cupão", error.message);
       }
@@ -175,8 +208,8 @@ export const useCarrinhoStore = create((set, get) => {
 
     aplicarCupao: async (codigo) => {
       try {
-        const response = await axios.post("/cupoes/validar", {codigo});
-        set({cupao: response.data, cupaoAplicado: true});
+        const response = await axios.post("/cupoes/validar", { codigo });
+        set({ cupao: response.data, cupaoAplicado: true });
         get().calcularTotal();
         toast.success("Cupão aplicado com sucesso!");
       } catch (error) {
@@ -185,7 +218,7 @@ export const useCarrinhoStore = create((set, get) => {
     },
 
     removerCupao: () => {
-      set({cupao: null, cupaoAplicado: false});
+      set({ cupao: null, cupaoAplicado: false });
       get().calcularTotal();
       toast.success("Cupão removido!");
     },
@@ -194,8 +227,8 @@ export const useCarrinhoStore = create((set, get) => {
       set((prev) => {
         const exists = prev.carrinho.find(item => item._id === customProduct._id);
         const newCart = exists
-            ? prev.carrinho.map(item => item._id === customProduct._id ? { ...item, quantidade: (item.quantidade || 1) + 1 } : item)
-            : [...prev.carrinho, { ...customProduct, quantidade: customProduct.quantidade ?? 1 }];
+          ? prev.carrinho.map(item => item._id === customProduct._id ? { ...item, quantidade: (item.quantidade || 1) + 1 } : item)
+          : [...prev.carrinho, { ...customProduct, quantidade: customProduct.quantidade ?? 1 }];
         return { carrinho: newCart };
       });
       get().calcularTotal();

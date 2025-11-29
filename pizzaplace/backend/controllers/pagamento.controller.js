@@ -8,130 +8,129 @@ import User from "../models/user.model.js";
 const PRICE_MULTIPLIERS = {
   pequena: 1.0,
   media: 1.2,
-  grande: 1.4
+  grande: 1.4,
+  small: 1.0,
+  medium: 1.2,
+  large: 1.4
 };
 
 function parseCustomId(idStr) {
   if (typeof idStr !== "string") return null;
-  const m = idStr.match(/^([a-fA-F0-9]{24})_t_(pequena|media|grande)_(\d+)$/);
+  // Allow any alphanumeric string for size
+  const m = idStr.match(/^([a-fA-F0-9]{24})_t_([a-zA-Z0-9]+)_(\d+)$/);
   if (!m) return null;
   return { baseId: m[1], tamanho: m[2] };
 }
 
 export const criarSessaoCheckout = async (req, res) => {
-    try {
-        const {produtos, codigoCupao, tipoEntrega, pedidoLocation} = req.body;
+  try {
+    const { produtos, codigoCupao, tipoEntrega, pedidoLocation } = req.body;
 
-        if(!Array.isArray(produtos) || produtos.length === 0)
-        {
-            return res.status(400).json({msg: "Conjunto de produtos vazio ou inválido"});
-        }
+    if (!Array.isArray(produtos) || produtos.length === 0) {
+      return res.status(400).json({ msg: "Conjunto de produtos vazio ou inválido" });
+    }
 
-        if (!pedidoLocation) 
-        {
-            return res.status(400).json({ msg: "A localização/loja é obrigatória." });
-        }
+    if (!pedidoLocation) {
+      return res.status(400).json({ msg: "A localização/loja é obrigatória." });
+    }
 
-        let precoTotal = 0;
+    let precoTotal = 0;
 
-        const linhaItems = produtos.map((produto) => {
-            const precoInicial = Math.round(produto.preco * 100); //Porque o valor é em cêntimos no stripe
-            precoTotal += precoInicial * produto.quantidade;
+    const linhaItems = produtos.map((produto) => {
+      const precoInicial = Math.round(produto.preco * 100); //Porque o valor é em cêntimos no stripe
+      precoTotal += precoInicial * produto.quantidade;
 
 
-            return {
-                price_data: {
-                    currency: "eur",
-                    product_data: {
-                        name: produto.nome,
-                        images: [produto.imagem],
-                    },
-                    unit_amount: precoInicial
-                },
-                quantity: produto.quantidade || 1
+      return {
+        price_data: {
+          currency: "eur",
+          product_data: {
+            name: produto.nome,
+            images: [produto.imagem],
+          },
+          unit_amount: precoInicial
+        },
+        quantity: produto.quantidade || 1
 
-            };
-        });
+      };
+    });
 
-        let cupao = null;
-        if(codigoCupao)
-        {
-            cupao = await Cupao.findOne({codigo: codigoCupao, userId: req.user._id, ativo: true });
-            if(cupao)
-            {
-                precoTotal -= Math.round((precoTotal * cupao.percentagemDesconto) / 100);
-            }
-        }
+    let cupao = null;
+    if (codigoCupao) {
+      cupao = await Cupao.findOne({ codigo: codigoCupao, userId: req.user._id, ativo: true });
+      if (cupao) {
+        precoTotal -= Math.round((precoTotal * cupao.percentagemDesconto) / 100);
+      }
+    }
 
-        const sessao = await stripe.checkout.sessions.create({
-            payment_method_types: ["card"],
-            line_items: linhaItems,
-            mode: "payment",
-            billing_address_collection: "required",
-            shipping_address_collection: {
-                allowed_countries: ["PT"]  
-            },
-            success_url: `${process.env.CLIENT_URL}/purchase-success?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${process.env.CLIENT_URL}/purchase-cancel`,
-            discounts: cupao ? [{coupon: await criarCupaoStripe(cupao.percentagemDesconto)}] : [],
-            metadata: {
-                userId: req.user._id.toString(),
-                codigoCupao: codigoCupao || "",
-                tipoEntrega: tipoEntrega,
-                metodoPagamento: "cartao",
-                produtos: JSON.stringify(produtos.map(p => ({
-                  id: p._id,
-                  quantidade: p.quantidade,
-                  preco: p.preco,
-                  tamanho: p.meta?.tamanho ?? p.tamanho ?? null
-                }))),
-                pedidoLocation: pedidoLocation,
-            }
-        });
+    const sessao = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: linhaItems,
+      mode: "payment",
+      billing_address_collection: "required",
+      shipping_address_collection: {
+        allowed_countries: ["PT"]
+      },
+      success_url: `${process.env.CLIENT_URL}/purchase-success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.CLIENT_URL}/purchase-cancel`,
+      discounts: cupao ? [{ coupon: await criarCupaoStripe(cupao.percentagemDesconto) }] : [],
+      metadata: {
+        userId: req.user._id.toString(),
+        codigoCupao: codigoCupao || "",
+        tipoEntrega: tipoEntrega,
+        metodoPagamento: "cartao",
+        produtos: JSON.stringify(produtos.map(p => ({
+          id: p._id,
+          quantidade: p.quantidade,
+          preco: p.preco,
+          tamanho: p.meta?.tamanho ?? p.tamanho ?? null
+        }))),
+        pedidoLocation: pedidoLocation,
+      }
+    });
 
-        //Se ele gastar 100 euros ou + numa só compra, oferecemos um cupão de desconto de 10%
-        if(precoTotal >= 10000)
-        {
-            await criarNovoCupao(req.user._id);
-        }
+    //Se ele gastar 100 euros ou + numa só compra, oferecemos um cupão de desconto de 10%
+    if (precoTotal >= 10000) {
+      await criarNovoCupao(req.user._id);
+    }
 
-        res.status(200).json({id: sessao.id, precoTotal: precoTotal / 100});
+    res.status(200).json({ id: sessao.id, precoTotal: precoTotal / 100 });
 
-    } catch (error) {  
-        console.log("Erro ao criar sessão de checkout", error.message);
-        res.status(500).json({msg: "Erro no servidor", error: error.message});
-     }
+  } catch (error) {
+    console.log("Erro ao criar sessão de checkout", error.message);
+    res.status(500).json({ msg: "Erro no servidor", error: error.message });
+  }
 }
 
 async function criarCupaoStripe(percentagemDesconto) {
-    const cupao = await stripe.coupons.create({
-        percent_off: percentagemDesconto,
-        duration: "once"
-    })
+  const cupao = await stripe.coupons.create({
+    percent_off: percentagemDesconto,
+    duration: "once"
+  })
 
-    return cupao.id;
+  return cupao.id;
 }
 
 async function criarNovoCupao(userId) {
-    await Cupao.findOneAndDelete({userId});
-    const novoCupao = new Cupao({
-        codigo: "GIFT" + Math.random().toString(36).substring(2, 8).toUpperCase(),
-        percentagemDesconto: 10,
-        dataExpiracao: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), //Expira em 30 dias
-        userId: userId
-    })
+  await Cupao.findOneAndDelete({ userId });
+  const novoCupao = new Cupao({
+    codigo: "GIFT" + Math.random().toString(36).substring(2, 8).toUpperCase(),
+    percentagemDesconto: 10,
+    dataExpiracao: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), //Expira em 30 dias
+    userId: userId
+  })
 
-    await novoCupao.save();
+  await novoCupao.save();
 
-    return novoCupao;
+  return novoCupao;
 }
 
-export const sucessoCheckout = async(req, res) => {
+export const sucessoCheckout = async (req, res) => {
   try {
-    const {sessaoId} = req.body;
+    const { sessaoId } = req.body;
     const sessao = await stripe.checkout.sessions.retrieve(sessaoId);
 
-    if(sessao.payment_status === "paid") {
+    if (sessao.payment_status === "paid") {
       const pedidoExistente = await Pedido.findOne({ stripeSessionID: sessaoId });
       if (pedidoExistente) {
         return res.status(200).json({
@@ -141,7 +140,7 @@ export const sucessoCheckout = async(req, res) => {
         });
       }
 
-      if(sessao.metadata.codigoCupao) {
+      if (sessao.metadata.codigoCupao) {
         await Cupao.findOneAndUpdate({
           codigo: sessao.metadata.codigoCupao, userId: sessao.metadata.userId
         }, {
@@ -155,12 +154,12 @@ export const sucessoCheckout = async(req, res) => {
       }
 
       const shippingAddress = {
-        name:        ship.name,
-        line1:       ship.address.line1,
-        line2:       ship.address.line2,
-        city:        ship.address.city,
+        name: ship.name,
+        line1: ship.address.line1,
+        line2: ship.address.line2,
+        city: ship.address.city,
         postal_code: ship.address.postal_code,
-        country:     ship.address.country
+        country: ship.address.country
       };
 
       // evitar duplicados
@@ -238,7 +237,7 @@ export const sucessoCheckout = async(req, res) => {
     return res.status(400).json({ msg: "Pagamento não finalizado." });
   } catch (error) {
     console.error("Erro ao criar pedido (sucessoCheckout):", error);
-    return res.status(500).json({msg: "Erro no servidor", error: error.message});
+    return res.status(500).json({ msg: "Erro no servidor", error: error.message });
   }
 };
 
@@ -260,7 +259,7 @@ export const cashPayment = async (req, res) => {
     );
 
     // calcular total server-side
-    const total = items.reduce((sum,i) => sum + i.preco * i.quantidade, 0);
+    const total = items.reduce((sum, i) => sum + i.preco * i.quantidade, 0);
 
     const pedido = await Pedido.create({
       user: req.user._id,

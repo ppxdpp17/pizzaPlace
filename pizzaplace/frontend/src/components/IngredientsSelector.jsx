@@ -68,13 +68,6 @@ export default function IngredientsSelector({ value = [], onChange }) {
           placeholder="Procurar ingredientes..."
           className="flex-1 p-2 rounded-md bg-gray-700 border border-gray-600 text-white"
         />
-        <button
-          type="button"
-          onClick={() => setShowAdd((s) => !s)}
-          className="px-3 py-2 bg-emerald-600 text-white rounded-md inline-flex items-center gap-2"
-        >
-          <Plus /> <span className="text-sm">Novo</span>
-        </button>
       </div>
 
       {showAdd && (

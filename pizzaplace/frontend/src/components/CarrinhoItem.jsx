@@ -3,9 +3,10 @@ import { useCarrinhoStore } from "../stores/useCarrinhoStore";
 
 const sizeLabelShort = (size) => {
   if (!size) return "";
-  if (size === "pequena") return "Peq.";
-  if (size === "media") return "Méd.";
-  if (size === "grande") return "Grd.";
+  const s = size.toLowerCase();
+  if (s === "pequena" || s === "small") return "Peq.";
+  if (s === "media" || s === "medium") return "Méd.";
+  if (s === "grande" || s === "large") return "Grd.";
   return size;
 };
 
@@ -77,9 +78,9 @@ const CarrinhoItem = ({ item }) => {
   // Ingredientes: lidar com strings / objects
   const ingredientesTexto = Array.isArray(item.ingredientes)
     ? item.ingredientes
-        .map(i => (typeof i === "string" ? i : `${i.icone ? i.icone + " " : ""}${i.nome ?? ""}`.trim()))
-        .filter(Boolean)
-        .join(", ")
+      .map(i => (typeof i === "string" ? i : `${i.icone ? i.icone + " " : ""}${i.nome ?? ""}`.trim()))
+      .filter(Boolean)
+      .join(", ")
     : "";
 
   return (
