@@ -1,7 +1,7 @@
 // src/pages/CriarPizzaForm.jsx
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { PlusCircle, Upload, Loader } from "lucide-react";
+import { PlusCircle, Upload, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useProductStore } from "../stores/useProductStore";
 import IngredientsSelector from "../components/IngredientsSelector";
@@ -23,7 +23,7 @@ const CriarPizzaForm = () => {
 
   const [showIngredientes, setShowIngredientes] = useState(false); //Toggle para mostrar selector
 
-  const { criarProduto, loading } = useProductStore();
+  const { criarProduto, isLoading } = useProductStore();
 
   //Quando a categoria muda, por defeito mostrar ingredientes só se for "pizzas"
   useEffect(() => {
@@ -156,19 +156,22 @@ const CriarPizzaForm = () => {
             <Upload className="h-5 inline-block mr-2" /> Escolher Imagem
           </label>
           {novoProduto.imagem && (
-            <div className="mt-3 text-sm text-gray-300">Imagem pronta para upload (dataURL)</div>
+            <div className="mt-4 flex flex-col items-center">
+              <span className="text-sm text-gray-300 mb-2">Pré-visualização:</span>
+              <img src={novoProduto.imagem} alt="Preview" className="h-32 w-32 object-cover rounded-md border border-gray-600" />
+            </div>
           )}
         </div>
 
         <button
           type="submit"
-          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50"
-          disabled={loading}
+          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={isLoading}
         >
-          {loading ? (
+          {isLoading ? (
             <>
-              <Loader className="mr-2 h-5 w-5 animate-spin" />
-              A carregar...
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              A Criar...
             </>
           ) : (
             <>

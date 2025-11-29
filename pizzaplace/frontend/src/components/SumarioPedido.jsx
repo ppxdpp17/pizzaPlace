@@ -4,8 +4,9 @@ import { Link, useNavigate } from "react-router-dom"
 import { MoveRight } from "lucide-react"
 import axios from "../lib/axios";
 import TipoEntrega from "./TipoEntrega";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import MoradaForm from "./MoradaForm";
+import { toast } from "react-hot-toast";
 
 const SumarioPedido = () => {
 
@@ -24,6 +25,31 @@ const SumarioPedido = () => {
 
     const navigate = useNavigate();
 
+    useEffect(() => {
+        const validateCart = async () => {
+            if (carrinho.length === 0) return;
+            try {
+                const res = await axios.get("/carrinho/validate");
+                if (!res.data.valid) {
+                    const invalidItems = res.data.invalidItems || [];
+                    if (invalidItems.length > 0) {
+                        // Remover itens inválidos
+                        for (const item of invalidItems) {
+                            // Tenta remover pelo _id do item do carrinho (se existir) ou pelo produto
+                            const idToRemove = item._id || item.produto;
+                            await useCarrinhoStore.getState().apagarDoCarrinho(idToRemove);
+                        }
+                        toast.error("Alguns produtos no seu carrinho já não estão disponíveis e foram removidos.", { duration: 5000 });
+                        // Atualizar carrinho após limpeza
+                        useCarrinhoStore.getState().getItensCarrinho();
+                    }
+                }
+            } catch (err) {
+                console.error("Erro ao validar carrinho", err);
+            }
+        };
+        validateCart();
+    }, [carrinho.length]);
 
     const handleSelectEntrega = async ({ tipoEntrega, paymentMethod, pedidoLocation }) => {
         fecharModal();
@@ -50,6 +76,11 @@ const SumarioPedido = () => {
             }
         } catch (err) {
             console.error(err);
+            if (err.response?.data?.code === "INVALID_PRODUCT") {
+                toast.error("O seu carrinho contém produtos que já não existem. Por favor limpe o carrinho e tente novamente.");
+            } else {
+                toast.error("Erro ao processar pagamento MBWay. Tente novamente.");
+            }
         }
     };
 
@@ -67,6 +98,11 @@ const SumarioPedido = () => {
             navigate("/purchase-success?method=dinheiro");
         } catch (err) {
             console.error("Erro pagamento dinheiro:", err);
+            if (err.response?.data?.code === "INVALID_PRODUCT") {
+                toast.error("O seu carrinho contém produtos que já não existem. Por favor limpe o carrinho e tente novamente.");
+            } else {
+                toast.error("Erro ao processar pagamento. Tente novamente.");
+            }
         }
     };
 

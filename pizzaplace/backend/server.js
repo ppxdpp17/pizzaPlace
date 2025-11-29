@@ -21,16 +21,16 @@ import ingredienteRoutes from "./routes/ingrediente.route.js"
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000; 
+const PORT = process.env.PORT || 5000;
 
 const ___dirname = path.resolve();
 
 app.use(cors({
-  origin: "http://localhost:5173",
-  credentials: true
+    origin: "http://localhost:5173",
+    credentials: true
 }));
 
-app.use(express.json({limit: "50mb"}));
+app.use(express.json({ limit: "50mb" }));
 app.use(cookieParser());
 
 app.use("/api/auth", authRoutes)    //Rotas de autenticação 
@@ -42,8 +42,7 @@ app.use("/api/analises", analisesRoutes)    //Rotas do carrinho
 app.use("/api/pedidos", pedidosRoutes)    //Rotas dos pedidos
 app.use("/api/ingredientes", ingredienteRoutes)  //Rota dos ingredientes
 
-if(process.env.NODE_ENV === "production")
-{
+if (process.env.NODE_ENV === "production") {
     app.use(express.static(path.join(___dirname, "/frontend/dist")));
 
     app.get("*", (req, res) => {

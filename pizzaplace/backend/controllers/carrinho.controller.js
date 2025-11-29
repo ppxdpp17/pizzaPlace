@@ -263,3 +263,42 @@ export const atualizarQuantidade = async (req, res) => {
     res.status(500).json({ msg: "Erro no servidor", error: error.message });
   }
 };
+
+export const validateCart = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ msg: "User not found" });
+
+    const itens = user.itensCarrinho || [];
+    if (itens.length === 0) return res.json({ valid: true, invalidItems: [] });
+
+    const invalidItems = [];
+    for (const item of itens) {
+      let produtoId = String(item.produto);
+      // Handle custom IDs if necessary, similar to payment controller
+      // But usually cart items store the direct objectId or we can validate it.
+      // For simplicity, we check if the product exists.
+
+      if (mongoose.Types.ObjectId.isValid(produtoId)) {
+        const exists = await Produto.exists({ _id: produtoId });
+        if (!exists) {
+          invalidItems.push({ ...item.toObject(), reason: "Produto não existe" });
+        }
+      } else {
+        // If it's a custom ID (e.g. from a mix), we might need more complex logic
+        // For now, let's assume if it's not a valid ObjectId, it might be invalid unless it's a special case
+        // But the cart usually stores ObjectId in 'produto' field.
+        invalidItems.push({ ...item.toObject(), reason: "ID inválido" });
+      }
+    }
+
+    if (invalidItems.length > 0) {
+      return res.json({ valid: false, invalidItems });
+    }
+
+    return res.json({ valid: true });
+  } catch (error) {
+    console.error("Erro ao validar carrinho:", error);
+    res.status(500).json({ msg: "Erro ao validar carrinho", error: error.message });
+  }
+};

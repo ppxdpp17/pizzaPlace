@@ -25,6 +25,7 @@ function parseCustomId(idStr) {
 export const criarSessaoCheckout = async (req, res) => {
   try {
     const { produtos, codigoCupao, tipoEntrega, pedidoLocation } = req.body;
+    console.log("criarSessaoCheckout payload:", { produtos: produtos?.length, codigoCupao, tipoEntrega, pedidoLocation });
 
     if (!Array.isArray(produtos) || produtos.length === 0) {
       return res.status(400).json({ msg: "Conjunto de produtos vazio ou inválido" });
@@ -36,7 +37,7 @@ export const criarSessaoCheckout = async (req, res) => {
 
     // Normalizar produtos para calcular total corretamente
     const items = await normalizeProdutosForPedido(
-      produtos.map(p => ({ produto: p._id ?? p.produto ?? p.id, quantidade: p.quantidade, meta: p.meta ?? undefined }))
+      produtos.map(p => ({ produto: p.produto ?? p._id ?? p.id, quantidade: p.quantidade, meta: p.meta ?? undefined }))
     );
 
     let precoTotal = items.reduce((sum, i) => sum + i.preco * i.quantidade, 0);
@@ -243,10 +244,10 @@ export const sucessoCheckout = async (req, res) => {
   }
 };
 
-
 export const cashPayment = async (req, res) => {
   try {
     const { produtos: rawProdutos, tipoEntrega, pedidoLocation, shippingAddress } = req.body;
+    console.log("cashPayment payload:", { produtos: rawProdutos?.length, tipoEntrega, pedidoLocation, shippingAddress });
 
     if (!Array.isArray(rawProdutos) || rawProdutos.length === 0) {
       return res.status(400).json({ msg: "Carrinho vazio" });
@@ -255,9 +256,14 @@ export const cashPayment = async (req, res) => {
       return res.status(400).json({ msg: "Morada obrigatória" });
     }
 
-    // Normaliza e valida no servidor
+    // --- CORREÇÃO AQUI ---
+    // Alterada a ordem: p.produto vem primeiro, depois p._id
     const items = await normalizeProdutosForPedido(
-      rawProdutos.map(p => ({ produto: p._id ?? p.produto ?? p.id, quantidade: p.quantidade, meta: p.meta ?? undefined }))
+      rawProdutos.map(p => ({
+        produto: p.produto ?? p._id ?? p.id, // <--- AQUI ESTAVA O ERRO
+        quantidade: p.quantidade,
+        meta: p.meta ?? undefined
+      }))
     );
 
     // calcular total server-side
@@ -331,7 +337,8 @@ async function normalizeProdutosForPedido(rawProdutos = []) {
     // buscar produto actual no DB para ter o preço canónico
     const produtoDoc = await Produto.findById(produtoField).lean();
     if (!produtoDoc) {
-      throw { status: 400, message: `Produto não existe: ${produtoField}` };
+      console.error(`Produto não encontrado: ${produtoField}`);
+      throw { status: 400, message: `Produto não existe ou foi removido.`, code: "INVALID_PRODUCT", invalidId: produtoField };
     }
 
     // recalcular preço no servidor
