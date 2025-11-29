@@ -147,7 +147,7 @@ export default function CustomizarPizza() {
 
             <div>
               <div className="text-sm text-gray-300 mb-2">Toppings (cada um €0.75)</div>
-              <IngredientsSelector value={selecionados} onChange={setSelecionados} />
+              <IngredientsSelector value={selecionados} onChange={setSelecionados} allowAdd={false} />
             </div>
 
             <div>

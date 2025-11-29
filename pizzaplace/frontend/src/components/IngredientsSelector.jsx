@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import axios from "../lib/axios";
 import { Plus } from "lucide-react";
 
-export default function IngredientsSelector({ value = [], onChange }) {
+export default function IngredientsSelector({ value = [], onChange, allowAdd = true }) {
   const [ingredientes, setIngredientes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
@@ -68,6 +68,15 @@ export default function IngredientsSelector({ value = [], onChange }) {
           placeholder="Procurar ingredientes..."
           className="flex-1 p-2 rounded-md bg-gray-700 border border-gray-600 text-white"
         />
+        {allowAdd && (
+          <button
+            type="button"
+            onClick={() => setShowAdd((s) => !s)}
+            className="px-3 py-2 bg-emerald-600 text-white rounded-md inline-flex items-center gap-2"
+          >
+            <Plus /> <span className="text-sm">Novo</span>
+          </button>
+        )}
       </div>
 
       {showAdd && (
