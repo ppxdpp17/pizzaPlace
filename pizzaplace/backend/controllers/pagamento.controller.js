@@ -34,81 +34,69 @@ export const criarSessaoCheckout = async (req, res) => {
       return res.status(400).json({ msg: "A localização/loja é obrigatória." });
     }
 
-    let precoTotal = 0;
+    // Normalizar produtos para calcular total corretamente
+    const items = await normalizeProdutosForPedido(
+      produtos.map(p => ({ produto: p._id ?? p.produto ?? p.id, quantidade: p.quantidade, meta: p.meta ?? undefined }))
+    );
 
-    const linhaItems = produtos.map((produto) => {
-      const precoInicial = Math.round(produto.preco * 100); //Porque o valor é em cêntimos no stripe
-      precoTotal += precoInicial * produto.quantidade;
-
-
-      return {
-        price_data: {
-          currency: "eur",
-          product_data: {
-            name: produto.nome,
-            images: [produto.imagem],
-          },
-          unit_amount: precoInicial
-        },
-        quantity: produto.quantidade || 1
-
-      };
-    });
+    let precoTotal = items.reduce((sum, i) => sum + i.preco * i.quantidade, 0);
 
     let cupao = null;
     if (codigoCupao) {
       cupao = await Cupao.findOne({ codigo: codigoCupao, userId: req.user._id, ativo: true });
       if (cupao) {
-        precoTotal -= Math.round((precoTotal * cupao.percentagemDesconto) / 100);
+        precoTotal -= (precoTotal * cupao.percentagemDesconto) / 100;
       }
     }
 
-    const sessao = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      line_items: linhaItems,
-      mode: "payment",
-      billing_address_collection: "required",
-      shipping_address_collection: {
-        allowed_countries: ["PT"]
+    // Simulação MBWay - Retornar sucesso imediato com ID de pedido
+    // Na vida real, aqui chamaria a API da SIBS/MBWay
+
+    const pedido = await Pedido.create({
+      user: req.user._id,
+      produtos: items,
+      total: precoTotal,
+      tipoEntrega,
+      metodoPagamento: "mbway",
+      shippingAddress: {
+        name: req.user.name, // Simplificação
+        line1: "Online Payment",
+        country: "PT"
       },
-      success_url: `${process.env.CLIENT_URL}/purchase-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.CLIENT_URL}/purchase-cancel`,
-      discounts: cupao ? [{ coupon: await criarCupaoStripe(cupao.percentagemDesconto) }] : [],
-      metadata: {
-        userId: req.user._id.toString(),
-        codigoCupao: codigoCupao || "",
-        tipoEntrega: tipoEntrega,
-        metodoPagamento: "cartao",
-        produtos: JSON.stringify(produtos.map(p => ({
-          id: p._id,
-          quantidade: p.quantidade,
-          preco: p.preco,
-          tamanho: p.meta?.tamanho ?? p.tamanho ?? null
-        }))),
-        pedidoLocation: pedidoLocation,
-      }
+      estado: "A Cozinhar",
+      localizacao: pedidoLocation
     });
 
-    //Se ele gastar 100 euros ou + numa só compra, oferecemos um cupão de desconto de 10%
-    if (precoTotal >= 10000) {
+    if (cupao) {
+      await Cupao.findByIdAndUpdate(cupao._id, { ativo: false });
+    }
+
+    // Se gastar mais de 100 euros
+    if (precoTotal >= 100) {
       await criarNovoCupao(req.user._id);
     }
 
-    res.status(200).json({ id: sessao.id, precoTotal: precoTotal / 100 });
+    // Limpar carrinho
+    try {
+      await User.findByIdAndUpdate(req.user._id, { $set: { itensCarrinho: [] } });
+    } catch (err) {
+      console.warn("Falha ao limpar carrinho", err);
+    }
+
+    res.status(200).json({
+      id: "mbway_sim_" + pedido._id,
+      url: `${process.env.CLIENT_URL}/purchase-success?session_id=mbway_sim_${pedido._id}&pedidoId=${pedido._id}`
+    });
 
   } catch (error) {
-    console.log("Erro ao criar sessão de checkout", error.message);
+    console.log("Erro ao criar pagamento MBWay", error.message);
     res.status(500).json({ msg: "Erro no servidor", error: error.message });
   }
 }
 
 async function criarCupaoStripe(percentagemDesconto) {
-  const cupao = await stripe.coupons.create({
-    percent_off: percentagemDesconto,
-    duration: "once"
-  })
-
-  return cupao.id;
+  // Mock function or remove if not needed
+  return "mock_coupon_id";
 }
 
 async function criarNovoCupao(userId) {
@@ -128,6 +116,20 @@ async function criarNovoCupao(userId) {
 export const sucessoCheckout = async (req, res) => {
   try {
     const { sessaoId } = req.body;
+
+    // Se for simulação MBWay
+    if (sessaoId.startsWith("mbway_sim_")) {
+      const pedidoId = sessaoId.replace("mbway_sim_", "");
+      const pedido = await Pedido.findById(pedidoId);
+      if (!pedido) return res.status(404).json({ msg: "Pedido não encontrado" });
+
+      return res.status(200).json({
+        success: true,
+        msg: "Pagamento MBWay confirmado",
+        pedidoId: pedido._id
+      });
+    }
+
     const sessao = await stripe.checkout.sessions.retrieve(sessaoId);
 
     if (sessao.payment_status === "paid") {

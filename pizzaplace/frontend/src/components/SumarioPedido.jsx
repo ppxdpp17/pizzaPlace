@@ -1,20 +1,17 @@
-import  { motion } from "framer-motion"
+import { motion } from "framer-motion"
 import { useCarrinhoStore } from "../stores/useCarrinhoStore"
 import { Link, useNavigate } from "react-router-dom"
 import { MoveRight } from "lucide-react"
-import { loadStripe } from "@stripe/stripe-js";
 import axios from "../lib/axios";
 import TipoEntrega from "./TipoEntrega";
 import { useState } from "react";
 import MoradaForm from "./MoradaForm";
 
-const stripePromise = loadStripe("pk_test_51RhA5gPaffH1WIPMMjsLlLdSSDrJ5MRtISziKg7BHOZZSlZhVl2KywHaco90UMR4QXD8fXFcNT5eeUbL70JlhhDF005veqHo7y");
-
 const SumarioPedido = () => {
-    
+
     const { total, subTotal, cupao, cupaoAplicado, carrinho, limparCarrinho } = useCarrinhoStore();
     const poupancas = subTotal - total;
-    const subtotalFormatado = subTotal.toFixed(2); 
+    const subtotalFormatado = subTotal.toFixed(2);
     const totalFormatado = total.toFixed(2);
     const poupancasFormatado = poupancas.toFixed(2);
 
@@ -31,44 +28,53 @@ const SumarioPedido = () => {
     const handleSelectEntrega = async ({ tipoEntrega, paymentMethod, pedidoLocation }) => {
         fecharModal();
 
-        if(paymentMethod === "dinheiro") {
+        if (paymentMethod === "dinheiro") {
             setPendingCash({ tipoEntrega, pedidoLocation });
             setShowAddressForm(true);
             return;
         }
 
-        //Pagaemento com cartão: fluxo Stripe normal
-        const stripe = await stripePromise;
-        const { id: sessionId } = (await axios.post("/pagamentos/criar-sessao-checkout", {
-            produtos: carrinho,
-            codigoCupao: cupao?.codigo || "",
-            tipoEntrega,
-            paymentMethod: "cartao",
-            pedidoLocation
-        })).data;
+        // Pagamento com cartão (agora MBWay simulado)
+        try {
+            const res = await axios.post("/pagamentos/criar-sessao-checkout", {
+                produtos: carrinho,
+                codigoCupao: cupao?.codigo || "",
+                tipoEntrega,
+                paymentMethod: "cartao", // Mantemos "cartao" no frontend por compatibilidade, mas backend trata como MBWay
+                pedidoLocation
+            });
 
-        const { error } = await stripe.redirectToCheckout({ sessionId });
-        if (error) console.error(error);
+            const { url } = res.data;
+            if (url) {
+                window.location.href = url;
+            }
+        } catch (err) {
+            console.error(err);
+        }
     };
 
     const handleAddressSubmit = async (shippingAddress) => {
         setShowAddressForm(false);
         const { tipoEntrega, pedidoLocation } = pendingCash;
-        await axios.post("/pagamentos/dinheiro", {
-            produtos: carrinho,
-            tipoEntrega,
-            pedidoLocation,
-            shippingAddress
-        });
-        limparCarrinho();
-        navigate("/purchase-success?method=dinheiro");
+        try {
+            await axios.post("/pagamentos/dinheiro", {
+                produtos: carrinho,
+                tipoEntrega,
+                pedidoLocation,
+                shippingAddress
+            });
+            limparCarrinho();
+            navigate("/purchase-success?method=dinheiro");
+        } catch (err) {
+            console.error("Erro pagamento dinheiro:", err);
+        }
     };
 
     return (
-    <motion.div className="space-y-4 rounded-lg border border-gray-700 bg-gray-800 p-4 shadow-sm sm:p-6"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}>
+        <motion.div className="space-y-4 rounded-lg border border-gray-700 bg-gray-800 p-4 shadow-sm sm:p-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}>
             <p className="text-xl font-semibold text-emerald-400">Resumo do Pedido:</p>
             <div className="space-y-4">
                 <div className="space-y-2">
@@ -100,32 +106,32 @@ const SumarioPedido = () => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={abrirModal}
-                    >
-                        Continuar para o Checkout
+                >
+                    Continuar para o Checkout
                 </motion.button>
                 <TipoEntrega
-                    isOpen   = {modalOpen}
-                    onClose  = {fecharModal}
-                    onSelect = {handleSelectEntrega}
+                    isOpen={modalOpen}
+                    onClose={fecharModal}
+                    onSelect={handleSelectEntrega}
                 />
                 {showAddressForm && (
                     <MoradaForm
-                        isOpen   = {showAddressForm}
-                        onCancel = {() => setShowAddressForm(false)}
-                        onSubmit = {handleAddressSubmit}
+                        isOpen={showAddressForm}
+                        onCancel={() => setShowAddressForm(false)}
+                        onSubmit={handleAddressSubmit}
                     />
-                    )}
+                )}
                 <div className="flex items-center justify-center gap-2">
                     <span className="text-sm font-normal text-gray-400">ou</span>
                     <Link to='/' className="inline-flex items-center gap-2 text-sm font-medium text-emerald-400*
                         underline hover:text-emerald-300 hover:no-underline">
-                            Continuar a comprar
-                            <MoveRight size={16} />
+                        Continuar a comprar
+                        <MoveRight size={16} />
                     </Link>
                 </div>
             </div>
-    </motion.div>
-  )
+        </motion.div>
+    )
 }
 
 export default SumarioPedido

@@ -110,7 +110,7 @@ const EditProductPage = () => {
 
       await editarProduto(id, payload);
       toast.success("Produto atualizado!");
-      navigate("/admin/produtos");
+      navigate("/dashboard-secreta");
     } catch (err) {
       console.error(err);
       toast.error(err?.response?.data?.msg || "Erro ao atualizar produto.");
