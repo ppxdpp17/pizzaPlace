@@ -123,9 +123,9 @@ export default function MeusPedidos() {
 
           //Mapping para cor e label
           const estadoLabel = estado === "A Cozinhar" ? "A cozinhar..." :
-                              estado === "A Caminho"   ? "A caminho" : "Entregue!";
+            estado === "A Caminho" ? "A caminho" : "Entregue!";
           const estadoColor = estado === "A Cozinhar" ? "text-yellow-300" :
-                              estado === "A Caminho"   ? "text-amber-300" : "text-emerald-400";
+            estado === "A Caminho" ? "text-amber-300" : "text-emerald-400";
 
           const dataHora = pedido.createdAt ? new Date(pedido.createdAt).toLocaleString() : "";
 
@@ -160,15 +160,15 @@ export default function MeusPedidos() {
                   </div>
 
                   <div className="text-sm text-gray-400 mt-2">
-                    {address.line1}{address.line2 ? `, ${address.line2}` : ""} • {address.city}
+                    {address.line1}{address.line2 ? `, ${address.line2}` : ""} {address.city}
                   </div>
                   <div className="text-sm text-gray-400">
-                    {address.postal_code} • {address.country}
+                    {address.postal_code} {address.country}
                   </div>
 
                   <div className="text-sm text-gray-400 mt-2">
                     Entrega: <span className="font-medium text-white">{pedido.tipoEntrega}</span>
-                    {"  •  "}
+                    <div></div>
                     Pagamento: <span className="font-medium text-white">{pedido.metodoPagamento}</span>
                   </div>
 

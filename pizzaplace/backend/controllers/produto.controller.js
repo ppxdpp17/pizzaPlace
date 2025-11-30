@@ -66,12 +66,16 @@ export const criarProduto = async (req, res) => {
   try {
     const { nome, descricao, preco, imagem, categoria, ingredientes } = req.body;
 
+    if (!imagem) {
+      return res.status(400).json({ msg: "Adicione uma imagem ao produto" });
+    }
+
     const ingredientesIds = Array.isArray(ingredientes)
       ? ingredientes.map((i) => {
-          if (typeof i === "string") return i;
-          if (i && (i._id || i.id)) return i._id ?? i.id;
-          return null;
-        }).filter(Boolean)
+        if (typeof i === "string") return i;
+        if (i && (i._id || i.id)) return i._id ?? i.id;
+        return null;
+      }).filter(Boolean)
       : [];
 
     let respostaCloudinary = null;

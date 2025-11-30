@@ -8,8 +8,8 @@ import Confetti from 'react-confetti';
 export default function PaginaSucessoCompra() {
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get('session_id');
-  const method    = searchParams.get('method');   //"dinheiro" ou undefined
-  const pedidoId  = searchParams.get('pedidoId'); //opcional para cash
+  const method = searchParams.get('method');   //"dinheiro" ou undefined
+  const pedidoId = searchParams.get('pedidoId'); //opcional para cash
 
   const [aProcessar, setEstaProcessar] = useState(true);
   const [error, setErro] = useState(null);
@@ -70,7 +70,7 @@ export default function PaginaSucessoCompra() {
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-center text-emerald-400 mb-2">
             {method === 'dinheiro'
-              ? 'Pagamento em Dinheiro Concluído!'
+              ? 'O seu pedido foi efetuado'
               : 'Compra Efetuada com Sucesso!'}
           </h1>
           <p className="text-gray-300 text-center mb-2">

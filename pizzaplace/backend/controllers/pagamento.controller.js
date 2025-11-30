@@ -249,6 +249,201 @@ export const cashPayment = async (req, res) => {
   } catch (err) {
     console.error("Erro cashPayment:", err);
     res.status(err.status || 500).json({ msg: err.message });
+    tipoEntrega,
+      metodoPagamento: "stripe",
+        // Para stripe checkout, o shippingAddress é atualizado depois, mas se for takeaway criamos dummy
+        shippingAddress: tipoEntrega === 'takeaway' ? {
+          name: req.user.name || "Cliente Takeaway",
+          line1: "Levantamento em Loja",
+          line2: pedidoLocation,
+          city: "Takeaway",
+          postal_code: "0000-000",
+          country: "PT"
+        } : undefined,
+          estado: "Aguardando Pagamento",
+            localizacao: pedidoLocation
+  });
+
+  // 4. Preparar Stripe
+  // Nota: O Stripe precisa de valores inteiros (cêntimos)
+  const lineItems = items.map((item) => ({
+    price_data: {
+      currency: "eur",
+      product_data: {
+        name: item.nome, // Nome correto
+        images: item.imagem ? [item.imagem] : [], // Imagem correta
+      },
+      unit_amount: Math.round(item.preco * 100),
+    },
+    quantity: item.quantidade,
+  }));
+
+  // Configurar desconto no Stripe
+  let discounts = [];
+  if (cupao) {
+    const stripeCoupon = await stripe.coupons.create({
+      percent_off: cupao.percentagemDesconto,
+      duration: 'once',
+      name: cupao.codigo
+    });
+    discounts.push({ coupon: stripeCoupon.id });
+  }
+
+  // 5. Criar Sessão Stripe
+  const sessao = await stripe.checkout.sessions.create({
+    payment_method_types: ["card"],
+    line_items: lineItems,
+    mode: "payment",
+    billing_address_collection: "required",
+    shipping_address_collection: {
+      allowed_countries: ["PT"]
+    },
+    success_url: `${process.env.CLIENT_URL}/purchase-success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${process.env.CLIENT_URL}/`,
+    discounts: discounts,
+    metadata: {
+      pedidoId: novoPedido._id.toString(), // CRÍTICO: Passamos o ID do pedido que já criámos
+      userId: req.user._id.toString(),
+      cupaoId: cupao ? cupao._id.toString() : ""
+    }
+  });
+
+  // Guardar o ID da sessão no pedido para referência futura
+  novoPedido.stripeSessionID = sessao.id;
+  await novoPedido.save();
+
+  res.status(200).json({ id: sessao.id, url: sessao.url });
+
+} catch (error) {
+  console.error("Erro checkout:", error);
+  res.status(500).json({ msg: "Erro servidor", error: error.message });
+}
+}
+
+async function criarCupaoStripe(percentagemDesconto) {
+  const cupao = await stripe.coupons.create({
+    percent_off: percentagemDesconto,
+    duration: "once"
+  })
+
+  return cupao.id;
+}
+
+async function criarNovoCupao(userId) {
+  await Cupao.findOneAndDelete({ userId });
+  const novoCupao = new Cupao({
+    codigo: "GIFT" + Math.random().toString(36).substring(2, 8).toUpperCase(),
+    percentagemDesconto: 10,
+    dataExpiracao: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+    userId: userId
+  })
+  await novoCupao.save();
+}
+
+
+export const sucessoCheckout = async (req, res) => {
+  try {
+    const { sessaoId } = req.body;
+    const sessao = await stripe.checkout.sessions.retrieve(sessaoId);
+
+    if (sessao.payment_status === "paid") {
+
+      const { pedidoId, userId, cupaoId } = sessao.metadata;
+
+      // 1. Buscar o pedido JÁ EXISTENTE
+      const pedido = await Pedido.findById(pedidoId);
+
+      if (!pedido) {
+        // Caso raro: pedido não encontrado (não devia acontecer neste fluxo)
+        return res.status(404).json({ msg: "Pedido não encontrado." });
+      }
+
+      // Se já estiver pago, retorna sucesso sem fazer nada
+      if (pedido.estado !== "Aguardando Pagamento") {
+        return res.status(200).json({ success: true, pedidoId: pedido._id });
+      }
+
+      // 2. Recolher Morada do Stripe
+      const ship = sessao.shipping_details || sessao.customer_details;
+      const shippingAddress = {
+        name: ship?.name || "Cliente",
+        line1: ship?.address?.line1 || "N/A",
+        line2: ship?.address?.line2 || "",
+        city: ship?.address?.city || "",
+        postal_code: ship?.address?.postal_code || "",
+        country: ship?.address?.country || "PT"
+      };
+
+      // 3. ATUALIZAR PEDIDO (Sem tocar no array 'produtos'!)
+      // Apenas mudamos o estado, a morada e o ID do pagamento.
+      // Os nomes e imagens dos produtos mantêm-se os originais (Snapshot).
+      pedido.estado = "A Cozinhar";
+      pedido.stripeSessionID = sessaoId;
+      pedido.paymentId = sessao.payment_intent;
+
+      // Só atualizamos a morada se for Delivery (se for takeaway já está certa)
+      if (pedido.tipoEntrega === 'delivery') {
+        pedido.shippingAddress = shippingAddress;
+      }
+
+      await pedido.save();
+
+      // 4. Consumir Cupão e Limpar Carrinho
+      if (cupaoId) {
+        await Cupao.findByIdAndUpdate(cupaoId, { ativo: false });
+      }
+
+      if (sessao.amount_total >= 10000) {
+        await criarNovoCupao(userId);
+      }
+
+      try {
+        await User.findByIdAndUpdate(userId, { $set: { itensCarrinho: [] } });
+      } catch (err) { console.warn(err); }
+
+      return res.status(200).json({
+        success: true,
+        msg: "Pedido confirmado.",
+        pedidoId: pedido._id
+      });
+    }
+
+    return res.status(400).json({ msg: "Pagamento não confirmado." });
+
+  } catch (error) {
+    console.error("Erro sucessoCheckout:", error);
+    return res.status(500).json({ msg: "Erro ao processar sucesso", error: error.message });
+  }
+};
+
+
+export const cashPayment = async (req, res) => {
+  try {
+    const { produtos, tipoEntrega, pedidoLocation, shippingAddress } = req.body;
+
+    if (!produtos?.length) return res.status(400).json({ msg: "Carrinho vazio" });
+
+    // Normaliza (Snapshot)
+    const items = await normalizeProdutosForPedido(produtos, true);
+    const total = items.reduce((sum, i) => sum + i.preco * i.quantidade, 0);
+
+    const pedido = await Pedido.create({
+      user: req.user._id,
+      produtos: items,
+      total,
+      tipoEntrega,
+      metodoPagamento: "dinheiro",
+      shippingAddress,
+      estado: "A Cozinhar",
+      localizacao: pedidoLocation
+    });
+
+    await User.findByIdAndUpdate(req.user._id, { $set: { itensCarrinho: [] } });
+    return res.status(201).json({ success: true, pedidoId: pedido._id });
+
+  } catch (err) {
+    console.error("Erro cashPayment:", err);
+    res.status(err.status || 500).json({ msg: err.message });
   }
 };
 
@@ -286,6 +481,21 @@ async function normalizeProdutosForPedido(rawProdutos = [], strictMode = true) {
     }
 
     if (!mongoose.Types.ObjectId.isValid(produtoField)) {
+      // FIX: Se for um item custom ou mix (que não existe na BD como produto único),
+      // e tivermos os dados no payload (nome, preço, etc), usamos esses dados.
+      if (produtoField.startsWith("mix-2-") || produtoField.startsWith("custom-")) {
+        normalized.push({
+          produto: new mongoose.Types.ObjectId("000000000000000000000000"), // Dummy ID
+          quantidade,
+          preco: Number(raw.preco || 0),
+          nome: raw.nome || "Produto Personalizado",
+          imagem: raw.imagem || "",
+          tamanho: tamanho || null,
+          meta: raw.meta || {}
+        });
+        continue;
+      }
+
       if (strictMode) throw { status: 400, message: `ID inválido: ${produtoField}` };
     }
 

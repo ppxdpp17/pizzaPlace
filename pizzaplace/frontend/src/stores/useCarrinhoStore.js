@@ -136,7 +136,9 @@ export const useCarrinhoStore = create((set, get) => {
         if (isObjectIdLike(cartItemId)) {
           const res = await axios.delete(`/carrinho/${cartItemId}`);
           const itens = res.data;
-          set({ carrinho: itens });
+          // FIX: Merge with local items (custom/mix) that are not on the server
+          const currentLocalItems = get().carrinho.filter(i => isLocalItem(i));
+          set({ carrinho: [...itens, ...currentLocalItems] });
           get().calcularTotal();
         } else {
           // local custom item id -> remover localmente

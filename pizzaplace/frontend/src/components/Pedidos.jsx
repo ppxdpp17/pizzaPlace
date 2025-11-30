@@ -76,6 +76,7 @@ const Pedidos = () => {
   const [pedidos, setPedidos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedCity, setSelectedCity] = useState('Todos');
   const intervalRef = useRef(null);
 
   const fetchPedidos = async () => {
@@ -107,9 +108,31 @@ const Pedidos = () => {
   if (error) return <p className="p-4 text-center text-red-400">Erro: {error}</p>;
   if (!pedidos.length) return <p className="p-4 text-center text-gray-400">Nenhum pedido encontrado.</p>;
 
+  const filteredPedidos = pedidos.filter(pedido => {
+    if (!isAdmin || selectedCity === 'Todos') return true;
+    const city = pedido.shippingAddress?.city || (pedido.tipoEntrega === 'takeaway' ? 'Takeaway' : 'Outro');
+    return city === selectedCity;
+  });
+
+  const cities = ['Todos', ...new Set(pedidos.map(p => p.shippingAddress?.city || (p.tipoEntrega === 'takeaway' ? 'Takeaway' : 'Outro')).filter(Boolean))];
+
   return (
-    <div className="space-y-4">
-      {pedidos.map((pedido) => {
+    <div className="space-y-4 pb-24">
+      {isAdmin && (
+        <div className="flex justify-end mb-4">
+          <select
+            value={selectedCity}
+            onChange={(e) => setSelectedCity(e.target.value)}
+            className="bg-gray-700 text-white rounded-md px-3 py-1 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          >
+            {cities.map(city => (
+              <option key={city} value={city}>{city}</option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {filteredPedidos.map((pedido) => {
         // --- LÓGICA DE IMAGENS ---
         // 1. Tenta imagem guardada no pedido (p.imagem)
         // 2. Se não existir, tenta no produto populado (p.produto.imagem)

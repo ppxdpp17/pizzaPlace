@@ -7,7 +7,7 @@ export const useProductStore = create((set) => ({
   isLoading: false,
 
   setProducts: (products) => set({ products }),
-  
+
   criarProduto: async (productData) => {
     set({ isLoading: true });
     try {
@@ -18,7 +18,6 @@ export const useProductStore = create((set) => ({
       return novo;
     } catch (error) {
       set({ isLoading: false });
-      toast.error(error.response?.data?.msg || "Erro NA CRIAÇÃO de produto");
       throw error;
     }
   },
@@ -39,7 +38,7 @@ export const useProductStore = create((set) => ({
     try {
       await axios.delete(`/produtos/${productId}`);
       set((prev) => ({ products: prev.products.filter((p) => p._id !== productId), isLoading: false }));
-      try { window.dispatchEvent(new CustomEvent("produtos:updated")); } catch (e) {}
+      try { window.dispatchEvent(new CustomEvent("produtos:updated")); } catch (e) { }
     } catch (error) {
       set({ isLoading: false });
       toast.error(error.response?.data?.msg || "Falha ao apagar produto");
@@ -88,21 +87,21 @@ export const useProductStore = create((set) => ({
   },
 
   editarProduto: async (productId, productData) => {
-  set({ isLoading: true });
-  try {
-    const res = await axios.put(`/produtos/${productId}`, productData);
-    const atualizado = res.data;
-    set((prev) => ({
-      products: prev.products.map(p => p._id === productId ? atualizado : p),
-      isLoading: false
-    }));
-    window.dispatchEvent(new Event("produtos:updated"));
-    return atualizado;
-  } catch (error) {
-    set({ isLoading: false });
-    toast.error(error.response?.data?.msg || "Falha ao editar produto");
-    throw error;
-  }
-},
+    set({ isLoading: true });
+    try {
+      const res = await axios.put(`/produtos/${productId}`, productData);
+      const atualizado = res.data;
+      set((prev) => ({
+        products: prev.products.map(p => p._id === productId ? atualizado : p),
+        isLoading: false
+      }));
+      window.dispatchEvent(new Event("produtos:updated"));
+      return atualizado;
+    } catch (error) {
+      set({ isLoading: false });
+      toast.error(error.response?.data?.msg || "Falha ao editar produto");
+      throw error;
+    }
+  },
 
 }));
