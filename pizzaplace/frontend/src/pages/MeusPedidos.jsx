@@ -113,7 +113,10 @@ export default function MeusPedidos() {
         {pedidos.map(pedido => {
           const imagens = (pedido.produtos ?? []).map(p => p.imagem || p.produto?.imagem).filter(Boolean);
           const imagensFinal = imagens.length ? imagens : ["/placeholder.png"];
-          const nomes = (pedido.produtos ?? []).map(p => p.produto?.nome ?? "Produto");
+          // --- LÓGICA DE NOMES (HEADER) ---
+          // 1. Tenta nome guardado no pedido (p.nome)
+          // 2. Se não existir, tenta no produto populado (p.produto.nome)
+          const nomes = (pedido.produtos ?? []).map(p => p.nome ?? p.produto?.nome ?? "Produto");
           const nomePedido = nomes.length === 1 ? nomes[0] : `${nomes[0]} +${Math.max(0, nomes.length - 1)}`;
           const address = pedido.shippingAddress || {};
           const total = Number(pedido.total ?? 0).toFixed(2);

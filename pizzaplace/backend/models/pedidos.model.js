@@ -37,7 +37,7 @@ const pedidoSchema = new mongoose.Schema(
         },
         meta: {
           type: Map,
-          of: String, // Flexibilidade para guardar cor, nota, etc.
+          of: mongoose.Schema.Types.Mixed, // Flexibilidade para guardar cor, nota, arrays, etc.
         },
       },
     ],

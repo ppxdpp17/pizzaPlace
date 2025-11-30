@@ -94,7 +94,13 @@ export default function CustomizarPizza() {
       estaDisponivel: true,
       ingredientes: chosenIngredients,
       isCustom: true,
-      meta: { tamanho, massa, molho, observacoes },
+      meta: {
+        tamanho,
+        massa,
+        molho,
+        nota: observacoes, // Mapear para 'nota' como esperado pelo Pedidos.jsx
+        ingredientes: chosenIngredients.map(i => i.nome) // Guardar nomes para exibir
+      },
     };
 
     adicionarAoCarrinhoCustom(customProduct);
