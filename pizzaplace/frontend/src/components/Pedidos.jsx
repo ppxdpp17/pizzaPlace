@@ -114,7 +114,14 @@ const Pedidos = () => {
     return city === selectedCity;
   });
 
-  const cities = ['Todos', ...new Set(pedidos.map(p => p.shippingAddress?.city || (p.tipoEntrega === 'takeaway' ? 'Takeaway' : 'Outro')).filter(Boolean))];
+  const cities = [
+    'Todos',
+    'Bragança (Shopping)',
+    'Bragança (Av. Jõao da Cruz)',
+    'Vila Real',
+    'Chaves',
+    'Braga'
+  ];
 
   return (
     <div className="space-y-4 pb-24">
@@ -258,15 +265,33 @@ const Pedidos = () => {
                     const nomeProduto = p.nome || p.produto?.nome || "Produto Removido";
 
                     return (
-                      <div key={idx} className="flex justify-between items-center">
-                        <div>
-                          <span className="font-medium text-white">{nomeProduto}</span>
-                          {tamanhoLabel && <span className="text-gray-400 ml-2 text-xs uppercase bg-gray-700 px-1.5 py-0.5 rounded">
-                            {tamanhoLabel}
-                          </span>}
-                          <span className="text-gray-400 text-xs"> × {p.quantidade}</span>
+                      <div key={idx} className="flex flex-col">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <span className="font-medium text-white">{nomeProduto}</span>
+                            {tamanhoLabel && <span className="text-gray-400 ml-2 text-xs uppercase bg-gray-700 px-1.5 py-0.5 rounded">
+                              {tamanhoLabel}
+                            </span>}
+                            <span className="text-gray-400 text-xs"> × {p.quantidade}</span>
+                          </div>
+                          <div className="text-gray-400">€{(p.preco).toFixed(2)}</div>
                         </div>
-                        <div className="text-gray-400">€{(p.preco).toFixed(2)}</div>
+                        {/* Detalhes para Pizza Personalizada (apenas Admin) */}
+                        {isAdmin && (p.nome?.toLowerCase().includes("personalizada") || p.nome?.toLowerCase().includes("custom")) && (
+                          <div className="ml-4 mt-1">
+                            <details className="text-xs text-gray-400 cursor-pointer">
+                              <summary className="hover:text-emerald-400 transition-colors">Ver Detalhes</summary>
+                              <div className="pl-2 pt-1 border-l border-gray-600 mt-1 space-y-0.5">
+                                {p.meta?.massa && <div><span className="text-gray-500">Massa:</span> {p.meta.massa}</div>}
+                                {p.meta?.molho && <div><span className="text-gray-500">Molho:</span> {p.meta.molho}</div>}
+                                {p.meta?.ingredientes && Array.isArray(p.meta.ingredientes) && (
+                                  <div><span className="text-gray-500">Ingredientes:</span> {p.meta.ingredientes.join(", ")}</div>
+                                )}
+                                {p.meta?.nota && <div><span className="text-gray-500">Nota:</span> <span className="text-yellow-200/80">{p.meta.nota}</span></div>}
+                              </div>
+                            </details>
+                          </div>
+                        )}
                       </div>
                     );
                   })}

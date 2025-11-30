@@ -111,7 +111,7 @@ export default function MeusPedidos() {
         <h2 className="text-2xl font-semibold text-emerald-400">Os Meus Pedidos</h2>
 
         {pedidos.map(pedido => {
-          const imagens = (pedido.produtos ?? []).map(p => p.produto?.imagem).filter(Boolean);
+          const imagens = (pedido.produtos ?? []).map(p => p.imagem || p.produto?.imagem).filter(Boolean);
           const imagensFinal = imagens.length ? imagens : ["/placeholder.png"];
           const nomes = (pedido.produtos ?? []).map(p => p.produto?.nome ?? "Produto");
           const nomePedido = nomes.length === 1 ? nomes[0] : `${nomes[0]} +${Math.max(0, nomes.length - 1)}`;

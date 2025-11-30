@@ -90,7 +90,10 @@ const CartaoProduto = ({
           <div className="mt-2 mb-5 flex items-center justify-between">
             <p>
               {!especial && typeof p.preco === "number" && p.preco > 0 ? (
-                <span className="text-3xl font-bold text-emerald-400">€{p.preco.toFixed(2)}</span>
+                <span className="text-3xl font-bold text-emerald-400">
+                  {(p.categoria === "pizzas" || p.categoria === "bebidas") && <span className="text-lg font-normal text-gray-400 mr-1">desde</span>}
+                  €{p.preco.toFixed(2)}
+                </span>
               ) : (
                 especial ? null : (p.preco === 0 ? <span className="text-sm text-gray-400">Grátis</span> : null)
               )}
@@ -114,33 +117,33 @@ const CartaoProduto = ({
         )}
 
         <div className="mt-auto">
-        {!hideActions && (
-          <>
-            {especial ? (
-              <button
-                onClick={() => {
-                  if (typeof onPersonalizar === "function") {
-                    onPersonalizar();
-                  } else {
-                    navigate("/pizza/customizar");
-                  }
-                }}
-                className="flex items-center justify-center rounded-lg bg-indigo-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-300"
-              >
-                {especialLabel}
-              </button>
-            ) : (
-              <button
-                className="flex items-center justify-center rounded-lg bg-emerald-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-300"
-                onClick={gerirAdicionarCarrinho}
-                disabled={!p || !p._id}
-              >
-                <ShoppingCart size={22} className="mr-2" />
-                Adicionar ao carrinho
-              </button>
-            )}
-          </>
-        )}
+          {!hideActions && (
+            <>
+              {especial ? (
+                <button
+                  onClick={() => {
+                    if (typeof onPersonalizar === "function") {
+                      onPersonalizar();
+                    } else {
+                      navigate("/pizza/customizar");
+                    }
+                  }}
+                  className="flex items-center justify-center rounded-lg bg-indigo-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-300"
+                >
+                  {especialLabel}
+                </button>
+              ) : (
+                <button
+                  className="flex items-center justify-center rounded-lg bg-emerald-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-300"
+                  onClick={gerirAdicionarCarrinho}
+                  disabled={!p || !p._id}
+                >
+                  <ShoppingCart size={22} className="mr-2" />
+                  Adicionar ao carrinho
+                </button>
+              )}
+            </>
+          )}
         </div>
       </div>
     </div>

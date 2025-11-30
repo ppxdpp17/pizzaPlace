@@ -94,10 +94,11 @@ const CategoriaPage = () => {
       }
 
       // soma e arredonda o preço para o inteiro mais próximo
+      // soma e arredonda o preço para o inteiro mais próximo (metade de cada)
       const precoA = typeof pA.preco === "number" ? pA.preco : Number(pA.preco) || 0;
       const precoB = typeof pB.preco === "number" ? pB.preco : Number(pB.preco) || 0;
-      const precoSomado = precoA + precoB;
-      const precoArredondado = Math.round(precoSomado);
+      const precoSomado = (precoA / 2) + (precoB / 2);
+      const precoArredondado = Math.ceil(precoSomado);
 
       const mixProduct = {
         _id: `mix-2-${Date.now()}`,
