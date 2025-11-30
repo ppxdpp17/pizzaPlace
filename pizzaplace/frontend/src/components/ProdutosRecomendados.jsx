@@ -1,16 +1,12 @@
 import { useEffect, useState } from "react";
-import { useProductStore } from "../stores/useProductStore";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import CartaoProduto from "./CartaoProduto";
 
-const ProdutosRecomendados = () => {
-    const { produtosRecomendados, getProdutosRecomendados, loading } = useProductStore();
+const ProdutosRecomendados = ({ produtosRecomendados }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [itemsPerPage, setItemsPerPage] = useState(4);
 
     useEffect(() => {
-        getProdutosRecomendados();
-
         const handleResize = () => {
             if (window.innerWidth < 640) setItemsPerPage(1);
             else if (window.innerWidth < 1024) setItemsPerPage(2);
@@ -22,9 +18,9 @@ const ProdutosRecomendados = () => {
         handleResize(); // Set initial items per page
 
         return () => window.removeEventListener("resize", handleResize);
-    }, [getProdutosRecomendados]);
+    }, []);
 
-    if (loading) return null;
+    if (!produtosRecomendados || produtosRecomendados.length === 0) return null;
 
     const nextSlide = () => {
         setCurrentIndex((prevIndex) =>
