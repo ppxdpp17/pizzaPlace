@@ -71,17 +71,24 @@ export const criarSessaoCheckout = async (req, res) => {
 
     // 4. Preparar Stripe
     // Nota: O Stripe precisa de valores inteiros (cêntimos)
-    const lineItems = items.map((item) => ({
-      price_data: {
-        currency: "eur",
-        product_data: {
-          name: item.nome, // Nome correto
-          images: item.imagem ? [item.imagem] : [], // Imagem correta
+    const lineItems = items.map((item) => {
+      // Validar URL da imagem para o Stripe
+      const imagensValidas = (item.imagem && item.imagem.startsWith("http"))
+        ? [item.imagem]
+        : [];
+
+      return {
+        price_data: {
+          currency: "eur",
+          product_data: {
+            name: item.nome, // Nome correto
+            images: imagensValidas, // Imagem validada
+          },
+          unit_amount: Math.round(item.preco * 100),
         },
-        unit_amount: Math.round(item.preco * 100),
-      },
-      quantity: item.quantidade,
-    }));
+        quantity: item.quantidade,
+      };
+    });
 
     // Configurar desconto no Stripe
     let discounts = [];
@@ -95,14 +102,11 @@ export const criarSessaoCheckout = async (req, res) => {
     }
 
     // 5. Criar Sessão Stripe
-    const sessao = await stripe.checkout.sessions.create({
+    const sessionConfig = {
       payment_method_types: ["card"],
       line_items: lineItems,
       mode: "payment",
       billing_address_collection: "required",
-      shipping_address_collection: {
-        allowed_countries: ["PT"]
-      },
       success_url: `${process.env.CLIENT_URL}/purchase-success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.CLIENT_URL}/`,
       discounts: discounts,
@@ -111,7 +115,16 @@ export const criarSessaoCheckout = async (req, res) => {
         userId: req.user._id.toString(),
         cupaoId: cupao ? cupao._id.toString() : ""
       }
-    });
+    };
+
+    // Apenas pedir morada no Stripe se for Delivery
+    if (tipoEntrega === 'delivery') {
+      sessionConfig.shipping_address_collection = {
+        allowed_countries: ["PT"]
+      };
+    }
+
+    const sessao = await stripe.checkout.sessions.create(sessionConfig);
 
     // Guardar o ID da sessão no pedido para referência futura
     novoPedido.stripeSessionID = sessao.id;

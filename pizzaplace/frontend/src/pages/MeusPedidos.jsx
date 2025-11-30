@@ -185,7 +185,8 @@ export default function MeusPedidos() {
                       const tamanhoLabel = formatTamanhoLabel(tamanhoRaw);
 
                       // nome do produto (se produto estiver populado use p.produto.nome, senão p.nome)
-                      const nomeProduto = p.produto?.nome ?? p.nome ?? "Produto";
+                      // nome do produto (prioridade ao snapshot p.nome, depois p.produto.nome)
+                      const nomeProduto = p.nome ?? p.produto?.nome ?? "Produto";
 
                       // preço: garantir .toFixed(2) sem erro
                       const preco = Number(p.preco ?? 0).toFixed(2);
