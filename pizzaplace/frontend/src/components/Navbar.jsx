@@ -9,27 +9,27 @@ const Navbar = () => {
   const { carrinho } = useCarrinhoStore();
 
   return (
-    <header className="fixed top-0 left-0 w-full bg-gray-900 bg-opacity-90 backdrop-blur-md shadow-lg z-40 transition-all duration-300 border-b border-red-800">
+    <header className="fixed top-0 left-0 w-full bg-white bg-opacity-90 backdrop-blur-md shadow-lg z-40 transition-all duration-300 border-b border-red-100">
       <div className="container mx-auto px-4 py-3">
         <div className="flex flex-wrap justify-between items-center">
-          <Link to="/" className="text-2xl font-bold text-red-500 flex items-center space-x-2">
+          <Link to="/" className="text-2xl font-bold text-red-600 flex items-center space-x-2">
             Big-Boss'
           </Link>
           <nav className="flex flex-wrap items-center gap-4">
-            <Link to={"/"} className="text-gray-300 hover:text-red-400 transition duration-300 ease-in-out">
+            <Link to={"/"} className="text-gray-700 hover:text-red-600 transition duration-300 ease-in-out">
               Página Inicial
             </Link>
             {user && (
-              <Link to={"/meus-pedidos"} className="text-gray-300 hover:text-red-400 transition duration-300 ease-in-out">
+              <Link to={"/meus-pedidos"} className="text-gray-700 hover:text-red-600 transition duration-300 ease-in-out">
                 Os Meus Pedidos
               </Link>
             )}
             {user && (
-              <Link to={"/carrinho"} className="relative group text-gray-300 hover:text-red-400 transition duration-300 ease-in-out">
-                <ShoppingCart className="inline-block mr-1 group-hover:text-red-400" size={20} />
+              <Link to={"/carrinho"} className="relative group text-gray-700 hover:text-red-600 transition duration-300 ease-in-out">
+                <ShoppingCart className="inline-block mr-1 group-hover:text-red-600" size={20} />
                 <span className="hidden sm:inline">Carrinho</span>
                 {carrinho.length > 0 && (
-                  <span className="absolute -top-2 -left-2 bg-red-500 text-white rounded-full px-2 py-0.5 text-xs group-hover:bg-red-400 transition duration-300 ease-in-out">
+                  <span className="absolute -top-2 -left-2 bg-red-600 text-white rounded-full px-2 py-0.5 text-xs group-hover:bg-red-500 transition duration-300 ease-in-out">
                     {carrinho.length}
                   </span>
                 )}
@@ -37,7 +37,7 @@ const Navbar = () => {
             )}
             {isAdmin && (
               <Link
-                className="bg-red-700 hover:bg-red-600 text-white px-3 py-1 rounded-md font-medium transition duration-300 ease-in-out flex items-center"
+                className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md font-medium transition duration-300 ease-in-out flex items-center"
                 to="/dashboard-secreta"
               >
                 <Lock className="mr-1 inline-block" size={18} />
@@ -47,7 +47,7 @@ const Navbar = () => {
 
             {user ? (
               <button
-                className="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-md flex items-center transition duration-300 ease-in-out"
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-md flex items-center transition duration-300 ease-in-out"
                 onClick={logout}
               >
                 <LogOut size={18} />
@@ -64,7 +64,7 @@ const Navbar = () => {
                 </Link>
                 <Link
                   to={"/login"}
-                  className="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-md flex items-center transition duration-300 ease-in-out"
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-md flex items-center transition duration-300 ease-in-out"
                 >
                   <LogIn className="mr-2" size={18} />
                   Entrar

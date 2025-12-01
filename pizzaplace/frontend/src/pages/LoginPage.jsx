@@ -28,10 +28,10 @@ const LoginPage = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className='max-w-md w-full bg-gray-800 bg-opacity-50 backdrop-filter backdrop-blur-xl rounded-2 xl shadow-xl overflow-hidden'
+        className='max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden'
       >
         <div className='p-8'>
-          <h2 className='text-3xl font-bold mb-6 text-center bg-gradient-to-r from-red-500 to-orange-500 text-transparent bg-clip-text'>
+          <h2 className='text-3xl font-bold mb-6 text-center bg-gradient-to-r from-red-600 to-orange-600 text-transparent bg-clip-text'>
             Bem-Vindo
           </h2>
 
@@ -53,7 +53,7 @@ const LoginPage = () => {
             />
 
             <div className='flex justify-center mb-6'>
-              <Link to='/esqueceu-password' className='text-sm text-orange-400 hover:underline'>
+              <Link to='/esqueceu-password' className='text-sm text-red-500 hover:underline hover:text-red-700'>
                 Esqueceu-se da Password?
               </Link>
             </div>
@@ -62,7 +62,7 @@ const LoginPage = () => {
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className='w-full py-3 px-4 bg-gradient-to-r from-red-500 to-orange-600 text-white font-bold rounded-lg shadow-lg hover:from-red-600 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition duration-200'
+              className='w-full py-3 px-4 bg-gradient-to-r from-red-600 to-orange-600 text-white font-bold rounded-lg shadow-lg hover:from-red-700 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-white transition duration-200'
               type='submit'
               disabled={isLoading}
             >
@@ -70,10 +70,10 @@ const LoginPage = () => {
             </motion.button>
           </form>
         </div>
-        <div className='px-8 py-4 bg-gray-900 bg-opacity-50 flex justify-center'>
-          <p className='text-sm text-gray-400'>
+        <div className='px-8 py-4 bg-gray-50 flex justify-center border-t border-gray-100'>
+          <p className='text-sm text-gray-600'>
             Não tem uma conta?{" "}
-            <Link to='/signup' className='text-orange-400 hover:underline'>
+            <Link to='/signup' className='text-red-500 hover:underline hover:text-red-700'>
               Criar conta
             </Link>
           </p>
