@@ -69,20 +69,20 @@ const CartaoProduto = ({
   // exceto por incluirmos o markup do modal abaixo do root
 
   const root = (
-    <div className="flex w-72 h-[28rem] relative flex-col overflow-hidden rounded-lg border border-gray-700 shadow-lg bg-gray-800">
+    <div className="flex w-72 h-[28rem] relative flex-col overflow-hidden rounded-lg border border-red-100 shadow-lg bg-white">
       <div className="relative mx-3 mt-3 flex h-60 overflow-hidden rounded-xl">
         <img className="object-cover w-full" src={p.imagem || "/placeholder.png"} alt={p.nome || "Produto"} />
-        <div className="absolute inset-0 bg-black bg-opacity-20" />
+        <div className="absolute inset-0 bg-black bg-opacity-0" />
       </div>
 
       <div className="mt-4 px-5 pb-5 flex-1 flex flex-col">
-        <h5 className="text-xl font-semibold tracking-tight text-white">{p.nome ?? "Produto"}</h5>
+        <h5 className="text-xl font-semibold tracking-tight text-gray-800">{p.nome ?? "Produto"}</h5>
 
         {especial ? (
-          <p className="text-sm text-gray-300">{p.descricao ?? "Personalize a sua pizza escolhendo massa, molho e toppings."}</p>
+          <p className="text-sm text-gray-600">{p.descricao ?? "Personalize a sua pizza escolhendo massa, molho e toppings."}</p>
         ) : (
           (Array.isArray(p.ingredientes) && p.ingredientes.length > 0) ? (
-            <p className="text-sm text-gray-300">{p.ingredientes.map(i => typeof i === "string" ? i : `${i.icone ? i.icone + " " : ""}${i.nome}`).join(", ")}</p>
+            <p className="text-sm text-gray-600">{p.ingredientes.map(i => typeof i === "string" ? i : `${i.icone ? i.icone + " " : ""}${i.nome}`).join(", ")}</p>
           ) : null
         )}
 
@@ -90,26 +90,26 @@ const CartaoProduto = ({
           <div className="mt-2 mb-5 flex items-center justify-between">
             <p>
               {!especial && typeof p.preco === "number" && p.preco > 0 ? (
-                <span className="text-3xl font-bold text-emerald-400">
-                  {(p.categoria === "pizzas" || p.categoria === "bebidas") && <span className="text-lg font-normal text-gray-400 mr-1">desde</span>}
+                <span className="text-3xl font-bold text-red-600">
+                  {(p.categoria === "pizzas" || p.categoria === "bebidas") && <span className="text-lg font-normal text-gray-500 mr-1">desde</span>}
                   €{p.preco.toFixed(2)}
                 </span>
               ) : (
-                especial ? null : (p.preco === 0 ? <span className="text-sm text-gray-400">Grátis</span> : null)
+                especial ? null : (p.preco === 0 ? <span className="text-sm text-gray-500">Grátis</span> : null)
               )}
             </p>
           </div>
         )}
 
         {showLoginPrompt && !user && (
-          <div className="mb-3 rounded-md bg-yellow-900/60 px-4 py-2 text-yellow-100 text-sm">
+          <div className="mb-3 rounded-md bg-yellow-50 px-4 py-2 text-yellow-800 text-sm border border-yellow-200">
             Por favor, faça login para adicionar produtos ao carrinho.
             <button
               onClick={() => {
                 setShowLoginPrompt(false);
                 navigate("/login");
               }}
-              className="ml-3 underline text-yellow-200"
+              className="ml-3 underline text-yellow-900"
             >
               Fazer login
             </button>
@@ -128,13 +128,13 @@ const CartaoProduto = ({
                       navigate("/pizza/customizar");
                     }
                   }}
-                  className="flex items-center justify-center rounded-lg bg-indigo-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-300"
+                  className="flex items-center justify-center rounded-lg bg-orange-500 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-600 focus:outline-none focus:ring-4 focus:ring-orange-300"
                 >
                   {especialLabel}
                 </button>
               ) : (
                 <button
-                  className="flex items-center justify-center rounded-lg bg-emerald-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-300"
+                  className="flex items-center justify-center rounded-lg bg-red-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300"
                   onClick={gerirAdicionarCarrinho}
                   disabled={!p || !p._id}
                 >
@@ -194,15 +194,15 @@ const SizeModal = ({ onClose, selectedSize, onSelect, onConfirm }) => {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.18 }}
-        className="relative z-10 w-full max-w-md bg-gray-900/90 rounded-xl border border-gray-700 p-6"
+        className="relative z-10 w-full max-w-md bg-white rounded-xl border border-red-100 shadow-xl p-6"
       >
-        <h3 className="text-lg font-semibold text-emerald-300 mb-3">Escolha o Tamanho</h3>
+        <h3 className="text-lg font-semibold text-red-600 mb-3">Escolha o Tamanho</h3>
 
         <div className="space-y-3">
           {TAMANHOS.map(t => (
-            <label key={t.value} className={`flex items-center justify-between p-3 rounded-md cursor-pointer border ${selectedSize === t.value ? "border-emerald-400 bg-gray-800" : "border-gray-700"}`}>
+            <label key={t.value} className={`flex items-center justify-between p-3 rounded-md cursor-pointer border ${selectedSize === t.value ? "border-red-500 bg-red-50" : "border-gray-200"}`}>
               <div>
-                <div className="text-sm font-medium text-white">{t.label}</div>
+                <div className="text-sm font-medium text-gray-800">{t.label}</div>
               </div>
               <input
                 type="radio"
@@ -210,15 +210,15 @@ const SizeModal = ({ onClose, selectedSize, onSelect, onConfirm }) => {
                 value={t.value}
                 checked={selectedSize === t.value}
                 onChange={() => onSelect(t.value)}
-                className="h-4 w-4"
+                className="h-4 w-4 accent-red-600"
               />
             </label>
           ))}
         </div>
 
         <div className="flex justify-end gap-3 mt-4">
-          <button onClick={onClose} className="px-4 py-2 rounded bg-gray-700 hover:bg-gray-600 text-white">Cancelar</button>
-          <button onClick={onConfirm} className="px-4 py-2 rounded bg-emerald-600 hover:bg-emerald-500 text-white">Adicionar</button>
+          <button onClick={onClose} className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-800">Cancelar</button>
+          <button onClick={onConfirm} className="px-4 py-2 rounded bg-red-600 hover:bg-red-500 text-white">Adicionar</button>
         </div>
       </motion.div>
     </div>

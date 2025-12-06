@@ -13,7 +13,8 @@ const Navbar = () => {
       <div className="container mx-auto px-4 py-3">
         <div className="flex flex-wrap justify-between items-center">
           <Link to="/" className="text-2xl font-bold text-red-600 flex items-center space-x-2">
-            Big-Boss'
+            <img src="/logo.png" alt="Big Bob's Logo" className="h-10 w-auto rounded-full" />
+            <span>Big-Boss'</span>
           </Link>
           <nav className="flex flex-wrap items-center gap-4">
             <Link to={"/"} className="text-gray-700 hover:text-red-600 transition duration-300 ease-in-out">

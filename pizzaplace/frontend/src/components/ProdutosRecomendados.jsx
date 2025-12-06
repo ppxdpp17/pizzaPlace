@@ -42,7 +42,7 @@ const ProdutosRecomendados = ({ produtosRecomendados }) => {
     return (
         <div className='mt-8 py-12'>
             <div className="container mx-auto px-4">
-                <h3 className='text-2xl font-semibold text-emerald-400 mb-4'>Recomendados para si</h3>
+                <h3 className='text-2xl font-semibold text-red-600 mb-4'>Recomendados para si</h3>
                 <div className='relative'>
                     <div className='overflow-hidden'>
                         <div
@@ -60,7 +60,7 @@ const ProdutosRecomendados = ({ produtosRecomendados }) => {
                         onClick={prevSlide}
                         disabled={isInicioDesativado}
                         className={`absolute top-1/2 -left-4 transform -translate-y-1/2 p-2 rounded-full transition-colors duration-300 ${isInicioDesativado ?
-                            "bg-gray-400 cursor-not-allowed" : "bg-emerald-600 hover:bg-emerald-500 text-white"}`}
+                            "bg-gray-400 cursor-not-allowed" : "bg-red-600 hover:bg-red-500 text-white"}`}
                     >
                         <ChevronLeft size={24} />
                     </button>
@@ -68,7 +68,7 @@ const ProdutosRecomendados = ({ produtosRecomendados }) => {
                         onClick={nextSlide}
                         disabled={isFimDesativado}
                         className={`absolute top-1/2 -right-4 transform -translate-y-1/2 p-2 rounded-full transition-colors duration-300 ${isFimDesativado ?
-                            "bg-gray-400 cursor-not-allowed" : "bg-emerald-600 hover:bg-emerald-500 text-white"}`}
+                            "bg-gray-400 cursor-not-allowed" : "bg-red-600 hover:bg-red-500 text-white"}`}
                     >
                         <ChevronRight size={24} />
                     </button>
