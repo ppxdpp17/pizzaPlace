@@ -90,7 +90,7 @@ const CartaoProduto = ({
           <div className="mt-2 mb-5 flex items-center justify-between">
             <p>
               {!especial && typeof p.preco === "number" && p.preco > 0 ? (
-                <span className="text-3xl font-bold text-red-600">
+                <span className="text-3xl font-bold text-orange-500">
                   {(p.categoria === "pizzas" || p.categoria === "bebidas") && <span className="text-lg font-normal text-gray-500 mr-1">desde</span>}
                   €{p.preco.toFixed(2)}
                 </span>
@@ -134,7 +134,7 @@ const CartaoProduto = ({
                 </button>
               ) : (
                 <button
-                  className="flex items-center justify-center rounded-lg bg-red-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300"
+                  className="flex items-center justify-center rounded-lg bg-orange-500 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-600 focus:outline-none focus:ring-4 focus:ring-orange-300"
                   onClick={gerirAdicionarCarrinho}
                   disabled={!p || !p._id}
                 >
@@ -196,11 +196,11 @@ const SizeModal = ({ onClose, selectedSize, onSelect, onConfirm }) => {
         transition={{ duration: 0.18 }}
         className="relative z-10 w-full max-w-md bg-white rounded-xl border border-red-100 shadow-xl p-6"
       >
-        <h3 className="text-lg font-semibold text-red-600 mb-3">Escolha o Tamanho</h3>
+        <h3 className="text-lg font-semibold text-orange-500 mb-3">Escolha o Tamanho</h3>
 
         <div className="space-y-3">
           {TAMANHOS.map(t => (
-            <label key={t.value} className={`flex items-center justify-between p-3 rounded-md cursor-pointer border ${selectedSize === t.value ? "border-red-500 bg-red-50" : "border-gray-200"}`}>
+            <label key={t.value} className={`flex items-center justify-between p-3 rounded-md cursor-pointer border ${selectedSize === t.value ? "border-orange-500 bg-orange-50" : "border-gray-200"}`}>
               <div>
                 <div className="text-sm font-medium text-gray-800">{t.label}</div>
               </div>
@@ -210,7 +210,7 @@ const SizeModal = ({ onClose, selectedSize, onSelect, onConfirm }) => {
                 value={t.value}
                 checked={selectedSize === t.value}
                 onChange={() => onSelect(t.value)}
-                className="h-4 w-4 accent-red-600"
+                className="h-4 w-4 accent-orange-500"
               />
             </label>
           ))}
@@ -218,7 +218,7 @@ const SizeModal = ({ onClose, selectedSize, onSelect, onConfirm }) => {
 
         <div className="flex justify-end gap-3 mt-4">
           <button onClick={onClose} className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-800">Cancelar</button>
-          <button onClick={onConfirm} className="px-4 py-2 rounded bg-red-600 hover:bg-red-500 text-white">Adicionar</button>
+          <button onClick={onConfirm} className="px-4 py-2 rounded bg-orange-500 hover:bg-orange-600 text-white">Adicionar</button>
         </div>
       </motion.div>
     </div>
