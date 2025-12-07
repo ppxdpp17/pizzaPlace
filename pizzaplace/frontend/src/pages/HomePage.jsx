@@ -14,7 +14,7 @@ const HomePage = () => {
   const { fetchProdutosRecomendados, products, isLoading } = useProductStore();
 
   useEffect(() => {
-    fetchProdutosRecomendados({ size: 6 });
+    fetchProdutosRecomendados({ size: 8 });
   }, [fetchProdutosRecomendados]);
 
   return (
@@ -24,7 +24,7 @@ const HomePage = () => {
           Explore as Nossas Categorias
         </h1>
         <p className="text-center text-xl text-gray-700 mb-12">
-          Descubra as últimas trends da moda.
+          Descubra os nossos produtos deliciosos.
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {categorias.map((categoria => (
