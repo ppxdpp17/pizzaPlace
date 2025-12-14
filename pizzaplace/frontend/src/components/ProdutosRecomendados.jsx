@@ -46,11 +46,11 @@ const ProdutosRecomendados = ({ produtosRecomendados }) => {
                 <div className='relative'>
                     <div className='overflow-hidden'>
                         <div
-                            className='flex transition-transform duration-500 ease-out gap-4'
+                            className='flex transition-transform duration-500 ease-out'
                             style={{ transform: `translateX(-${currentIndex * (100 / itemsPerPage)}%)` }}
                         >
                             {produtosRecomendados.map((produto) => (
-                                <div key={produto._id} className='w-full sm:w-1/2 lg:w-1/3 xl:w-1/4 flex-shrink-0 flex justify-center'>
+                                <div key={produto._id} className='w-full sm:w-1/2 lg:w-1/3 xl:w-1/4 flex-shrink-0 flex justify-center p-2'>
                                     <CartaoProduto product={produto} animate={false} />
                                 </div>
                             ))}
