@@ -69,7 +69,7 @@ const CartaoProduto = ({
   // exceto por incluirmos o markup do modal abaixo do root
 
   const root = (
-    <div className="flex w-72 h-[28rem] relative flex-col overflow-hidden rounded-lg border border-red-100 shadow-lg bg-amber-100">
+    <div className="flex w-72 h-[28rem] relative flex-col overflow-hidden rounded-lg border border-red-100 shadow-lg bg-[#fdf4e5]">
       <div className="relative mx-3 mt-3 flex h-60 overflow-hidden rounded-xl">
         <img className="object-cover w-full" src={p.imagem || "/placeholder.png"} alt={p.nome || "Produto"} />
         <div className="absolute inset-0 bg-black bg-opacity-0" />

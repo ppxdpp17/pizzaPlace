@@ -2,22 +2,22 @@ import { Link } from 'react-router-dom'
 
 const CategoryItem = ({ categoria }) => {
     return (
-        <div className="relative overflow-hidden h-96 w-full rounded-lg group bg-amber-100">
+        <div className="relative overflow-hidden h-96 w-full rounded-lg group">
             <Link to={"/categoria" + categoria.href} >
                 <div className="w-full h-full cursor-pointer">
+                    <div className="absolute inset-0 bg-gradient-to-b from-[#ede3d3] to-gray-700 opacity-20 z-10" />
                     <img src={categoria.imageUrl}
                         alt={categoria.nome}
-                        className="w-full h-full object-cover transition-transform duration-500 
-                    ease-out group-hover:scale-110"
+                        className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
                         loading="lazy" />
                     <div className="absolute bottom-0 left-0 right-0 p-4 z-20">
-                        <h3 className="text-red-700 text-2xl font-bold mb-2">{categoria.nome}</h3>
-                        <p className="text-orange-900 text-sm">Explorar {categoria.nome}</p>
+                        <h3 className="text-white text-2xl font-bold mb-2">{categoria.nome}</h3>
+                        <p className="text-gray-200 text-sm">Explorar {categoria.nome}</p>
+
                     </div>
                 </div>
             </Link>
         </div>
     )
 }
-
 export default CategoryItem
