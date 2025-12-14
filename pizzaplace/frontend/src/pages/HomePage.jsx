@@ -18,7 +18,10 @@ const HomePage = () => {
   }, [fetchProdutosRecomendados]);
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div
+      className="relative min-h-screen overflow-hidden bg-cover bg-center bg-no-repeat"
+      style={{ backgroundImage: "url('/piuzz.png')" }}
+    >
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <h1 className="text-center text-5xl sm:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-700 mb-4">
           Explore as Nossas Categorias
