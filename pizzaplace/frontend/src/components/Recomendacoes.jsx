@@ -44,9 +44,11 @@ const Recomendacoes = ({ excludeIds = [], size = 3 }) => {
       <h3 className='text-2xl font-semibold text-red-600'>
         Produtos Recomendados
       </h3>
-      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-6 flex overflow-x-auto pb-4 gap-4 snap-x sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:overflow-visible sm:pb-0 sm:snap-none">
         {recomendacoes.map((product) => (
-          <CartaoProduto key={product._id} product={product} />
+          <div key={product._id} className="shrink-0 snap-center sm:shrink sm:w-auto flex justify-center">
+             <CartaoProduto product={product} compactMobile={true} />
+          </div>
         ))}
       </div>
     </div>

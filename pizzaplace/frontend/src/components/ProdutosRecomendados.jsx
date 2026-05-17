@@ -51,7 +51,7 @@ const ProdutosRecomendados = ({ produtosRecomendados }) => {
                         >
                             {produtosRecomendados.map((produto) => (
                                 <div key={produto._id} className='w-full sm:w-1/2 lg:w-1/3 xl:w-1/4 flex-shrink-0 flex justify-center p-2'>
-                                    <CartaoProduto product={produto} animate={false} />
+                                    <CartaoProduto product={produto} animate={false} compactMobile={true} />
                                 </div>
                             ))}
                         </div>

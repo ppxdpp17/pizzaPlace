@@ -146,28 +146,28 @@ export default function MeusPedidos() {
                 layout
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex items-stretch bg-white/95 backdrop-blur-sm rounded-xl p-4 shadow-md border border-gray-200 hover:shadow-lg transition-shadow"
+                className="flex flex-col sm:flex-row items-stretch bg-white/95 backdrop-blur-sm rounded-xl p-4 shadow-md border border-gray-200 hover:shadow-lg transition-shadow"
               >
-                <div className="w-32 flex-shrink-0 flex flex-col items-end pr-4 border-r border-gray-200">
-                  <div className="text-right">
+                <div className="flex sm:w-32 sm:flex-shrink-0 justify-between sm:flex-col sm:items-end pb-4 sm:pb-0 sm:pr-4 border-b sm:border-b-0 sm:border-r border-gray-200">
+                  <div className="text-left sm:text-right">
                     <div className="text-sm text-gray-500 font-medium">Total</div>
                     <div className="text-xl font-bold text-red-600">€{total}</div>
                   </div>
-                  <div className="mt-auto pt-4 text-right">
-                    <div className="text-xs text-gray-500 font-medium uppercase tracking-wider">Estado</div>
-                    <div className={`mt-1 text-sm font-bold ${estadoColor}`}>{estadoLabel}</div>
+                  <div className="pt-0 sm:mt-auto sm:pt-4 text-right">
+                    <div className="text-xs text-gray-500 font-medium uppercase tracking-wider hidden sm:block">Estado</div>
+                    <div className={`mt-1 text-sm font-bold ${estadoColor} bg-gray-50 sm:bg-transparent px-2 py-1 rounded sm:px-0 sm:py-0`}>{estadoLabel}</div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-4 pl-4 flex-1">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pt-4 sm:pt-0 sm:pl-4 flex-1 w-full overflow-hidden">
                   <ImagemCollage imagens={imagensFinal} altBase={nomePedido} />
                   <div className="flex-1">
-                    <div className="flex items-center justify-between gap-4">
-                      <div>
-                        <div className="text-lg font-bold text-gray-900">{nomePedido}</div>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 w-full">
+                      <div className="w-full break-words">
+                        <div className="text-lg font-bold text-gray-900 leading-tight">{nomePedido}</div>
                         <div className="text-sm text-gray-600 mt-0.5">{address.name}</div>
                       </div>
-                      <div className="text-sm text-gray-500 font-medium">{dataHora}</div>
+                      <div className="text-sm text-gray-500 font-medium whitespace-nowrap">{dataHora}</div>
                     </div>
 
                     <div className="text-sm text-gray-600 mt-2">
@@ -177,7 +177,7 @@ export default function MeusPedidos() {
                       {address.postal_code} {address.country}
                     </div>
 
-                    <div className="text-sm text-gray-600 mt-3 pt-2 flex gap-4">
+                    <div className="text-sm text-gray-600 mt-3 pt-2 flex flex-col sm:flex-row gap-1 sm:gap-4 border-t border-gray-100 sm:border-0">
                       <span>
                         Entrega: <span className="font-semibold text-gray-900 capitalize">{pedido.tipoEntrega}</span>
                       </span>
@@ -186,7 +186,7 @@ export default function MeusPedidos() {
                       </span>
                     </div>
 
-                    <div className="mt-3 text-sm text-gray-700 space-y-1">
+                    <div className="mt-3 text-sm text-gray-700 space-y-2 sm:space-y-1 w-full">
                       {pedido.produtos?.map((p, idx) => {
                         const tamanhoRaw =
                           p.tamanho ??

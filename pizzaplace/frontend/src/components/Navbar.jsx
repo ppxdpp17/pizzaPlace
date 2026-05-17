@@ -25,6 +25,7 @@ const Navbar = () => {
   };
 
   return (
+    <>
     <header className="fixed top-0 left-0 w-full bg-white bg-opacity-90 backdrop-blur-md shadow-lg z-40 transition-all duration-300 border-b border-red-100">
       <div className="container mx-auto px-4 py-3">
         <div className="flex flex-wrap justify-between items-center">
@@ -32,8 +33,8 @@ const Navbar = () => {
             <img src="/logo.png" alt="Big Bob's Logo" className="h-10 w-auto rounded-full" />
             <span>Big-Boss'</span>
           </Link>
-          <nav className="flex flex-wrap items-center gap-4">
-            <Link to={"/"} className="text-gray-700 hover:text-red-600 transition duration-300 ease-in-out">
+          <nav className="flex flex-wrap items-center gap-4 w-full sm:w-auto mt-3 sm:mt-0">
+            <Link to={"/"} className="hidden sm:inline text-gray-700 hover:text-red-600 transition duration-300 ease-in-out">
               Página Inicial
             </Link>
             {user && (
@@ -42,7 +43,7 @@ const Navbar = () => {
               </Link>
             )}
             {user && (
-              <Link to={"/carrinho"} className="relative group text-gray-700 hover:text-red-600 transition duration-300 ease-in-out">
+              <Link to={"/carrinho"} className="hidden sm:inline-block relative group text-gray-700 hover:text-red-600 transition duration-300 ease-in-out">
                 <ShoppingCart className="inline-block mr-1 group-hover:text-red-600" size={20} />
                 <span className="hidden sm:inline">Carrinho</span>
                 {carrinho.length > 0 && (
@@ -64,7 +65,7 @@ const Navbar = () => {
 
             {user ? (
               <button
-                className="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md flex items-center transition duration-300 ease-in-out"
+                className="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md flex items-center transition duration-300 ease-in-out ml-auto sm:ml-0"
                 onClick={() => setShowLogoutModal(true)}
               >
                 <LogOut size={18} />
@@ -115,6 +116,22 @@ const Navbar = () => {
         )}
       </AnimatePresence>
     </header>
+
+      {/* Floating Action Button for Mobile Cart */}
+      {user && (
+        <Link
+          to={"/carrinho"}
+          className="sm:hidden fixed bottom-6 right-6 z-50 bg-orange-500 text-white p-4 rounded-full shadow-2xl flex items-center justify-center hover:bg-orange-600 active:scale-95 transition-all"
+        >
+          <ShoppingCart size={28} />
+          {carrinho.length > 0 && (
+            <span className="absolute -top-1 -right-1 bg-red-600 text-white font-bold rounded-full w-6 h-6 flex items-center justify-center text-xs shadow-md border border-white">
+              {carrinho.length}
+            </span>
+          )}
+        </Link>
+      )}
+    </>
   );
 };
 

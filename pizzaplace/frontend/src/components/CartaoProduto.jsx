@@ -22,6 +22,7 @@ const CartaoProduto = ({
   animate = true,
   onPersonalizar,
   especialLabel = "Personalizar 🍕",
+  compactMobile = false,
 }) => {
   const p = product ?? produto ?? {};
   const { user } = useUserStore();
@@ -69,14 +70,14 @@ const CartaoProduto = ({
   // exceto por incluirmos o markup do modal abaixo do root
 
   const root = (
-    <div className="flex w-72 h-[28rem] relative flex-col overflow-hidden rounded-lg border border-red-100 shadow-lg bg-[#fdf4e5]">
-      <div className="relative mx-3 mt-3 flex h-60 overflow-hidden rounded-xl">
+    <div className={`flex relative flex-col overflow-hidden rounded-lg border border-red-100 shadow-lg bg-[#fdf4e5] ${compactMobile ? "w-60 h-[24rem] sm:w-72 sm:h-[28rem]" : "w-72 h-[28rem]"}`}>
+      <div className={`relative mx-3 mt-3 flex overflow-hidden rounded-xl ${compactMobile ? "h-36 sm:h-60" : "h-60"}`}>
         <img className="object-cover w-full" src={p.imagem || "/placeholder.png"} alt={p.nome || "Produto"} />
         <div className="absolute inset-0 bg-black bg-opacity-0" />
       </div>
 
       <div className="mt-4 px-5 pb-5 flex-1 flex flex-col">
-        <h5 className="text-xl font-semibold tracking-tight text-gray-800">{p.nome ?? "Produto"}</h5>
+        <h5 className={`font-semibold tracking-tight text-gray-800 ${compactMobile ? "text-lg sm:text-xl mb-1 sm:mb-0" : "text-xl"}`}>{p.nome ?? "Produto"}</h5>
 
         {especial ? (
           <p className="text-sm text-gray-600">{p.descricao ?? "Personalize a sua pizza escolhendo massa, molho e toppings."}</p>
@@ -87,11 +88,11 @@ const CartaoProduto = ({
         )}
 
         {!hidePrice && (
-          <div className="mt-2 mb-5 flex items-center justify-between">
+          <div className={`mt-2 flex items-center justify-between ${compactMobile ? "mb-3 sm:mb-5" : "mb-5"}`}>
             <p>
               {!especial && typeof p.preco === "number" && p.preco > 0 ? (
-                <span className="text-3xl font-bold text-orange-500">
-                  {(p.categoria === "pizzas" || p.categoria === "bebidas") && <span className="text-lg font-normal text-gray-500 mr-1">desde</span>}
+                <span className={`font-bold text-orange-500 ${compactMobile ? "text-2xl sm:text-3xl" : "text-3xl"}`}>
+                  {(p.categoria === "pizzas" || p.categoria === "bebidas") && <span className={`font-normal text-gray-500 mr-1 ${compactMobile ? "text-sm sm:text-lg" : "text-lg"}`}>desde</span>}
                   €{p.preco.toFixed(2)}
                 </span>
               ) : (
@@ -128,17 +129,17 @@ const CartaoProduto = ({
                       navigate("/pizza/customizar");
                     }
                   }}
-                  className="flex items-center justify-center rounded-lg bg-orange-500 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-600 focus:outline-none focus:ring-4 focus:ring-orange-300"
+                  className={`flex items-center justify-center rounded-lg bg-orange-500 text-center font-medium text-white hover:bg-orange-600 focus:outline-none focus:ring-4 focus:ring-orange-300 ${compactMobile ? "px-3 py-2 text-xs sm:px-5 sm:py-2.5 sm:text-sm" : "px-5 py-2.5 text-sm"}`}
                 >
                   {especialLabel}
                 </button>
               ) : (
                 <button
-                  className="flex items-center justify-center rounded-lg bg-orange-500 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-600 focus:outline-none focus:ring-4 focus:ring-orange-300"
+                  className={`flex items-center justify-center rounded-lg bg-orange-500 text-center font-medium text-white hover:bg-orange-600 focus:outline-none focus:ring-4 focus:ring-orange-300 ${compactMobile ? "px-3 py-2 text-xs sm:px-5 sm:py-2.5 sm:text-sm" : "px-5 py-2.5 text-sm"}`}
                   onClick={gerirAdicionarCarrinho}
                   disabled={!p || !p._id}
                 >
-                  <ShoppingCart size={22} className="mr-2" />
+                  <ShoppingCart size={compactMobile ? 18 : 22} className={`mr-2 ${compactMobile ? "sm:w-6 sm:h-6" : ""}`} />
                   Adicionar ao carrinho
                 </button>
               )}
