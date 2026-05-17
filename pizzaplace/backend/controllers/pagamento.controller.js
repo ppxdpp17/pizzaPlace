@@ -103,7 +103,7 @@ export const criarSessaoCheckout = async (req, res) => {
 
     // 5. Criar Sessão Stripe
     const sessionConfig = {
-      payment_method_types: ["card"],
+      payment_method_types: ["card", "mb_way", "paypal"],
       line_items: lineItems,
       mode: "payment",
       billing_address_collection: "required",
