@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Mail, Loader } from "lucide-react";
 import { Link } from "react-router-dom";
 import Input from "../components/Input";
-import axios from "../lib/axios"; 
+import axios from "../lib/axios";
 
 const PaginaEsqueceuPassword = () => {
   const [email, setEmail] = useState("");
@@ -34,35 +34,40 @@ const PaginaEsqueceuPassword = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 bg-cover bg-center bg-no-repeat bg-fixed" style={{ backgroundImage: "url('/piuzz.png')" }}>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="max-w-md w-full bg-gray-800 bg-opacity-50 backdrop-filter backdrop-blur-xl rounded-2xl shadow-xl overflow-hidden"
+        className="max-w-md w-full bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200 overflow-hidden mx-4"
       >
         <div className="p-8">
-          <h2 className="text-3xl font-bold mb-6 text-center bg-gradient-to-r from-green-400 to-emerald-500 text-transparent bg-clip-text">
+          <div className="flex justify-center mb-6">
+            <img src="/logo.png" alt="Big Bob's Logo" className="h-20 w-auto rounded-full shadow-md" />
+          </div>
+          <h2 className="text-3xl font-bold mb-6 text-center text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-700 pb-1">
             Recuperar Password
           </h2>
 
           <form onSubmit={handleSubmit}>
-            <Input
-              icon={Mail}
-              type="email"
-              placeholder="Insira o seu email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+            <div className="bg-gray-50 p-1 rounded-xl mb-4">
+              <Input
+                icon={Mail}
+                type="email"
+                placeholder="Insira o seu email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
 
-            {message && <p className="text-sm text-center mt-2 text-green-300">{message}</p>}
-            {error && <p className="text-sm text-center mt-2 text-red-400">{error}</p>}
+            {message && <p className="text-sm font-medium text-center mt-2 text-green-600 bg-green-50 rounded-lg py-2">{message}</p>}
+            {error && <p className="text-sm font-medium text-center mt-2 text-red-500 bg-red-50 rounded-lg py-2">{error}</p>}
 
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full py-3 px-4 mt-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-lg shadow-lg hover:from-green-600 hover:to-emerald-700 focus:outline-none transition duration-200"
+              className="w-full py-3 px-4 mt-4 bg-red-600 text-white font-bold rounded-lg shadow-md hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 transition duration-200"
               type="submit"
               disabled={isLoading}
             >
@@ -71,8 +76,8 @@ const PaginaEsqueceuPassword = () => {
           </form>
         </div>
 
-        <div className="px-8 py-4 bg-gray-900 bg-opacity-50 flex justify-center">
-          <Link to="/login" className="text-green-400 hover:underline text-sm">
+        <div className="px-8 py-4 bg-gray-50 border-t border-gray-100 flex justify-center">
+          <Link to="/login" className="text-red-500 hover:text-red-700 font-medium hover:underline text-sm transition-colors">
             Voltar ao Login
           </Link>
         </div>

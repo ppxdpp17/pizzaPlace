@@ -18,10 +18,14 @@ export default function PaginaResetPassword() {
 
   if (!token) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="max-w-md w-full p-6 bg-gray-800 rounded-2xl text-center">
-          <p className="text-red-400">Token inválido ou ausente.</p>
-          <Link className="text-green-400 mt-4 inline-block" to="/esqueceu-password">Pedir novo link</Link>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 bg-cover bg-center bg-no-repeat bg-fixed" style={{ backgroundImage: "url('/piuzz.png')" }}>
+        <div className="max-w-md w-full p-8 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl text-center border border-gray-200 mx-4">
+          <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Lock className="text-red-500 w-8 h-8" />
+          </div>
+          <p className="text-red-500 font-bold text-lg mb-2">Token inválido ou ausente.</p>
+          <p className="text-gray-500 text-sm mb-6">Infelizmente este link de recuperação não funciona ou já expirou.</p>
+          <Link className="bg-red-50 text-red-600 font-semibold px-6 py-2 rounded-lg hover:bg-red-100 transition-colors inline-block" to="/esqueceu-password">Pedir novo link</Link>
         </div>
       </div>
     );
@@ -55,53 +59,58 @@ export default function PaginaResetPassword() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 bg-cover bg-center bg-no-repeat bg-fixed" style={{ backgroundImage: "url('/piuzz.png')" }}>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="max-w-md w-full bg-gray-800 bg-opacity-50 backdrop-blur rounded-2xl shadow-xl overflow-hidden"
+        className="max-w-md w-full bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200 overflow-hidden mx-4"
       >
         <div className="p-8">
-          <h2 className="text-2xl font-bold mb-4 text-center text-emerald-400">Repor Password</h2>
+          <div className="flex justify-center mb-4">
+            <img src="/logo.png" alt="Big Bob's Logo" className="h-16 w-auto rounded-full shadow-md" />
+          </div>
+          <h2 className="text-2xl font-bold mb-6 text-center text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-700 pb-1">Repor Password</h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <Input
-              icon={Lock}
-              type="password"
-              placeholder="Nova password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-            <Input
-              icon={Lock}
-              type="password"
-              placeholder="Confirmar password"
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-              required
-            />
+            <div className="bg-gray-50 p-1 rounded-xl space-y-2">
+              <Input
+                icon={Lock}
+                type="password"
+                placeholder="Nova password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <Input
+                icon={Lock}
+                type="password"
+                placeholder="Confirmar password"
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+                required
+              />
+            </div>
 
             <MedidorForcaPassword password={password} />
 
-            {msg && <p className="text-sm text-center mt-2 text-emerald-300">{msg}</p>}
-            {error && <p className="text-sm text-center mt-2 text-red-400">{error}</p>}
+            {msg && <p className="text-sm font-medium text-center mt-2 text-green-600 bg-green-50 rounded-lg py-2">{msg}</p>}
+            {error && <p className="text-sm font-medium text-center mt-2 text-red-500 bg-red-50 rounded-lg py-2">{error}</p>}
 
             <motion.button
               type="submit"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               disabled={isLoading}
-              className="w-full py-3 mt-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-lg transition"
+              className="w-full py-3 mt-4 bg-red-600 text-white font-bold rounded-lg shadow-md hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 transition duration-200"
             >
               {isLoading ? <Loader className="w-5 h-5 animate-spin mx-auto" /> : "Alterar password"}
             </motion.button>
           </form>
         </div>
 
-        <div className="px-8 py-4 bg-gray-900 bg-opacity-50 flex justify-center">
-          <Link to="/login" className="text-green-400 hover:underline text-sm">Voltar ao Login</Link>
+        <div className="px-8 py-4 bg-gray-50 border-t border-gray-100 flex justify-center">
+          <Link to="/login" className="text-red-500 hover:text-red-700 font-medium hover:underline text-sm transition-colors">Voltar ao Login</Link>
         </div>
       </motion.div>
     </div>
