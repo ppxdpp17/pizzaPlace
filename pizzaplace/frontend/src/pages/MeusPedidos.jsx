@@ -8,8 +8,8 @@ function ImagemCollage({ imagens = [], altBase = "Produto" }) {
   const count = imagens.length;
   if (count === 0) {
     return (
-      <div className="w-16 h-16 rounded-md bg-gray-700 flex items-center justify-center text-sm text-gray-400">
-        Sem imagem
+      <div className="w-16 h-16 rounded-md bg-gray-100 flex items-center justify-center text-sm text-gray-500 border border-gray-200">
+        Sem img
       </div>
     );
   }
@@ -55,17 +55,17 @@ function formatTamanhoLabel(tamanhoRaw) {
 
 const MeusPedidosVazio = () => (
   <motion.div
-    className="flex flex-col items-center justify-center space-y-4 py-24"
+    className="flex flex-col items-center justify-center space-y-4 py-20 bg-white/90 rounded-xl shadow-md border border-gray-100 max-w-xl mx-auto mt-10 backdrop-blur-sm"
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.4 }}
   >
-    <Package className="h-24 w-24 text-gray-300" />
-    <h3 className="text-2xl font-semibold">Ainda não realizou nenhum pedido.</h3>
-    <p className="text-gray-400">Comece a explorar o menu e faça a sua primeira encomenda.</p>
+    <Package className="h-24 w-24 text-gray-400" />
+    <h3 className="text-2xl font-semibold text-gray-900">Ainda não realizou nenhum pedido.</h3>
+    <p className="text-gray-600">Comece a explorar o menu e faça a sua primeira encomenda.</p>
     <Link
       to="/"
-      className="mt-4 rounded-md bg-emerald-500 px-6 py-2 text-white transition-colors hover:bg-emerald-600"
+      className="mt-6 rounded-md bg-red-600 px-8 py-3 text-white font-medium transition-colors hover:bg-red-700 shadow-sm"
     >
       Começar a Comprar
     </Link>
@@ -101,118 +101,131 @@ export default function MeusPedidos() {
     return () => clearInterval(intervalRef.current);
   }, []);
 
-  if (loading) return <p className="p-4 text-center">A carregar...</p>;
-  if (error) return <p className="p-4 text-center text-red-400">Erro: {error}</p>;
-  if (!pedidos.length) return <div className="p-4"><MeusPedidosVazio /></div>;
+  if (loading) return (
+    <div className="p-4 min-h-screen bg-cover bg-center bg-no-repeat bg-fixed bg-gray-50 flex items-center justify-center" style={{ backgroundImage: "url('/piuzz.png')" }}>
+      <div className="bg-white/90 p-6 rounded-xl shadow-md border border-gray-100 backdrop-blur-sm">
+        <p className="text-lg text-gray-700 font-medium">A carregar...</p>
+      </div>
+    </div>
+  );
+  if (error) return (
+    <div className="p-4 min-h-screen bg-cover bg-center bg-no-repeat bg-fixed bg-gray-50 flex items-center justify-center" style={{ backgroundImage: "url('/piuzz.png')" }}>
+      <div className="bg-white/90 p-6 rounded-xl shadow-md border border-gray-100 backdrop-blur-sm">
+        <p className="text-red-500 font-medium">Erro: {error}</p>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="p-4">
-      <div className="max-w-7xl mx-auto space-y-4">
-        <h2 className="text-2xl font-semibold text-emerald-400">Os Meus Pedidos</h2>
+    <div className="p-4 min-h-screen bg-cover bg-center bg-no-repeat bg-fixed bg-gray-50" style={{ backgroundImage: "url('/piuzz.png')" }}>
 
-        {pedidos.map(pedido => {
-          const imagens = (pedido.produtos ?? []).map(p => p.imagem || p.produto?.imagem).filter(Boolean);
-          const imagensFinal = imagens.length ? imagens : ["/placeholder.png"];
-          // --- LÓGICA DE NOMES (HEADER) ---
-          // 1. Tenta nome guardado no pedido (p.nome)
-          // 2. Se não existir, tenta no produto populado (p.produto.nome)
-          const nomes = (pedido.produtos ?? []).map(p => p.nome ?? p.produto?.nome ?? "Produto");
-          const nomePedido = nomes.length === 1 ? nomes[0] : `${nomes[0]} +${Math.max(0, nomes.length - 1)}`;
-          const address = pedido.shippingAddress || {};
-          const total = Number(pedido.total ?? 0).toFixed(2);
+      {!pedidos.length ? (
+        <MeusPedidosVazio />
+      ) : (
+        <div className="max-w-7xl mx-auto space-y-4">
+          <h2 className="text-4xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-700 mt-4 mb-8 drop-shadow-sm">
+            Os Meus Pedidos
+          </h2>
 
-          //Usar "A cozinhar" (por defeito) ou o que está guardado no "pedido"
-          const estado = pedido.estado || "A Cozinhar";
+          {pedidos.map(pedido => {
+            const imagens = (pedido.produtos ?? []).map(p => p.imagem || p.produto?.imagem).filter(Boolean);
+            const imagensFinal = imagens.length ? imagens : ["/placeholder.png"];
+            // --- LÓGICA DE NOMES (HEADER) ---
+            const nomes = (pedido.produtos ?? []).map(p => p.nome ?? p.produto?.nome ?? "Produto");
+            const nomePedido = nomes.length === 1 ? nomes[0] : `${nomes[0]} +${Math.max(0, nomes.length - 1)}`;
+            const address = pedido.shippingAddress || {};
+            const total = Number(pedido.total ?? 0).toFixed(2);
 
-          //Mapping para cor e label
-          const estadoLabel = estado === "A Cozinhar" ? "A cozinhar..." :
-            estado === "A Caminho" ? "A caminho" : "Entregue!";
-          const estadoColor = estado === "A Cozinhar" ? "text-yellow-300" :
-            estado === "A Caminho" ? "text-amber-300" : "text-emerald-400";
+            const estado = pedido.estado || "A Cozinhar";
 
-          const dataHora = pedido.createdAt ? new Date(pedido.createdAt).toLocaleString() : "";
+            const estadoLabel = estado === "A Cozinhar" ? "A cozinhar..." :
+              estado === "A Caminho" ? "A caminho" : "Entregue!";
+            const estadoColor = estado === "A Cozinhar" ? "text-orange-500" :
+              estado === "A Caminho" ? "text-yellow-600" : "text-green-600";
 
-          return (
-            <motion.div
-              key={pedido._id}
-              layout
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex items-stretch bg-gray-800/60 rounded-xl p-4 shadow-sm"
-            >
-              <div className="w-24 flex-shrink-0 flex flex-col items-end pr-4 border-r border-gray-700">
-                <div className="text-right">
-                  <div className="text-sm text-gray-400">Total</div>
-                  <div className="text-xl font-semibold text-emerald-400">€{total}</div>
+            const dataHora = pedido.createdAt ? new Date(pedido.createdAt).toLocaleString() : "";
+
+            return (
+              <motion.div
+                key={pedido._id}
+                layout
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-stretch bg-white/95 backdrop-blur-sm rounded-xl p-4 shadow-md border border-gray-200 hover:shadow-lg transition-shadow"
+              >
+                <div className="w-32 flex-shrink-0 flex flex-col items-end pr-4 border-r border-gray-200">
+                  <div className="text-right">
+                    <div className="text-sm text-gray-500 font-medium">Total</div>
+                    <div className="text-xl font-bold text-red-600">€{total}</div>
+                  </div>
+                  <div className="mt-auto pt-4 text-right">
+                    <div className="text-xs text-gray-500 font-medium uppercase tracking-wider">Estado</div>
+                    <div className={`mt-1 text-sm font-bold ${estadoColor}`}>{estadoLabel}</div>
+                  </div>
                 </div>
-                <div className="mt-auto pt-4 text-right">
-                  <div className="text-xs text-gray-400">Estado:</div>
-                  <div className={`mt-1 text-sm font-semibold ${estadoColor}`}>{estadoLabel}</div>
-                </div>
-              </div>
 
-              <div className="flex items-center gap-4 pl-4 flex-1">
-                <ImagemCollage imagens={imagensFinal} altBase={nomePedido} />
-                <div className="flex-1">
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <div className="text-lg font-semibold text-white">{nomePedido}</div>
-                      <div className="text-sm text-gray-300 mt-1">{address.name}</div>
+                <div className="flex items-center gap-4 pl-4 flex-1">
+                  <ImagemCollage imagens={imagensFinal} altBase={nomePedido} />
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between gap-4">
+                      <div>
+                        <div className="text-lg font-bold text-gray-900">{nomePedido}</div>
+                        <div className="text-sm text-gray-600 mt-0.5">{address.name}</div>
+                      </div>
+                      <div className="text-sm text-gray-500 font-medium">{dataHora}</div>
                     </div>
-                    <div className="text-sm text-gray-400">{dataHora}</div>
-                  </div>
 
-                  <div className="text-sm text-gray-400 mt-2">
-                    {address.line1}{address.line2 ? `, ${address.line2}` : ""} {address.city}
-                  </div>
-                  <div className="text-sm text-gray-400">
-                    {address.postal_code} {address.country}
-                  </div>
+                    <div className="text-sm text-gray-600 mt-2">
+                      {address.line1}{address.line2 ? `, ${address.line2}` : ""} {address.city}
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      {address.postal_code} {address.country}
+                    </div>
 
-                  <div className="text-sm text-gray-400 mt-2">
-                    Entrega: <span className="font-medium text-white">{pedido.tipoEntrega}</span>
-                    <div></div>
-                    Pagamento: <span className="font-medium text-white">{pedido.metodoPagamento}</span>
-                  </div>
+                    <div className="text-sm text-gray-600 mt-3 pt-2 flex gap-4">
+                      <span>
+                        Entrega: <span className="font-semibold text-gray-900 capitalize">{pedido.tipoEntrega}</span>
+                      </span>
+                      <span>
+                        Pagamento: <span className="font-semibold text-gray-900 capitalize">{pedido.metodoPagamento === 'stripe' ? 'Cartão' : pedido.metodoPagamento}</span>
+                      </span>
+                    </div>
 
-                  <div className="mt-2 text-sm text-gray-300">
-                    {pedido.produtos?.map((p, idx) => {
-                      // tentar extrair o tamanho de várias possíveis localizações
-                      const tamanhoRaw =
-                        p.tamanho ??
-                        p.meta?.tamanho ??
-                        p.produto?.tamanho ??
-                        p.produto?.meta?.tamanho ??
-                        (p.produto && typeof p.produto === "object" ? p.produto.meta?.tamanho : undefined);
+                    <div className="mt-3 text-sm text-gray-700 space-y-1">
+                      {pedido.produtos?.map((p, idx) => {
+                        const tamanhoRaw =
+                          p.tamanho ??
+                          p.meta?.tamanho ??
+                          p.produto?.tamanho ??
+                          p.produto?.meta?.tamanho ??
+                          (p.produto && typeof p.produto === "object" ? p.produto.meta?.tamanho : undefined);
 
-                      const tamanhoLabel = formatTamanhoLabel(tamanhoRaw);
+                        const tamanhoLabel = formatTamanhoLabel(tamanhoRaw);
+                        const nomeProduto = p.nome ?? p.produto?.nome ?? "Produto";
+                        const preco = Number(p.preco ?? 0).toFixed(2);
 
-                      // nome do produto (se produto estiver populado use p.produto.nome, senão p.nome)
-                      // nome do produto (prioridade ao snapshot p.nome, depois p.produto.nome)
-                      const nomeProduto = p.nome ?? p.produto?.nome ?? "Produto";
-
-                      // preço: garantir .toFixed(2) sem erro
-                      const preco = Number(p.preco ?? 0).toFixed(2);
-
-                      return (
-                        <div key={idx} className="flex justify-between">
-                          <div>
-                            <span className="font-medium text-white">{nomeProduto}</span>
-                            {tamanhoLabel && <span className="text-gray-400 ml-2">({tamanhoLabel})</span>}
-                            <span className="text-gray-400 ml-2">× {p.quantidade}</span>
+                        return (
+                          <div key={idx} className="flex justify-between items-center bg-gray-50 p-1.5 rounded-md border border-gray-100">
+                            <div>
+                              <span className="font-semibold text-gray-800">{nomeProduto}</span>
+                              {tamanhoLabel && <span className="text-xs text-gray-600 font-medium ml-2 bg-gray-200 px-1.5 py-0.5 rounded">
+                                {tamanhoLabel}
+                              </span>}
+                              <span className="text-gray-500 ml-2 text-xs font-semibold">× {p.quantidade}</span>
+                            </div>
+                            <div className="text-gray-700 font-medium">€{preco}</div>
                           </div>
-                          <div className="text-gray-400">€{preco}</div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-            </motion.div>
-          );
-        })}
-      </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

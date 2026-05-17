@@ -28,7 +28,7 @@ function ImagemCollage({ imagens = [], altBase = "Produto" }) {
 
   if (count === 0) {
     return (
-      <div className="w-24 h-24 rounded-md bg-gray-700 flex items-center justify-center text-sm text-gray-400">
+      <div className="w-24 h-24 rounded-md bg-gray-100 border border-gray-200 flex items-center justify-center text-sm text-gray-500">
         Sem img
       </div>
     );
@@ -38,7 +38,7 @@ function ImagemCollage({ imagens = [], altBase = "Produto" }) {
       <img
         src={imagens[0]}
         alt={`${altBase} 1`}
-        className="w-24 h-24 rounded-md object-cover bg-gray-700 flex-shrink-0"
+        className="w-24 h-24 rounded-md object-cover bg-gray-100 flex-shrink-0 border border-gray-100 shadow-sm"
       />
     );
   }
@@ -104,9 +104,21 @@ const Pedidos = () => {
     return () => clearInterval(intervalRef.current);
   }, [isAdmin]); // Recarrega se o cargo mudar (login/logout)
 
-  if (loading) return <p className="p-4 text-center text-gray-300">Carregando pedidos...</p>;
-  if (error) return <p className="p-4 text-center text-red-400">Erro: {error}</p>;
-  if (!pedidos.length) return <p className="p-4 text-center text-gray-400">Nenhum pedido encontrado.</p>;
+  if (loading) return (
+    <div className="bg-white/90 p-4 rounded-xl shadow-sm border border-gray-100 mx-auto max-w-sm mt-4 text-center">
+      <p className="text-gray-600 font-medium">Carregando pedidos...</p>
+    </div>
+  );
+  if (error) return (
+    <div className="bg-white/90 p-4 rounded-xl shadow-sm border border-gray-100 mx-auto max-w-sm mt-4 text-center">
+      <p className="text-red-500 font-medium">Erro: {error}</p>
+    </div>
+  );
+  if (!pedidos.length) return (
+    <div className="bg-white/90 p-4 rounded-xl shadow-sm border border-gray-100 mx-auto max-w-sm mt-4 text-center">
+      <p className="text-gray-500 font-medium">Nenhum pedido encontrado.</p>
+    </div>
+  );
 
   const filteredPedidos = pedidos.filter(pedido => {
     if (!isAdmin || selectedCity === 'Todos') return true;
@@ -134,7 +146,7 @@ const Pedidos = () => {
           <select
             value={selectedCity}
             onChange={(e) => setSelectedCity(e.target.value)}
-            className="bg-gray-700 text-white rounded-md px-3 py-1 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            className="bg-white text-gray-800 rounded-md px-3 py-1.5 border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 font-medium"
           >
             {cities.map(city => (
               <option key={city} value={city}>{city}</option>
@@ -175,17 +187,17 @@ const Pedidos = () => {
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="flex items-stretch bg-gray-800/60 rounded-xl p-4 shadow-sm"
+            className="flex items-stretch bg-white/95 rounded-xl p-4 shadow-md border border-gray-100 hover:shadow-lg transition-shadow"
           >
             {/* COLUNA ESQUERDA: PREÇO E ESTADO */}
-            <div className="w-40 flex-shrink-0 flex flex-col items-end pr-4 border-r border-gray-700">
+            <div className="w-40 flex-shrink-0 flex flex-col items-end pr-4 border-r border-gray-200">
               <div className="text-right">
-                <div className="text-sm text-gray-400">Total</div>
-                <div className="text-xl font-semibold text-emerald-400">€{total}</div>
+                <div className="text-sm text-gray-500 font-medium">Total</div>
+                <div className="text-xl font-bold text-red-600">€{total}</div>
               </div>
 
               <div className="mt-auto pt-4 text-right">
-                <div className="text-xs text-gray-400">Estado:</div>
+                <div className="text-xs text-gray-500 font-medium uppercase tracking-wider">Estado:</div>
 
                 {isAdmin ? (
                   <div className="mt-1">
@@ -206,8 +218,8 @@ const Pedidos = () => {
                     />
                   </div>
                 ) : (
-                  <div className={`mt-1 text-sm font-semibold ${estado === "A Cozinhar" || estado === "Aguardando Pagamento" ? "text-yellow-300" :
-                    estado === "A Caminho" ? "text-amber-300" : "text-emerald-400"
+                  <div className={`mt-1 text-sm font-bold ${estado === "A Cozinhar" || estado === "Aguardando Pagamento" ? "text-orange-500" :
+                    estado === "A Caminho" ? "text-yellow-600" : "text-green-600"
                     }`}>
                     {estado === "A Cozinhar" ? "A cozinhar..." :
                       estado === "Aguardando Pagamento" ? "Aguardando..." :
@@ -226,40 +238,43 @@ const Pedidos = () => {
                 {/* CABEÇALHO DO ITEM */}
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <div className="text-lg font-semibold text-white">{nomePedido}</div>
-                    <div className="text-sm text-gray-300">
-                      {userNome} {userEmail && <span className="text-xs text-gray-500">• {userEmail}</span>}
+                    <div className="text-lg font-bold text-gray-900">{nomePedido}</div>
+                    <div className="text-sm text-gray-600 mt-0.5">
+                      {userNome} {userEmail && <span className="text-xs text-gray-400">• {userEmail}</span>}
                     </div>
                   </div>
-                  <div className="text-sm text-gray-400">
+                  <div className="text-sm text-gray-500 font-medium">
                     {pedido.createdAt ? new Date(pedido.createdAt).toLocaleString() : ""}
                   </div>
                 </div>
 
                 {/* MORADA E LOCALIZAÇÃO */}
-                <div className="text-sm text-gray-300 mt-2">
+                <div className="text-sm text-gray-600 mt-2">
                   {pedido.tipoEntrega === 'delivery' ? (
                     <>
-                      <div className="font-medium text-white">{address.name}</div>
+                      <div className="font-semibold text-gray-800">{address.name}</div>
                       <div>{address.line1}{address.line2 ? `, ${address.line2}` : ""}</div>
                       <div>{address.city} {address.postal_code && `• ${address.postal_code}`} {address.country && `• ${address.country}`}</div>
                     </>
                   ) : (
-                    <div className="font-medium text-yellow-400">
+                    <div className="font-bold text-orange-600">
                       Takeaway • Levantamento em: {pedido.localizacao}
                     </div>
                   )}
                 </div>
 
                 {/* DETALHES DE PAGAMENTO */}
-                <div className="text-sm text-gray-400 mt-2">
-                  Entrega: <span className="font-medium text-white capitalize">{pedido.tipoEntrega}</span>
-                  {" • "}
-                  Pagamento: <span className="font-medium text-white capitalize">{pedido.metodoPagamento === 'stripe' ? 'Cartão (Stripe)' : pedido.metodoPagamento}</span>
+                <div className="text-sm text-gray-600 mt-3 pt-2 flex gap-4">
+                  <span>
+                    Entrega: <span className="font-semibold text-gray-900 capitalize">{pedido.tipoEntrega}</span>
+                  </span>
+                  <span>
+                    Pagamento: <span className="font-semibold text-gray-900 capitalize">{pedido.metodoPagamento === 'stripe' ? 'Cartão' : pedido.metodoPagamento}</span>
+                  </span>
                 </div>
 
                 {/* LISTA DE PRODUTOS */}
-                <div className="mt-3 space-y-1 text-sm text-gray-300 border-t border-gray-700/50 pt-2">
+                <div className="mt-3 space-y-1 text-sm text-gray-700 border-t border-gray-100 pt-3">
                   {pedido.produtos?.map((p, idx) => {
                     // Fallback triplo para tamanho
                     const tamanhoRaw = p.tamanho ?? p.meta?.tamanho ?? p.produto?.tamanho;
@@ -270,15 +285,15 @@ const Pedidos = () => {
 
                     return (
                       <div key={idx} className="flex flex-col">
-                        <div className="flex justify-between items-center">
+                        <div className="flex justify-between items-center bg-gray-50 p-1.5 rounded-md border border-gray-100 mb-1">
                           <div>
-                            <span className="font-medium text-white">{nomeProduto}</span>
-                            {tamanhoLabel && <span className="text-gray-400 ml-2 text-xs uppercase bg-gray-700 px-1.5 py-0.5 rounded">
+                            <span className="font-semibold text-gray-800">{nomeProduto}</span>
+                            {tamanhoLabel && <span className="text-gray-600 ml-2 text-xs uppercase bg-gray-200 px-1.5 py-0.5 rounded font-medium">
                               {tamanhoLabel}
                             </span>}
-                            <span className="text-gray-400 text-xs"> × {p.quantidade}</span>
+                            <span className="text-gray-500 ml-2 text-xs font-semibold"> × {p.quantidade}</span>
                           </div>
-                          <div className="text-gray-400">€{(p.preco).toFixed(2)}</div>
+                          <div className="text-gray-700 font-medium">€{(p.preco).toFixed(2)}</div>
                         </div>
                         {/* Detalhes para Pizza Personalizada (apenas Admin) */}
                         {isAdmin && (
@@ -287,16 +302,16 @@ const Pedidos = () => {
                           p.nome?.toLowerCase().includes("costumizada") ||
                           p.nome?.toLowerCase().includes("make your own")
                         ) && (
-                            <div className="ml-4 mt-1">
-                              <details className="text-xs text-gray-400 cursor-pointer">
-                                <summary className="hover:text-emerald-400 transition-colors">Ver Detalhes</summary>
-                                <div className="pl-2 pt-1 border-l border-gray-600 mt-1 space-y-0.5">
-                                  {p.meta?.massa && <div><span className="text-gray-500">Massa:</span> {p.meta.massa}</div>}
-                                  {p.meta?.molho && <div><span className="text-gray-500">Molho:</span> {p.meta.molho}</div>}
+                            <div className="ml-4 mt-1 mb-2">
+                              <details className="text-xs text-gray-500 cursor-pointer">
+                                <summary className="hover:text-red-500 transition-colors font-medium">Ver Detalhes</summary>
+                                <div className="pl-2 pt-1 border-l-2 border-red-200 mt-1 space-y-0.5 text-gray-600 bg-red-50/50 p-2 rounded-r-md">
+                                  {p.meta?.massa && <div><span className="text-gray-400 font-medium">Massa:</span> {p.meta.massa}</div>}
+                                  {p.meta?.molho && <div><span className="text-gray-400 font-medium">Molho:</span> {p.meta.molho}</div>}
                                   {p.meta?.ingredientes && Array.isArray(p.meta.ingredientes) && (
-                                    <div><span className="text-gray-500">Ingredientes:</span> {p.meta.ingredientes.join(", ")}</div>
+                                    <div><span className="text-gray-400 font-medium">Ingredientes:</span> {p.meta.ingredientes.join(", ")}</div>
                                   )}
-                                  {p.meta?.nota && <div><span className="text-gray-500">Nota:</span> <span className="text-yellow-200/80">{p.meta.nota}</span></div>}
+                                  {p.meta?.nota && <div><span className="text-gray-400 font-medium">Nota:</span> <span className="text-gray-800 italic">{p.meta.nota}</span></div>}
                                 </div>
                               </details>
                             </div>
