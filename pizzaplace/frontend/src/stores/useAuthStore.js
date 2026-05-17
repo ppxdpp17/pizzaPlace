@@ -20,8 +20,8 @@ export const useAuthStore = create((set) => ({
 			set({ user: response.data.user, isAuthenticated: true, isLoading: false });
 		} catch (error) {
 			console.error("Resposta completa do erro:", error.response);
-  			console.error("Mensagem do servidor:", error.response?.data);
-			set({ error: error.response.data.message || "Por favor preencha todos os campos!", isLoading: false });
+			console.error("Mensagem do servidor:", error.response?.data);
+			set({ error: error.response?.data?.msg || error.response?.data?.message || "Ocorreu um erro a criar a conta!", isLoading: false });
 			throw error;
 		}
 	},
@@ -83,8 +83,8 @@ export const useAuthStore = create((set) => ({
 			set({ message: response.data?.msg || response.data?.message || null, isLoading: false });
 		} catch (error) {
 			set({
-			isLoading: false,
-			error: error.response?.data?.msg || error.response?.data?.message || "Erro no envio do email de redefinição de password",
+				isLoading: false,
+				error: error.response?.data?.msg || error.response?.data?.message || "Erro no envio do email de redefinição de password",
 			});
 			throw error;
 		}
@@ -96,8 +96,8 @@ export const useAuthStore = create((set) => ({
 			set({ message: response.data?.msg || response.data?.message || null, isLoading: false });
 		} catch (error) {
 			set({
-			isLoading: false,
-			error: error.response?.data?.msg || error.response?.data?.message || "Erro ao redifinir a password",
+				isLoading: false,
+				error: error.response?.data?.msg || error.response?.data?.message || "Erro ao redifinir a password",
 			});
 			throw error;
 		}

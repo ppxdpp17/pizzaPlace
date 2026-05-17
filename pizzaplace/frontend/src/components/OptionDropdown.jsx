@@ -54,11 +54,11 @@ export default function OptionDropdown({ options = [], value, onChange, placehol
         aria-haspopup="listbox"
         aria-expanded={open}
         onClick={() => { setOpen(v => !v); setFocusedIndex(-1); }}
-        className="w-full flex items-center justify-between p-3 rounded-lg bg-gray-700 text-white hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+        className="w-full flex items-center justify-between p-3 rounded-lg bg-white text-gray-900 border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500 shadow-sm transition-colors"
       >
         <div className="flex items-center gap-3">
-          {Icon && <Icon className="opacity-80" />}
-          <span className={`${selectedLabel ? "text-white" : "text-gray-300"}`}>
+          {Icon && <Icon className="text-gray-500" />}
+          <span className={`${selectedLabel ? "text-gray-900 font-bold" : "text-gray-500 font-medium"}`}>
             {selectedLabel || placeholder}
           </span>
         </div>
@@ -73,7 +73,7 @@ export default function OptionDropdown({ options = [], value, onChange, placehol
             initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
-            className="absolute left-0 right-0 mt-2 max-h-60 overflow-auto bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-50 p-1"
+            className="absolute left-0 right-0 mt-2 max-h-60 overflow-auto bg-white border border-gray-200 rounded-lg shadow-xl z-50 p-1"
             role="listbox"
             aria-activedescendant={focusedIndex >= 0 ? `opt-${focusedIndex}` : undefined}
           >
@@ -90,11 +90,11 @@ export default function OptionDropdown({ options = [], value, onChange, placehol
                     onMouseLeave={() => setFocusedIndex(-1)}
                     onClick={() => { onChange && onChange(val); setOpen(false); }}
                     className={`w-full text-left px-3 py-2 rounded-md transition 
-                      ${selected ? "bg-emerald-600 text-white" : (focused ? "bg-gray-700 text-white" : "text-gray-200")}
+                      ${selected ? "bg-red-50 text-red-700 font-bold" : (focused ? "bg-gray-50 text-gray-900 font-medium" : "text-gray-700 font-medium")}
                     `}
                   >
                     {label}
-                    {selected && <span className="ml-2 text-xs px-2 py-1 bg-white/10 rounded-full">Selecionado</span>}
+                    {selected && <span className="ml-2 text-xs font-bold px-2 py-1 bg-red-100 text-red-600 rounded-full">✓</span>}
                   </button>
                 </li>
               );

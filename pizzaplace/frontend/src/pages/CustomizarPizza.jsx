@@ -117,90 +117,94 @@ export default function CustomizarPizza() {
     navigate(-1);
   };
 
-  if (loading) return <div className="p-8 text-center">A Carregar...</div>;
+  if (loading) return <div className="p-8 text-center text-gray-500 font-medium">A Carregar...</div>;
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }} className="min-h-screen flex items-center justify-center py-12">
-      <div className="w-full max-w-6xl bg-gray-900/60 backdrop-blur-sm border border-gray-700 rounded-2xl shadow-2xl p-6" style={{ minHeight: 640 }}>
-        <motion.h1 className="text-center text-4xl sm:text-5xl font-bold text-emerald-400 mb-6" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-          Personalizar Pizza
-        </motion.h1>
+    <div className="min-h-screen bg-gray-50 bg-cover bg-center bg-no-repeat bg-fixed py-12" style={{ backgroundImage: "url('/piuzz.png')" }}>
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }} className="flex items-center justify-center px-4">
+        <div className="w-full max-w-6xl bg-white/95 backdrop-blur-sm border border-gray-200 rounded-2xl shadow-xl p-6" style={{ minHeight: 640 }}>
+          <motion.h1 className="text-center text-4xl sm:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600 mb-8 pb-3 border-b border-gray-100" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
+            Personalizar Pizza
+          </motion.h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-gray-800 rounded-lg p-6 flex flex-col gap-4">
-            <div>
-              <div className="text-sm text-gray-300 mb-2">Tamanho</div>
-              <div className="flex gap-2">
-                {TAMANHOS.map((t) => (
-                  <button key={t.id} type="button" onClick={() => setTamanho(t.id)} className={`px-3 py-2 rounded text-white text-sm ${t.id === tamanho ? "bg-emerald-600" : "bg-gray-700"}`}>
-                    {t.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 bg-gray-50 border border-gray-100 rounded-xl p-6 flex flex-col gap-6">
               <div>
-                <div className="text-sm text-gray-300 mb-2">Massa</div>
-                <OptionDropdown options={MASSAS} value={massa} onChange={setMassa} placeholder="Escolher massa" Icon={Badge} />
+                <div className="text-sm font-bold text-gray-700 mb-3">Tamanho</div>
+                <div className="flex gap-2">
+                  {TAMANHOS.map((t) => (
+                    <button key={t.id} type="button" onClick={() => setTamanho(t.id)} className={`px-4 py-2 rounded-lg font-bold text-sm transition-all shadow-sm ${t.id === tamanho ? "bg-red-600 text-white transform scale-105" : "bg-white text-gray-700 border border-gray-300 hover:bg-red-50 hover:text-red-700 hover:border-red-200"}`}>
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <div className="text-sm font-bold text-gray-700 mb-2">Massa</div>
+                  <OptionDropdown options={MASSAS} value={massa} onChange={setMassa} placeholder="Escolher massa" Icon={Badge} />
+                </div>
+
+                <div>
+                  <div className="text-sm font-bold text-gray-700 mb-2">Molho</div>
+                  <OptionDropdown options={MOLHOS} value={molho} onChange={setMolho} placeholder="Escolher molho" Icon={Shell} />
+                </div>
               </div>
 
               <div>
-                <div className="text-sm text-gray-300 mb-2">Molho</div>
-                <OptionDropdown options={MOLHOS} value={molho} onChange={setMolho} placeholder="Escolher molho" Icon={Shell} />
+                <div className="text-sm font-bold text-gray-700 mb-2">Toppings <span className="text-red-500 font-medium">(cada um €0.75)</span></div>
+                <div className="p-1 border border-gray-200 rounded-lg bg-white">
+                  <IngredientsSelector value={selecionados} onChange={setSelecionados} allowAdd={false} />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Observações</label>
+                <textarea value={observacoes} onChange={(e) => setObservacoes(e.target.value)} className="w-full p-3 rounded-lg bg-white text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500 shadow-sm" rows="3" placeholder="Adicione instruções especiais..." />
               </div>
             </div>
 
-            <div>
-              <div className="text-sm text-gray-300 mb-2">Toppings (cada um €0.75)</div>
-              <IngredientsSelector value={selecionados} onChange={setSelecionados} allowAdd={false} />
+            <div className="bg-gray-50 border border-gray-100 rounded-xl p-6 flex flex-col justify-between shadow-sm">
+              {/*Preço no topo da coluna*/}
+              <div className="mb-4">
+                <div className="text-sm font-bold text-gray-500 uppercase tracking-wider">Preço estimado</div>
+                <div className="text-4xl font-black text-red-600">€{preco.toFixed(2)}</div>
+              </div>
+
+              <div className="mb-4 bg-white p-2 rounded-xl shadow-sm border border-gray-100">
+                {/*Esconde-se o preço e ações no cartão de preview*/}
+                <CartaoProduto
+                  product={{
+                    _id: "preview-custom",
+                    nome: nomePadrao,
+                    preco,
+                    descricao: `${massa} · ${molho} · ${selecionados.length} toppings`,
+                    imagem: "/makeYourOwn.png",
+                    ingredientes: ingredientes.filter((i) => selecionados.includes(String(i._id ?? i.id))).map(i => ({ _id: i._id ?? i.id, nome: i.nome, icone: i.icone }))
+                  }}
+                  hideActions
+                  hidePrice
+                />
+              </div>
+
+              {/*Botões empilhados em baixo*/}
+              <div className="mt-6 flex flex-col gap-3">
+                <button onClick={handleAddToCart} className="flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 transition-colors px-4 py-3 rounded-lg text-white font-bold shadow-md">
+                  <ShoppingCartIcon size={20} />
+                  Adicionar ao carrinho
+                </button>
+
+                <button onClick={handleCancel} className="bg-white hover:bg-gray-100 border border-gray-300 transition-colors px-4 py-2.5 rounded-lg text-gray-700 font-bold shadow-sm">
+                  Cancelar
+                </button>
+              </div>
+
+              <div className="mt-4 text-xs font-medium text-gray-500 text-center">Ao adicionar a pizza personalizada, ela será colocada no carrinho como um item separado.</div>
             </div>
-
-            <div>
-              <label className="block text-sm text-gray-300 mb-1">Observações</label>
-              <textarea value={observacoes} onChange={(e) => setObservacoes(e.target.value)} className="w-full p-3 rounded bg-gray-700 text-white border border-gray-600" rows="4" />
-            </div>
-          </div>
-
-          <div className="bg-gray-800 rounded-lg p-6 flex flex-col justify-between shadow-sm">
-            {/*Preço no topo da coluna*/}
-            <div className="mb-4">
-              <div className="text-sm text-gray-300">Preço estimado</div>
-              <div className="text-2xl font-bold text-emerald-400">€{preco.toFixed(2)}</div>
-            </div>
-
-            <div className="mb-4">
-              {/*Esconde-se o preço e ações no cartão de preview*/}
-              <CartaoProduto
-                product={{
-                  _id: "preview-custom",
-                  nome: nomePadrao,
-                  preco,
-                  descricao: `${massa} · ${molho} · ${selecionados.length} toppings`,
-                  imagem: "/makeYourOwn.png",
-                  ingredientes: ingredientes.filter((i) => selecionados.includes(String(i._id ?? i.id))).map(i => ({ _id: i._id ?? i.id, nome: i.nome, icone: i.icone }))
-                }}
-                hideActions
-                hidePrice
-              />
-            </div>
-
-            {/*Botões empilhados em baixo*/}
-            <div className="mt-6 flex flex-col gap-3">
-              <button onClick={handleAddToCart} className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded text-white font-medium">
-                <ShoppingCartIcon size={18} />
-                Adicionar ao carrinho
-              </button>
-
-              <button onClick={handleCancel} className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-white text-sm">
-                Anular
-              </button>
-            </div>
-
-            <div className="mt-4 text-xs text-gray-400">Ao adicionar a pizza personalizada, ela será colocada no carrinho como um item separado.</div>
           </div>
         </div>
-      </div>
-    </motion.div>
+      </motion.div>
+    </div>
   );
 }

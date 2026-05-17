@@ -199,64 +199,68 @@ const CategoriaPage = () => {
 
       {/*Modal Mix 2 Pizzas*/}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           {/*overlay*/}
-          <div className="absolute inset-0 bg-black/60" onClick={closeModal} />
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={closeModal} />
 
           <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 12 }}
+            initial={{ opacity: 0, y: 12, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 12, scale: 0.95 }}
             transition={{ duration: 0.18 }}
-            className="relative z-10 w-full max-w-2xl bg-gray-900/80 backdrop-blur rounded-xl border border-gray-700 p-6"
+            className="relative z-10 w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-gray-100"
           >
-            <h3 className="text-xl font-semibold text-emerald-300 mb-4">Mix 2 Pizzas — Escolher</h3>
+            <div className="bg-red-600 px-6 py-4 rounded-t-2xl">
+              <h3 className="text-xl font-bold text-white">Mix 2 Pizzas — Escolher Pizzas</h3>
+            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-              <div>
-                <label className="text-sm text-gray-300 mb-1 block">Primeira Pizza</label>
+            <div className="p-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
+                <div>
+                  <label className="text-sm font-bold text-gray-700 mb-2 block">Primeira Pizza</label>
+                  {OptionDropdown ? (
+                    <OptionDropdown options={pizzaOptions} value={pizzaA} onChange={setPizzaA} placeholder="Escolher Primeira Pizza" />
+                  ) : (
+                    <select className="w-full p-2.5 outline-none rounded-lg bg-gray-50 border border-gray-300 focus:ring-2 focus:ring-red-500 text-gray-900" value={pizzaA || ""} onChange={(e) => setPizzaA(e.target.value)}>
+                      <option value="">Escolher Primeira Pizza</option>
+                      {pizzaOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                    </select>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-sm font-bold text-gray-700 mb-2 block">Segunda Pizza</label>
+                  {OptionDropdown ? (
+                    <OptionDropdown options={pizzaOptions} value={pizzaB} onChange={setPizzaB} placeholder="Escolher Segunda Pizza" />
+                  ) : (
+                    <select className="w-full p-2.5 outline-none rounded-lg bg-gray-50 border border-gray-300 focus:ring-2 focus:ring-red-500 text-gray-900" value={pizzaB || ""} onChange={(e) => setPizzaB(e.target.value)}>
+                      <option value="">Escolher Segunda Pizza</option>
+                      {pizzaOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                    </select>
+                  )}
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <label className="text-sm font-bold text-gray-700 mb-2 block">Tamanho da Pizza</label>
                 {OptionDropdown ? (
-                  <OptionDropdown options={pizzaOptions} value={pizzaA} onChange={setPizzaA} placeholder="Escolher Primeira Pizza" />
+                  <OptionDropdown options={TAMANHOS} value={tamanho} onChange={setTamanho} placeholder="Escolher tamanho" />
                 ) : (
-                  <select className="w-full p-2 rounded bg-gray-800 text-white" value={pizzaA || ""} onChange={(e) => setPizzaA(e.target.value)}>
-                    <option value="">Escolher Primeira Pizza</option>
-                    {pizzaOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  <select className="w-full p-2.5 outline-none rounded-lg bg-gray-50 border border-gray-300 focus:ring-2 focus:ring-red-500 text-gray-900" value={tamanho || ""} onChange={(e) => setTamanho(e.target.value)}>
+                    <option value="">Escolher tamanho</option>
+                    {TAMANHOS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
                   </select>
                 )}
               </div>
 
-              <div>
-                <label className="text-sm text-gray-300 mb-1 block">Segunda Pizza</label>
-                {OptionDropdown ? (
-                  <OptionDropdown options={pizzaOptions} value={pizzaB} onChange={setPizzaB} placeholder="Escolher Segunda Pizza" />
-                ) : (
-                  <select className="w-full p-2 rounded bg-gray-800 text-white" value={pizzaB || ""} onChange={(e) => setPizzaB(e.target.value)}>
-                    <option value="">Escolher Segunda Pizza</option>
-                    {pizzaOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-                  </select>
-                )}
+              <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-100">
+                <button onClick={closeModal} className="px-5 py-2.5 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 font-bold transition-colors">
+                  Cancelar
+                </button>
+                <button onClick={handleAddMixToCart} className="px-5 py-2.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold shadow-md transition-colors">
+                  Adicionar Mix
+                </button>
               </div>
-            </div>
-
-            <div className="mb-4">
-              <label className="text-sm text-gray-300 mb-1 block">Tamanho</label>
-              {OptionDropdown ? (
-                <OptionDropdown options={TAMANHOS} value={tamanho} onChange={setTamanho} placeholder="Escolher tamanho" />
-              ) : (
-                <select className="w-full p-2 rounded bg-gray-800 text-white" value={tamanho || ""} onChange={(e) => setTamanho(e.target.value)}>
-                  <option value="">Escolher tamanho</option>
-                  {TAMANHOS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
-                </select>
-              )}
-            </div>
-
-            <div className="flex justify-end gap-3 mt-4">
-              <button onClick={closeModal} className="px-4 py-2 rounded bg-gray-700 hover:bg-gray-600 text-white">
-                Anular
-              </button>
-              <button onClick={handleAddMixToCart} className="px-4 py-2 rounded bg-emerald-600 hover:bg-emerald-500 text-white">
-                Adicionar ao carrinho
-              </button>
             </div>
           </motion.div>
         </div>
