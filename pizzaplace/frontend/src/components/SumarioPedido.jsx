@@ -129,42 +129,42 @@ const SumarioPedido = () => {
 
     return (
         <motion.div
-            className="space-y-4 rounded-lg border border-gray-700 bg-gray-800 p-4 shadow-sm sm:p-6"
+            className="space-y-5 rounded-lg border border-gray-200 bg-white/95 p-4 shadow-md sm:p-6 backdrop-blur-sm"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
         >
-            <p className="text-xl font-semibold text-emerald-400">Resumo do Pedido:</p>
-            <div className="space-y-4">
-                <div className="space-y-2">
+            <p className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-700">Resumo do Pedido</p>
+            <div className="space-y-5">
+                <div className="space-y-3">
                     <dl className="flex items-center justify-between gap-4">
-                        <dt className="text-base font-normal text-gray-300">Preço Original</dt>
-                        <dd className="text-base font-medium text-white">€{subtotalFormatado}</dd>
+                        <dt className="text-base font-medium text-gray-600">Preço Original</dt>
+                        <dd className="text-base font-semibold text-gray-900">€{subtotalFormatado}</dd>
                     </dl>
 
                     {poupancas > 0 && (
                         <dl className="flex items-center justify-between gap-4">
-                            <dt className="text-base font-normal text-gray-300">Poupou</dt>
-                            <dd className="text-base font-medium text-white">-€{poupancasFormatado}</dd>
+                            <dt className="text-base font-medium text-gray-600">Poupou</dt>
+                            <dd className="text-base font-semibold text-green-600">-€{poupancasFormatado}</dd>
                         </dl>
                     )}
 
                     {cupao && cupaoAplicado && (
                         <dl className="flex items-center justify-between gap-4">
-                            <dt className="text-base font-normal text-gray-300">Cupão ({cupao.codigo})</dt>
-                            <dd className="text-base font-medium text-white">-{cupao.percentagemDesconto}%</dd>
+                            <dt className="text-base font-medium text-gray-600">Cupão ({cupao.codigo})</dt>
+                            <dd className="text-base font-semibold text-green-600">-{cupao.percentagemDesconto}%</dd>
                         </dl>
                     )}
 
-                    <dl className="flex items-center justify-between gap-4 border-t border-gray-600 pt-2">
-                        <dt className="text-base font-normal text-white">Total</dt>
-                        <dd className="text-base font-medium text-emerald-400">€{totalFormatado}</dd>
+                    <dl className="flex items-center justify-between gap-4 border-t border-gray-200 pt-4">
+                        <dt className="text-lg font-bold text-gray-900">Total</dt>
+                        <dd className="text-xl font-bold text-red-600">€{totalFormatado}</dd>
                     </dl>
                 </div>
 
                 <motion.button
-                    className="flex w-full items-center justify-center rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium
-                    text-white hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex w-full items-center justify-center rounded-lg bg-red-600 px-5 py-3 text-sm font-medium
+                    text-white hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={abrirModal}
@@ -187,10 +187,10 @@ const SumarioPedido = () => {
                     />
                 )}
 
-                <div className="flex items-center justify-center gap-2">
-                    <span className="text-sm font-normal text-gray-400">ou</span>
-                    <Link to='/' className="inline-flex items-center gap-2 text-sm font-medium text-emerald-400
-                        underline hover:text-emerald-300 hover:no-underline">
+                <div className="flex items-center justify-center gap-2 pt-2 border-t border-gray-100">
+                    <span className="text-sm font-medium text-gray-500">ou</span>
+                    <Link to='/' className="inline-flex items-center gap-2 text-sm font-bold text-red-600
+                        underline hover:text-red-500 hover:no-underline transition-colors">
                         Continuar a comprar
                         <MoveRight size={16} />
                     </Link>
