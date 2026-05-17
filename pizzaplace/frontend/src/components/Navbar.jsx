@@ -2,11 +2,27 @@ import { ShoppingCart, UserPlus, LogIn, LogOut, Lock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useUserStore } from "../stores/useUserStore";
 import { useCarrinhoStore } from "../stores/useCarrinhoStore";
+import { useState } from "react";
+import LogoutModal from "./LogoutModal";
+import { motion, AnimatePresence } from "framer-motion";
+import LoadingSpinner from "./LoadingSpinner";
 
 const Navbar = () => {
   const { user, logout } = useUserStore();
   const isAdmin = user?.cargo === "admin";
   const { carrinho } = useCarrinhoStore();
+
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogoutWithAnimation = () => {
+    setIsLoggingOut(true);
+    setShowLogoutModal(false);
+    setTimeout(() => {
+      logout();
+      setIsLoggingOut(false);
+    }, 600); // Wait for the transition to finish
+  };
 
   return (
     <header className="fixed top-0 left-0 w-full bg-white bg-opacity-90 backdrop-blur-md shadow-lg z-40 transition-all duration-300 border-b border-red-100">
@@ -48,8 +64,8 @@ const Navbar = () => {
 
             {user ? (
               <button
-                className="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-md flex items-center transition duration-300 ease-in-out"
-                onClick={logout}
+                className="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md flex items-center transition duration-300 ease-in-out"
+                onClick={() => setShowLogoutModal(true)}
               >
                 <LogOut size={18} />
                 <span className="hidden sm:inline ml-2">Sair</span>
@@ -75,6 +91,29 @@ const Navbar = () => {
           </nav>
         </div>
       </div>
+
+      <AnimatePresence>
+        {showLogoutModal && (
+          <LogoutModal
+            onClose={() => setShowLogoutModal(false)}
+            onConfirm={handleLogoutWithAnimation}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isLoggingOut && (
+          <motion.div
+            className="fixed inset-0 z-[99999]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <LoadingSpinner />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 };

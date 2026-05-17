@@ -29,10 +29,10 @@ const HomePage = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
       >
-        <h1 className="text-center text-5xl sm:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-700 mb-4">
+        <h1 className="text-center text-5xl sm:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-700 mb-4 pb-3">
           Explore as Nossas Categorias
         </h1>
-        <p className="text-center text-xl text-gray-700 mb-12">
+        <p className="text-center text-xl sm:text-2xl font-semibold text-gray-800 mb-12 drop-shadow-sm">
           Descubra os nossos produtos deliciosos.
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

@@ -78,7 +78,7 @@ export default function PaginaSucessoCompra() {
           <div className="flex justify-center">
             <CheckCircle className="text-red-500 w-20 h-20 mb-4 drop-shadow-sm" />
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-700 mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-700 mb-2 pb-3">
             {method === 'dinheiro'
               ? 'O seu pedido foi efetuado!'
               : 'Compra Efetuada com Sucesso!'}
