@@ -56,11 +56,11 @@ export default function LocationDropdown({ value, onChange, placeholder = "-- Se
         aria-haspopup="listbox"
         aria-expanded={open}
         onClick={() => { setOpen(v => !v); setFocusedIndex(-1); }}
-        className="w-full flex items-center justify-between p-3 rounded-lg bg-gray-700 text-white hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+        className="w-full flex items-center justify-between p-3 rounded-lg bg-gray-50 border border-gray-200 text-gray-800 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <MapPin className="opacity-80" />
-          <span className={`${value ? "text-white" : "text-gray-300"}`}>
+          <MapPin className="opacity-80 text-gray-500" />
+          <span className={`${value ? "text-gray-900 font-medium" : "text-gray-500"}`}>
             {value || placeholder}
           </span>
         </div>
@@ -75,7 +75,7 @@ export default function LocationDropdown({ value, onChange, placeholder = "-- Se
             initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
-            className="absolute left-0 right-0 mt-2 max-h-60 overflow-auto bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-50 p-1"
+            className="absolute left-0 right-0 mt-2 max-h-60 overflow-auto bg-white border border-gray-200 rounded-lg shadow-xl z-50 p-1"
             role="listbox"
             aria-activedescendant={focusedIndex >= 0 ? `loc-${focusedIndex}` : undefined}
           >
@@ -90,15 +90,15 @@ export default function LocationDropdown({ value, onChange, placeholder = "-- Se
                     onMouseLeave={() => setFocusedIndex(-1)}
                     onClick={() => { onChange(loc); setOpen(false); }}
                     className={`w-full text-left flex items-center gap-3 px-3 py-2 rounded-md transition 
-                      ${selected ? "bg-emerald-600 text-white" : (focused ? "bg-gray-700 text-white" : "text-gray-200")}
+                      ${selected ? "bg-red-50 text-red-600 font-semibold" : (focused ? "bg-gray-100 text-gray-900" : "text-gray-700")}
                     `}
                   >
-                    <MapPin className={`${selected ? "text-white" : "text-gray-300"}`} />
+                    <MapPin className={`${selected ? "text-red-500" : "text-gray-400"}`} />
                     <div className="flex-1">
                       <div className="text-sm font-medium">{loc}</div>
                     </div>
                     {selected && (
-                      <span className="text-xs px-2 py-1 bg-white/10 rounded-full">Selecionado</span>
+                      <span className="text-xs font-semibold px-2 py-1 bg-red-100 text-red-700 rounded-full">Selecionado</span>
                     )}
                   </button>
                 </li>
