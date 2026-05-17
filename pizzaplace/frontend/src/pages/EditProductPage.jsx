@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import axios from "../lib/axios";
 import { useProductStore } from "../stores/useProductStore";
 import IngredientsSelector from "../components/IngredientsSelector";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 const categorias = [
   { value: "pizzas", label: "Pizzas" },
@@ -120,11 +121,7 @@ const EditProductPage = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-300">A carregar produto...</div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   return (

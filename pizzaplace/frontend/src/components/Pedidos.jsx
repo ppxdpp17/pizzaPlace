@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import axios from "../lib/axios";
 import { useUserStore } from "../stores/useUserStore.js";
 import EstadoDropdown from "./EstadoDropdown.jsx";
+import LoadingSpinner from "./LoadingSpinner";
 
 // Função auxiliar para calcular estado se não vier do backend
 function calcularEstado(createdAt) {
@@ -104,11 +105,7 @@ const Pedidos = () => {
     return () => clearInterval(intervalRef.current);
   }, [isAdmin]); // Recarrega se o cargo mudar (login/logout)
 
-  if (loading) return (
-    <div className="bg-white/90 p-4 rounded-xl shadow-sm border border-gray-100 mx-auto max-w-sm mt-4 text-center">
-      <p className="text-gray-600 font-medium">Carregando pedidos...</p>
-    </div>
-  );
+  if (loading) return <div className="mt-8"><LoadingSpinner embedded={true} /></div>;
   if (error) return (
     <div className="bg-white/90 p-4 rounded-xl shadow-sm border border-gray-100 mx-auto max-w-sm mt-4 text-center">
       <p className="text-red-500 font-medium">Erro: {error}</p>

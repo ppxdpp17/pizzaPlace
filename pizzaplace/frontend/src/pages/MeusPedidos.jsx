@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { useEffect, useState, useRef } from "react";
 import axios from "../lib/axios";
 import { Package } from "lucide-react";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 function ImagemCollage({ imagens = [], altBase = "Produto" }) {
   const count = imagens.length;
@@ -101,13 +102,7 @@ export default function MeusPedidos() {
     return () => clearInterval(intervalRef.current);
   }, []);
 
-  if (loading) return (
-    <div className="p-4 min-h-screen bg-cover bg-center bg-no-repeat bg-fixed bg-gray-50 flex items-center justify-center" style={{ backgroundImage: "url('/piuzz.png')" }}>
-      <div className="bg-white/90 p-6 rounded-xl shadow-md border border-gray-100 backdrop-blur-sm">
-        <p className="text-lg text-gray-700 font-medium">A carregar...</p>
-      </div>
-    </div>
-  );
+  if (loading) return <LoadingSpinner />;
   if (error) return (
     <div className="p-4 min-h-screen bg-cover bg-center bg-no-repeat bg-fixed bg-gray-50 flex items-center justify-center" style={{ backgroundImage: "url('/piuzz.png')" }}>
       <div className="bg-white/90 p-6 rounded-xl shadow-md border border-gray-100 backdrop-blur-sm">

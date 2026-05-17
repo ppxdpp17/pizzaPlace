@@ -134,7 +134,7 @@ const SumarioPedido = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
         >
-            <p className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-700 pb-2">Resumo do Pedido</p>
+            <p className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-700 pb-3">Resumo do Pedido</p>
             <div className="space-y-5">
                 <div className="space-y-3">
                     <dl className="flex items-center justify-between gap-4">

@@ -2,9 +2,9 @@ import { useRef, useState, useEffect } from "react";
 import { AnimatePresence, motion as m } from "framer-motion";
 
 const ESTADOS = [
-  { value: "A Cozinhar", label: "A Cozinhar", color: "bg-yellow-400" },
-  { value: "A Caminho",  label: "A Caminho",  color: "bg-amber-400"  },
-  { value: "Entregue",    label: "Entregue",    color: "bg-emerald-400" }
+  { value: "A Cozinhar", label: "A Cozinhar", color: "bg-red-500" },
+  { value: "A Caminho", label: "A Caminho", color: "bg-orange-500" },
+  { value: "Entregue", label: "Entregue", color: "bg-green-500" }
 ];
 
 export default function EstadoDropdown({
@@ -58,15 +58,15 @@ export default function EstadoDropdown({
         aria-haspopup="listbox"
         aria-expanded={open}
         onClick={() => { setOpen(v => !v); setFocusedIndex(-1); }}
-        className={`flex items-center justify-between px-3 py-2 rounded-md ${compact ? "text-sm" : ""} bg-gray-700 text-white hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500`}
+        className={`flex items-center justify-between px-3 py-2 rounded-md ${compact ? "text-sm" : ""} bg-white text-gray-900 border border-gray-300 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500`}
       >
         <div className="flex items-center gap-2">
           {selected ? (
-            <span className={`${selected.color} w-2 h-2 rounded-full inline-block`} />
+            <span className={`${selected.color} w-2.5 h-2.5 rounded-full inline-block shadow-sm`} />
           ) : (
-            <span className="w-2 h-2 rounded-full bg-gray-600 inline-block" />
+            <span className="w-2.5 h-2.5 rounded-full bg-gray-200 inline-block shadow-sm" />
           )}
-          <span className={selected ? "text-white font-medium" : "text-gray-300"}>
+          <span className={selected ? "text-gray-900 font-bold" : "text-gray-500"}>
             {selected ? selected.label : placeholder}
           </span>
         </div>
@@ -82,14 +82,14 @@ export default function EstadoDropdown({
             initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
-            className="absolute left-0 mt-2 w-full max-h-44 overflow-auto bg-gray-800 border border-gray-700 rounded-md shadow-lg z-50 p-1"
+            className="absolute left-0 mt-2 w-full max-h-44 overflow-auto bg-white border border-gray-200 rounded-md shadow-lg z-50 p-1"
             role="listbox"
             aria-activedescendant={focusedIndex >= 0 ? `estado-${focusedIndex}` : undefined}
           >
             {ESTADOS.map((st, idx) => {
               const isSelected = st.value === value;
               const isFocused = idx === focusedIndex;
-              const rowClass = isSelected ? "bg-emerald-700 text-white" : isFocused ? "bg-gray-700 text-white" : "text-gray-200";
+              const rowClass = isSelected ? "bg-red-50 text-red-700 font-bold" : isFocused ? "bg-gray-50 text-gray-900" : "text-gray-700 font-medium";
               return (
                 <li key={st.value} id={`estado-${idx}`} role="option" aria-selected={isSelected}>
                   <button

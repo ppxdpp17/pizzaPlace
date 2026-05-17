@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import axios from "../lib/axios";
 import { Plus } from "lucide-react";
+import LoadingSpinner from "./LoadingSpinner";
 
 export default function IngredientsSelector({ value = [], onChange, allowAdd = true }) {
   const [ingredientes, setIngredientes] = useState([]);
@@ -61,42 +62,42 @@ export default function IngredientsSelector({ value = [], onChange, allowAdd = t
 
   return (
     <div>
-      <div className="flex items-center gap-2 mb-2">
+      <div className="flex items-center gap-2 mb-3">
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Procurar ingredientes..."
-          className="flex-1 p-2 rounded-md bg-gray-700 border border-gray-600 text-white"
+          className="flex-1 p-2.5 rounded-lg bg-white border border-gray-300 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500 shadow-sm"
         />
         {allowAdd && (
           <button
             type="button"
             onClick={() => setShowAdd((s) => !s)}
-            className="px-3 py-2 bg-emerald-600 text-white rounded-md inline-flex items-center gap-2"
+            className="px-4 py-2.5 bg-red-50 text-red-600 font-bold rounded-lg border border-red-100 hover:bg-red-100 transition-colors inline-flex items-center gap-2"
           >
-            <Plus /> <span className="text-sm">Novo</span>
+            <Plus size={18} /> <span className="text-sm">Novo</span>
           </button>
         )}
       </div>
 
       {showAdd && (
-        <div className="flex gap-2 mb-3">
+        <div className="flex gap-2 mb-4 bg-gray-50 p-2 rounded-xl border border-gray-200">
           <input
             value={novoNome}
             onChange={(e) => setNovoNome(e.target.value)}
             placeholder="Nome"
-            className="flex-1 p-2 rounded-md bg-gray-700 border border-gray-600 text-white"
+            className="flex-1 p-2 rounded-md bg-white border border-gray-300 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500 shadow-sm"
           />
           <input
             value={novoIcone}
             onChange={(e) => setNovoIcone(e.target.value)}
             placeholder="Ícone (ex: 🧀)"
-            className="w-28 p-2 rounded-md bg-gray-700 border border-gray-600 text-white text-center"
+            className="w-32 p-2 rounded-md bg-white border border-gray-300 text-gray-900 text-center focus:outline-none focus:ring-2 focus:ring-red-500 shadow-sm"
           />
           <button
             type="button"
             onClick={criarNovoIngrediente}
-            className="px-3 py-2 bg-emerald-600 text-white rounded-md"
+            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-md shadow-sm transition-colors"
           >
             Adicionar
           </button>
@@ -109,9 +110,13 @@ export default function IngredientsSelector({ value = [], onChange, allowAdd = t
         role="list"
         aria-label="Lista de ingredientes"
       >
-        {loading && <div className="text-sm text-gray-400 whitespace-nowrap">A carregar...</div>}
+        {loading && (
+          <div className="flex items-center justify-center w-full min-w-40 py-2">
+            <LoadingSpinner embedded={true} />
+          </div>
+        )}
         {!loading && listaFiltrada.length === 0 && (
-          <div className="text-sm text-gray-400 whitespace-nowrap">Nenhum ingrediente</div>
+          <div className="text-sm font-medium text-gray-500 whitespace-nowrap">Nenhum ingrediente encontrado</div>
         )}
 
         {listaFiltrada.map((ing) => {
@@ -121,8 +126,8 @@ export default function IngredientsSelector({ value = [], onChange, allowAdd = t
               key={ing._id}
               type="button"
               onClick={() => toggleSelect(ing._id)}
-              className={`flex flex-col items-center justify-center gap-1 px-4 py-3 rounded-2xl flex-shrink-0 transition
-                ${selected ? "bg-emerald-600 text-white" : "bg-gray-700 text-gray-200 hover:bg-gray-600"}
+              className={`flex flex-col items-center justify-center gap-1 px-4 py-3 rounded-2xl flex-shrink-0 transition-all duration-200 border
+                ${selected ? "bg-red-500 text-white shadow-md border-red-500" : "bg-white text-gray-600 border-gray-200 shadow-sm hover:border-red-300 hover:bg-red-50 hover:text-red-700"}
               snap-center`}
               style={{ width: 120, height: 88 }}
               aria-pressed={selected}

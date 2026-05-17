@@ -75,34 +75,36 @@ const CriarPizzaForm = () => {
 
   return (
     <motion.div
-      className="bg-gray-800 shadow-lg rounded-lg p-8 mb-8 max-w-xl mx-auto"
+      className="bg-white/95 backdrop-blur-sm shadow-xl border border-gray-200 rounded-xl p-8 mb-8 max-w-xl mx-auto"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8 }}
     >
-      <h2 className="text-2xl font-semibold mb-6 text-emerald-300">Criar Novo Produto</h2>
+      <h2 className="text-2xl font-bold mb-6 text-gray-900 border-b border-gray-100 pb-3 text-center">
+        Criar Novo Produto
+      </h2>
 
       <form onSubmit={gerirSubmissao} className="space-y-4">
         <div>
-          <label htmlFor="nome" className="block text-sm font-medium text-gray-300">Nome</label>
+          <label htmlFor="nome" className="block text-sm font-bold text-gray-700">Nome</label>
           <input
             type="text"
             id="nome"
             value={novoProduto.nome}
             onChange={(e) => setNovoProduto({ ...novoProduto, nome: e.target.value })}
-            className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            className="mt-1 block w-full bg-white border border-gray-300 rounded-lg py-2.5 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500 shadow-sm"
             required
           />
         </div>
 
         {/*Ingredients selector toggle*/}
         <div>
-          <label htmlFor="categoria" className="block text-sm font-medium text-gray-300">Categoria</label>
+          <label htmlFor="categoria" className="block text-sm font-bold text-gray-700">Categoria</label>
           <select
             id="categoria"
             value={novoProduto.categoria}
             onChange={(e) => setNovoProduto({ ...novoProduto, categoria: e.target.value })}
-            className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            className="mt-1 block w-full bg-white border border-gray-300 rounded-lg py-2.5 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500 shadow-sm"
             required
           >
             <option value="">Selecione uma categoria</option>
@@ -111,61 +113,61 @@ const CriarPizzaForm = () => {
         </div>
 
         <div>
-          <label htmlFor="preco" className="block text-sm font-medium text-gray-300">Preço</label>
+          <label htmlFor="preco" className="block text-sm font-bold text-gray-700">Preço</label>
           <input
             type="number"
             id="preco"
             step={0.01}
             value={novoProduto.preco}
             onChange={(e) => setNovoProduto({ ...novoProduto, preco: e.target.value })}
-            className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            className="mt-1 block w-full bg-white border border-gray-300 rounded-lg py-2.5 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500 shadow-sm"
             required
           />
         </div>
 
         {/*Toggle para ingredients (opcional)*/}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
           <input
             id="toggle-ings"
             type="checkbox"
             checked={showIngredientes}
             onChange={(e) => setShowIngredientes(e.target.checked)}
-            className="h-4 w-4 rounded bg-gray-700 border-gray-600 text-emerald-500 focus:ring-emerald-400"
+            className="h-4 w-4 rounded bg-white border-gray-300 text-red-600 focus:ring-red-500"
           />
-          <label htmlFor="toggle-ings" className="text-sm text-gray-300">
+          <label htmlFor="toggle-ings" className="text-sm font-medium text-gray-700">
             Adicionar ingredientes ao produto (opcional)
           </label>
         </div>
 
         {/*Ingredients selector — só renderiza se showIngredientes for true*/}
         {showIngredientes && (
-          <div>
-            <label className="block text-sm font-medium text-gray-300">Ingredientes (opcional)</label>
+          <div className="p-4 border border-gray-200 rounded-lg">
+            <label className="block text-sm font-bold text-gray-700 mb-2">Selecione os Ingredientes</label>
             <IngredientsSelector
               value={novoProduto.ingredientes}
               onChange={(ings) => setNovoProduto({ ...novoProduto, ingredientes: ings })}
             />
-            <p className="text-xs text-gray-400 mt-1">Se ficar vazio, o produto será criado sem ingredientes.</p>
+            <p className="text-xs text-gray-500 mt-2">Dica: Se ficar vazio, o produto será criado na mesma.</p>
           </div>
         )}
 
         {/*Escolher imagem*/}
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center pt-2">
           <input type="file" id="imagem" className="sr-only" accept="image/*" onChange={gerirMudancaImagem} />
-          <label htmlFor="imagem" className="cursor-pointer bg-gray-700 py-2 px-4 border border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-300 hover:bg-gray-600">
+          <label htmlFor="imagem" className="cursor-pointer bg-white py-2.5 px-6 border border-gray-300 rounded-lg shadow-sm text-sm font-bold text-gray-700 hover:bg-gray-50 transition-colors">
             <Upload className="h-5 inline-block mr-2" /> Escolher Imagem
           </label>
           {novoProduto.imagem && (
             <div className="mt-4 flex flex-col items-center">
-              <span className="text-sm text-gray-300 mb-2">Pré-visualização:</span>
-              <img src={novoProduto.imagem} alt="Preview" className="h-32 w-32 object-cover rounded-md border border-gray-600" />
+              <span className="text-sm font-medium text-gray-600 mb-2">Pré-visualização:</span>
+              <img src={novoProduto.imagem} alt="Preview" className="h-32 w-32 object-cover rounded-lg border border-gray-200 shadow-sm" />
             </div>
           )}
         </div>
 
         <button
           type="submit"
-          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full mt-6 py-3 px-4 rounded-lg shadow-md font-bold text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
           disabled={isLoading}
         >
           {isLoading ? (
