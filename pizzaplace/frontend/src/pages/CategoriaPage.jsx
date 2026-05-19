@@ -105,7 +105,7 @@ const CategoriaPage = () => {
         nome: `Mix 2 Pizzas — ${pA.nome} + ${pB.nome} (${tamanhoVal})`,
         descricao: "Junta duas pizzas à tua escolha para máximo sabor!",
         preco: precoArredondado,
-        imagem: "/pizza2mix.png", // fallback
+        imagem: "/pizza2mix2.png", // fallback
         imagens: [pA.imagem || "/placeholder.png", pB.imagem || "/placeholder.png"], // <-- útil para collage
         estaDisponivel: true,
         quantidade: 1,
@@ -179,7 +179,7 @@ const CategoriaPage = () => {
                   _id: "mix-2-pizzas",
                   nome: "Mix 2 Pizzas 🍕🍕",
                   preco: 0,
-                  imagem: "/pizza2mix.png",
+                  imagem: "/pizza2mix2.png",
                   descricao: "Junta duas pizzas à tua escolha para máximo sabor!",
                   estaDisponivel: true,
                   ingredientes: [],
