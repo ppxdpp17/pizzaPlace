@@ -69,7 +69,7 @@ const CarrinhoItem = ({ item }) => {
     : nomeBase;
 
   // Imagem: preferir item.imagem, senão mix, senão placeholder
-  const imagemSrc = item.imagem || (item.meta?.tipo === "mix-2" ? "/pizza2mix.png" : "/placeholder.png");
+  const imagemSrc = item.imagem || (item.meta?.tipo === "mix-2" ? "/pizza2mix2.png" : "/placeholder.png");
 
   // Formatar preço com duas casas decimais
   const precoNum = typeof item.preco === "number" ? item.preco : Number(item.preco) || 0;
@@ -92,7 +92,7 @@ const CarrinhoItem = ({ item }) => {
           ) : item.imagem ? (
             <img className="h-20 md:h-32 rounded object-cover" src={item.imagem} alt={item.nome} />
           ) : item.meta?.tipo === 'mix-2' ? (
-            <img className="h-20 md:h-32 rounded object-cover" src="/pizza2mix.png" alt="Mix 2 Pizzas" />
+            <img className="h-20 md:h-32 rounded object-cover" src="/pizza2mix2.png" alt="Mix 2 Pizzas" />
           ) : (
             <img className="h-20 md:h-32 rounded object-cover" src="/placeholder.png" alt="Produto" />
           )}

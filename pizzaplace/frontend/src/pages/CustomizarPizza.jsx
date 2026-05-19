@@ -89,7 +89,7 @@ export default function CustomizarPizza() {
       nome: nomePadrao,
       descricao: `${massa} · ${molho} · ${selecionados.length} toppings`,
       preco,
-      imagem: "/makeYourOwn.png",
+      imagem: "/makeYourOwn2.png",
       categoria: "pizza",
       estaDisponivel: true,
       ingredientes: chosenIngredients,
@@ -180,7 +180,7 @@ export default function CustomizarPizza() {
                     nome: nomePadrao,
                     preco,
                     descricao: `${massa} · ${molho} · ${selecionados.length} toppings`,
-                    imagem: "/makeYourOwn.png",
+                    imagem: "/makeYourOwn2.png",
                     ingredientes: ingredientes.filter((i) => selecionados.includes(String(i._id ?? i.id))).map(i => ({ _id: i._id ?? i.id, nome: i.nome, icone: i.icone }))
                   }}
                   hideActions

@@ -84,7 +84,7 @@ async function buildItensCarrinhoResponse(itens) {
         _id: cartId,
         produto: String(i.produto ?? ""),
         nome: nomeMix,
-        imagem: imgList[0] ?? i.imagem ?? "/pizza2mix.png",
+        imagem: imgList[0] ?? i.imagem ?? "/pizza2mix2.png",
         imagens: imgList.length ? imgList : undefined,
         quantidade: i.quantidade ?? 1,
         meta: i.meta ?? undefined,

@@ -164,7 +164,7 @@ const CategoriaPage = () => {
                   _id: "make-your-own",
                   nome: "Make Your Own Pizza 🍕",
                   preco: 0,
-                  imagem: "/makeYourOwn.png",
+                  imagem: "/makeYourOwn2.png",
                   descricao: "Escolhe massa, molho e ingredientes para criar a tua pizza!",
                   estaDisponivel: true,
                   ingredientes: [],
