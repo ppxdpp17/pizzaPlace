@@ -133,7 +133,7 @@ export default function MeusPedidos() {
 
             const estado = pedido.estado || "A Cozinhar";
 
-            const estadoLabel = estado === "A Cozinhar" ? "A cozinhar..." :
+            const estadoLabel = estado === "A Cozinhar" ? "A preparar..." :
               estado === "A Caminho" ? "A caminho" : "Entregue!";
             const estadoColor = estado === "A Cozinhar" ? "text-orange-500" :
               estado === "A Caminho" ? "text-yellow-600" : "text-green-600";

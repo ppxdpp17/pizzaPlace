@@ -114,7 +114,7 @@ export default function TipoEntrega({ isOpen, onClose, onSelect }) {
               animate={{ opacity: 1, height: 'auto' }}
               className="mt-4"
             >
-                <h4 className="text-sm font-bold text-gray-700 text-center mb-3">Como vai pagar no local?</h4>
+                <h4 className="text-sm font-bold text-gray-700 text-center mb-3">Como vai pagar?</h4>
                 <div className="flex justify-between gap-4">
                   <button
                     type="button"
@@ -131,7 +131,7 @@ export default function TipoEntrega({ isOpen, onClose, onSelect }) {
                     className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border transition-all ${paymentType === "cartao" ? "bg-orange-50 border-orange-500 text-orange-600 shadow-sm" : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"}`}
                   >
                     <CreditCard size={20} />
-                    <span className="text-sm font-medium">Cartão (TPA)</span>
+                    <span className="text-sm font-medium">Cartão</span>
                   </button>
                 </div>
             </motion.div>
