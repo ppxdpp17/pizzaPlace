@@ -8,10 +8,11 @@ export default function TipoEntrega({ isOpen, onClose, onSelect }) {
   if (!isOpen) return null;
 
   const [deliveryType, setDeliveryType] = useState(null);
+  const [paymentMoment, setPaymentMoment] = useState(null);
   const [paymentType, setPaymentType] = useState(null);
   const [pedidoLocation, setPedidoLocation] = useState("");
 
-  // O useEffect dispara quando os 3 estados estão preenchidos
+  // O useEffect dispara quando os 3 estados finais estão preenchidos
   useEffect(() => {
     if (deliveryType && paymentType && pedidoLocation) {
       console.log("TipoEntrega: A enviar dados...", { deliveryType, paymentType, pedidoLocation });
@@ -24,10 +25,21 @@ export default function TipoEntrega({ isOpen, onClose, onSelect }) {
 
       // Resetar estados
       setDeliveryType(null);
+      setPaymentMoment(null);
       setPaymentType(null);
       setPedidoLocation("");
     }
   }, [deliveryType, paymentType, pedidoLocation, onSelect]);
+
+  // Se escolhe pagar online, define logo o tipo como stripe e avança
+  const handlePaymentMoment = (moment) => {
+    setPaymentMoment(moment);
+    if (moment === "online") {
+        setPaymentType("stripe");
+    } else {
+        setPaymentType(null); // Reseta para forçar a escolha da sub-opção
+    }
+  };
 
   const paymentDisabled = !pedidoLocation; // Bloqueia pagamento se não houver loja selecionada
 
@@ -69,30 +81,61 @@ export default function TipoEntrega({ isOpen, onClose, onSelect }) {
         </div>
 
         {/* 3. PAGAMENTO */}
-        <h3 className="text-lg font-bold text-gray-900 text-center border-t border-gray-100 pt-4">Método de Pagamento</h3>
+        <h3 className="text-lg font-bold text-gray-900 text-center border-t border-gray-100 pt-4">Momento do Pagamento</h3>
         <div className="flex justify-between gap-4">
           <button
             type="button"
             disabled={paymentDisabled}
-            onClick={() => setPaymentType("dinheiro")}
-            className={`flex-1 flex flex-col items-center p-4 rounded-xl border-2 transition-all ${paymentDisabled ? "opacity-50 cursor-not-allowed bg-gray-100 text-gray-400 border-transparent" : (paymentType === "dinheiro" ? "bg-red-50 border-red-500 text-red-600 shadow-sm" : "bg-gray-50 border-transparent text-gray-500 hover:bg-gray-100")
+            onClick={() => handlePaymentMoment("online")}
+            className={`flex-1 flex flex-col items-center p-4 rounded-xl border-2 transition-all ${paymentDisabled ? "opacity-50 cursor-not-allowed bg-gray-100 text-gray-400 border-transparent" : (paymentMoment === "online" ? "bg-red-50 border-red-500 text-red-600 shadow-sm" : "bg-gray-50 border-transparent text-gray-500 hover:bg-gray-100")
               }`}
           >
-            <Coins size={32} className="mb-2" />
-            <span className="text-sm font-medium">Dinheiro</span>
+            <CreditCard size={32} className="mb-2" />
+            <span className="text-sm font-medium">Pagar Online</span>
+            <span className="text-[10px] text-gray-500 mt-1">Cartão, MBWay, Apple Pay</span>
           </button>
 
           <button
             type="button"
             disabled={paymentDisabled}
-            onClick={() => setPaymentType("cartao")} // 🚨 AQUI: Garante que envia "cartao"
-            className={`flex-1 flex flex-col items-center p-4 rounded-xl border-2 transition-all ${paymentDisabled ? "opacity-50 cursor-not-allowed bg-gray-100 text-gray-400 border-transparent" : (paymentType === "cartao" ? "bg-red-50 border-red-500 text-red-600 shadow-sm" : "bg-gray-50 border-transparent text-gray-500 hover:bg-gray-100")
+            onClick={() => handlePaymentMoment("local")}
+            className={`flex-1 flex flex-col items-center p-4 rounded-xl border-2 transition-all ${paymentDisabled ? "opacity-50 cursor-not-allowed bg-gray-100 text-gray-400 border-transparent" : (paymentMoment === "local" ? "bg-red-50 border-red-500 text-red-600 shadow-sm" : "bg-gray-50 border-transparent text-gray-500 hover:bg-gray-100")
               }`}
           >
-            <CreditCard size={32} className="mb-2" />
-            <span className="text-sm font-medium">Cartão</span>
+            <Coins size={32} className="mb-2" />
+            <span className="text-sm font-medium text-center">No Ato de Entrega</span>
+            <span className="text-[10px] text-gray-500 mt-1">Dinheiro ou TPA</span>
           </button>
         </div>
+
+        {paymentMoment === "local" && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              className="mt-4"
+            >
+                <h4 className="text-sm font-bold text-gray-700 text-center mb-3">Como vai pagar no local?</h4>
+                <div className="flex justify-between gap-4">
+                  <button
+                    type="button"
+                    onClick={() => setPaymentType("dinheiro")}
+                    className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border transition-all ${paymentType === "dinheiro" ? "bg-orange-50 border-orange-500 text-orange-600 shadow-sm" : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"}`}
+                  >
+                    <Coins size={20} />
+                    <span className="text-sm font-medium">Em Dinheiro</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setPaymentType("cartao")}
+                    className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border transition-all ${paymentType === "cartao" ? "bg-orange-50 border-orange-500 text-orange-600 shadow-sm" : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"}`}
+                  >
+                    <CreditCard size={20} />
+                    <span className="text-sm font-medium">Cartão (TPA)</span>
+                  </button>
+                </div>
+            </motion.div>
+        )}
 
         {!pedidoLocation && (
           <p className="text-xs font-medium text-center text-orange-500 bg-orange-50 p-2 rounded-md">Selecione a loja primeiro.</p>

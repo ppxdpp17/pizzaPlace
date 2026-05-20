@@ -237,7 +237,7 @@ export const sucessoCheckout = async (req, res) => {
 
 export const cashPayment = async (req, res) => {
   try {
-    const { produtos, tipoEntrega, pedidoLocation, shippingAddress } = req.body;
+    const { produtos, tipoEntrega, pedidoLocation, shippingAddress, paymentMethod } = req.body;
 
     if (!produtos?.length) return res.status(400).json({ msg: "Carrinho vazio" });
 
@@ -250,7 +250,7 @@ export const cashPayment = async (req, res) => {
       produtos: items,
       total,
       tipoEntrega,
-      metodoPagamento: "dinheiro",
+      metodoPagamento: paymentMethod || "dinheiro",
       shippingAddress,
       estado: "A Cozinhar",
       localizacao: pedidoLocation

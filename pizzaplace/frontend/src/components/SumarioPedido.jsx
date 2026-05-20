@@ -56,9 +56,8 @@ const SumarioPedido = () => {
     const handleSelectEntrega = async ({ tipoEntrega, paymentMethod, pedidoLocation }) => {
         fecharModal();
 
-        // CASO 1: PAGAMENTO COM CARTÃO (STRIPE)
-        // Aceitamos "cartao" (vindo do botão) ou "stripe"
-        if (paymentMethod === "cartao" || paymentMethod === "stripe") {
+        // CASO 1: PAGAMENTO ONLINE (STRIPE)
+        if (paymentMethod === "stripe") {
             try {
                 const res = await axios.post("/pagamentos/criar-sessao-checkout", {
                     produtos: carrinho,
@@ -86,43 +85,44 @@ const SumarioPedido = () => {
             return;
         }
 
-        // CASO 2: PAGAMENTO EM DINHEIRO
-        if (paymentMethod === "dinheiro") {
+        // CASO 2: PAGAMENTO NO LOCAL (Dinheiro ou Cartão/TPA)
+        if (paymentMethod === "dinheiro" || paymentMethod === "cartao") {
             // Se for Entrega ao Domicílio, precisamos de pedir a morada agora
             if (tipoEntrega === "delivery") {
                 setPendingCash({ tipoEntrega, pedidoLocation, paymentMethod });
                 setShowAddressForm(true);
             } else {
                 // Se for Takeaway, não precisa de morada
-                processarPagamentoDinheiro({ tipoEntrega, pedidoLocation, shippingAddress: null });
+                processarPagamentoLocal({ tipoEntrega, pedidoLocation, shippingAddress: null, paymentMethod });
             }
         }
     };
 
-    // Callback do formulário de morada (apenas para dinheiro)
+    // Callback do formulário de morada (apenas para pagamento local)
     const handleAddressSubmit = async (shippingAddress) => {
         setShowAddressForm(false);
         if (pendingCash) {
-            await processarPagamentoDinheiro({
+            await processarPagamentoLocal({
                 ...pendingCash,
                 shippingAddress
             });
         }
     };
 
-    // Função final para enviar pedido em dinheiro ao backend
-    const processarPagamentoDinheiro = async ({ tipoEntrega, pedidoLocation, shippingAddress }) => {
+    // Função final para enviar pedido local ao backend
+    const processarPagamentoLocal = async ({ tipoEntrega, pedidoLocation, shippingAddress, paymentMethod }) => {
         try {
             await axios.post("/pagamentos/dinheiro", {
                 produtos: carrinho,
                 tipoEntrega,
                 pedidoLocation,
-                shippingAddress
+                shippingAddress,
+                paymentMethod
             });
             limparCarrinho();
-            navigate("/purchase-success?method=dinheiro");
+            navigate(`/purchase-success?method=${paymentMethod}`);
         } catch (err) {
-            console.error("Erro pagamento dinheiro:", err);
+            console.error("Erro pagamento local:", err);
             toast.error(err.response?.data?.msg || "Erro ao processar pagamento.");
         }
     };
