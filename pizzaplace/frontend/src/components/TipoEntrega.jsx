@@ -104,7 +104,7 @@ export default function TipoEntrega({ isOpen, onClose, onSelect }) {
           >
             <Coins size={32} className="mb-2" />
             <span className="text-sm font-medium text-center">No Ato de Entrega</span>
-            <span className="text-[10px] text-gray-500 mt-1">Dinheiro ou TPA</span>
+            <span className="text-[10px] text-gray-500 mt-1">Dinheiro ou Cartão</span>
           </button>
         </div>
 

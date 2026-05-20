@@ -42,9 +42,9 @@ const CartaoProduto = ({
       return;
     }
 
-    // Se o produto pertencer a pizzas ou bebidas, abrir o modal de escolha
+    // Se o produto pertencer a pizzas, abrir o modal de escolha
     const categoria = (p.categoria || "").toLowerCase();
-    if (categoria === "pizzas" || categoria === "bebidas") {
+    if (categoria === "pizzas") {
       setSelectedSize(null);
       setSizeModalOpen(true);
       return;
@@ -92,7 +92,7 @@ const CartaoProduto = ({
             <p>
               {!especial && typeof p.preco === "number" && p.preco > 0 ? (
                 <span className={`font-bold text-orange-500 ${compactMobile ? "text-2xl sm:text-3xl" : "text-3xl"}`}>
-                  {(p.categoria === "pizzas" || p.categoria === "bebidas") && <span className={`font-normal text-gray-500 mr-1 ${compactMobile ? "text-sm sm:text-lg" : "text-lg"}`}>desde</span>}
+                  {p.categoria === "pizzas" && <span className={`font-normal text-gray-500 mr-1 ${compactMobile ? "text-sm sm:text-lg" : "text-lg"}`}>desde</span>}
                   €{p.preco.toFixed(2)}
                 </span>
               ) : (
