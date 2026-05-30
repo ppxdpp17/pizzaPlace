@@ -6,9 +6,13 @@ import { protectRoute } from "../middleware/auth.middleware.js";
 const router = express.Router();
 
 const loginLimiter = rateLimit({
-	windowMs: 15 * 60 * 1000,
+	windowMs: 10 * 60 * 1000,
 	max: 5,
-	message: { error: "Demasiadas tentativas no login. Tente novamente daqui a 15 minutos." },
+	standardHeaders: true,
+	legacyHeaders: false,
+	handler: (req, res) => {
+		return res.status(429).json({ error: "Demasiadas tentativas no login. Tente novamente daqui a 10 minutos." });
+	}
 });
 
 router.post("/signup", signup);

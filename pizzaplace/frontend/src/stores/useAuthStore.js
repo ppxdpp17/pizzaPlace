@@ -3,7 +3,6 @@ import axios from "axios";
 
 const API_URL = "/api/auth";
 
-
 axios.defaults.withCredentials = true;
 
 export const useAuthStore = create((set) => ({
@@ -42,7 +41,7 @@ export const useAuthStore = create((set) => ({
 				isLoading: false,
 			});
 		} catch (error) {
-			set({ error: error.response?.data?.message || "Credenciais inválidas!", isLoading: false });
+			set({ error: error.response?.data?.error || error.response?.data?.message || "Credenciais inválidas!", isLoading: false });
 			throw error;
 		}
 	},
