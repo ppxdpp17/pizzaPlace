@@ -8,7 +8,7 @@ import LoadingSpinner from "./LoadingSpinner";
 // Função auxiliar para calcular estado se não vier do backend
 function calcularEstado(createdAt) {
   const minutes = (Date.now() - new Date(createdAt).getTime()) / 60000;
-  if (minutes < 5) return "A Cozinhar...";
+  if (minutes < 5) return "A Preparar...";
   if (minutes < 10) return "A caminho";
   return "Entregue!";
 }
@@ -218,7 +218,7 @@ const Pedidos = () => {
                   <div className={`mt-1 text-sm font-bold ${estado === "A Cozinhar" || estado === "Aguardando Pagamento" ? "text-orange-500" :
                     estado === "A Caminho" ? "text-yellow-600" : "text-green-600"
                     }`}>
-                    {estado === "A Cozinhar" ? "A cozinhar..." :
+                    {estado === "A Cozinhar" ? "A preparar..." :
                       estado === "Aguardando Pagamento" ? "Aguardando..." :
                         estado === "A Caminho" ? "A caminho" :
                           estado === "Entregue" ? "Entregue!" : estado}

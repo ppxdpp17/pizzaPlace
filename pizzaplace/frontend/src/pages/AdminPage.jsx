@@ -10,7 +10,7 @@ import ListaProdutos from "../components/ListaProdutos.jsx";
 import Pedidos from "../components/Pedidos.jsx";
 
 const janelas = [
-    { id: "criar", label: "Adicionar Pizza", icon: PlusCircle },
+    { id: "criar", label: "Adicionar Produto", icon: PlusCircle },
     { id: "produtos", label: "Produtos", icon: ShoppingBasket },
     { id: "analises", label: "Estatísticas", icon: BarChart },
     { id: "pedidos", label: "Pedidos", icon: Pizza },

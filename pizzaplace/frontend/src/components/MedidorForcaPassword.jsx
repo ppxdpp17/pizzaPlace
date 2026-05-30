@@ -2,7 +2,7 @@ import { Check, X } from "lucide-react";
 
 const CriteriosPassword = ({ password }) => {
 	const criterios = [
-		{ label: "Pelo menos 6 caratéres", met: password.length >= 6 },
+		{ label: "Pelo menos 12 caratéres", met: password.length >= 12 },
 		{ label: "Contém uma letra maiúscula", met: /[A-Z]/.test(password) },
 		{ label: "Contém uma letra minúscula", met: /[a-z]/.test(password) },
 		{ label: "Contém um número", met: /\d/.test(password) },
