@@ -5,6 +5,7 @@ import { connectDB } from "./lib/db.js";
 import cookieParser from "cookie-parser";
 import path from "path";
 import cors from "cors";
+import mongoSanitize from 'express-mongo-sanitize';
 
 //import { startPedidoStatusJob } from "./jobs/pedidoStatus.job.js";
 
@@ -32,6 +33,7 @@ app.use(cors({
 
 app.use(express.json({ limit: "50mb" }));
 app.use(cookieParser());
+app.use(mongoSanitize());
 
 app.use("/api/auth", authRoutes)    //Rotas de autenticação 
 app.use("/api/produtos", produtosRoutes)    //Rotas de produtos 

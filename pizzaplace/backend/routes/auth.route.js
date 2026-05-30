@@ -16,7 +16,7 @@ const loginLimiter = rateLimit({
 });
 
 router.post("/signup", signup);
-router.post("/login", loginLimiter, login);
+router.post("/login", /*loginLimiter,*/ login);	//Descomentar mais tarde para continuar com o rate limiting
 router.post("/logout", logout);
 router.post("/refresh-token", tokenRefresh);
 router.get("/perfil", protectRoute, getPerfil);
