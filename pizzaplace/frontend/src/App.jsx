@@ -1,10 +1,11 @@
 import { Navigate, Route, Routes } from "react-router-dom";
+import { useEffect, lazy, Suspense } from "react";
 
 //Páginas
 import HomePage from "./pages/HomePage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import SignUpPage from "./pages/SignUpPage.jsx";
-import AdminPage from "./pages/AdminPage.jsx";
+const AdminPage = lazy(() => import("./pages/AdminPage.jsx"));
 import CategoriaPage from "./pages/CategoriaPage.jsx";
 import CarrinhoPage from "./pages/CarrinhoPage.jsx";
 import PaginaSucessoCompra from "./pages/PaginaSucessoCompra.jsx";
@@ -24,7 +25,6 @@ import Navbar from "./components/Navbar.jsx";
 import { Toaster } from "react-hot-toast";
 import { useUserStore } from "./stores/useUserStore.js";
 import LoadingSpinner from "./components/LoadingSpinner.jsx";
-import { useEffect } from "react";
 
 function App() {
   const { user, verificarAutenticacao, checkingAuth } = useUserStore();
@@ -59,7 +59,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/signup" element={!user ? <SignUpPage /> : <Navigate to="/" />} />
           <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/" />} />
-          <Route path="/dashboard-secreta" element={user?.cargo === "admin" ? <AdminPage /> : <Navigate to="/login" />} />
+          <Route path="/dashboard-secreta" element={user?.cargo === "admin" ? <Suspense fallback={<LoadingSpinner />}><AdminPage /></Suspense> : <Navigate to="/login" />} />
           <Route path="/categoria/:categoria" element={<CategoriaPage />} />
           <Route path="/carrinho" element={user ? <CarrinhoPage /> : <Navigate to="/login" />} />
           <Route path="/purchase-success" element={user ? <PaginaSucessoCompra /> : <Navigate to="/login" />} />
