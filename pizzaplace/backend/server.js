@@ -26,7 +26,7 @@ const PORT = process.env.PORT || 5000;
 const ___dirname = path.resolve();
 
 app.use(cors({
-    origin: "http://localhost:5173",
+    origin: ["http://localhost:5173", "http://192.168.1.179:5173"],
     credentials: true
 }));
 
@@ -50,7 +50,7 @@ if (process.env.NODE_ENV === "production") {
     });
 }
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log("Servidor a correr na porta http://localhost:" + PORT)
 
     connectDB();

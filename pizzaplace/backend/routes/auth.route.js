@@ -8,7 +8,7 @@ const router = express.Router();
 const loginLimiter = rateLimit({
 	windowMs: 15 * 60 * 1000,
 	max: 5,
-	message: { error: "Demasiadas tentativas no login. Tente novamente dentro de 15 minutos." },
+	message: { error: "Demasiadas tentativas no login. Tente novamente daqui a 15 minutos." },
 });
 
 router.post("/signup", signup);
