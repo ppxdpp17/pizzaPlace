@@ -32,7 +32,12 @@ app.use(cors({
 }));
 
 app.use(express.json({ limit: "50mb" }));
-app.use(mongoSanitize()); // Sanitiza payloads para prevenir injeção NoSQL
+app.use((req, res, next) => {
+    if (req.body) mongoSanitize.sanitize(req.body);
+    if (req.params) mongoSanitize.sanitize(req.params);
+    if (req.query) mongoSanitize.sanitize(req.query);
+    next();
+});
 app.use(cookieParser());
 
 app.use("/api/auth", authRoutes)    //Rotas de autenticação 
@@ -57,5 +62,7 @@ app.listen(PORT, '0.0.0.0', () => {
 
     connectDB();
 })
+
+app.disable('x-powered-by');
 
 //startPedidoStatusJob(); - para mudar o estado do pedido passado x minutos
