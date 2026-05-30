@@ -36,8 +36,8 @@ export default function PaginaResetPassword() {
     setError(null);
     setMsg(null);
 
-    if (password.length < 6) {
-      setError("A password deve ter pelo menos 6 caracteres.");
+    if (password.length < 12) {
+      setError("A password deve ter pelo menos 12 caracteres.");
       return;
     }
     if (password !== confirm) {
