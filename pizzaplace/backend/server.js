@@ -31,7 +31,7 @@ app.use(cors({
     credentials: true
 }));
 
-app.use(express.json({ limit: "50mb" }));
+app.use(express.json({ limit: "500kb" }));
 app.use((req, res, next) => {
     if (req.body) mongoSanitize.sanitize(req.body);
     if (req.params) mongoSanitize.sanitize(req.params);

@@ -131,6 +131,8 @@ export const getProdutosCarrinho = async (req, res) => {
  * body: { productId, quantidade = 1, meta = {} }
  */
 export const adicionarAoCarrinho = async (req, res) => {
+
+
   try {
     const { productId, quantidade = 1, meta = undefined } = req.body;
     if (!productId) return res.status(400).json({ msg: "productId required" });
@@ -154,8 +156,14 @@ export const adicionarAoCarrinho = async (req, res) => {
       }
     }
 
+    const novaQuantidade = found ? (found.quantidade || 1) + Number(quantidade) : Number(quantidade);
+
+    if (novaQuantidade > 15 || novaQuantidade < 1) {
+      return res.status(400).json({ msg: "Quantidade inválida. Permitido entre 1 e 15 produtos. Para mais informações, contacte a loja." });
+    }
+
     if (found) {
-      found.quantidade = (found.quantidade || 1) + Number(quantidade);
+      found.quantidade = novaQuantidade;
       found.preco = precoUnit;
     } else {
       user.itensCarrinho.push({
@@ -242,6 +250,10 @@ export const atualizarQuantidade = async (req, res) => {
 
     if (!item) return res.status(404).json({ msg: "Item nao encontrado" });
 
+    if (Number(quantidade) > 15) {
+      return res.status(400).json({ msg: "Quantidade inválida. Permitido entre 1 e 15 produtos. Para mais informações, contacte a loja." });
+    }
+
     if (Number(quantidade) <= 0) {
       // remover o item encontrado (por subdoc ou produto)
       user.itensCarrinho = user.itensCarrinho.filter(i =>
@@ -275,9 +287,6 @@ export const validateCart = async (req, res) => {
     const invalidItems = [];
     for (const item of itens) {
       let produtoId = String(item.produto);
-      // Handle custom IDs if necessary, similar to payment controller
-      // But usually cart items store the direct objectId or we can validate it.
-      // For simplicity, we check if the product exists.
 
       if (mongoose.Types.ObjectId.isValid(produtoId)) {
         const exists = await Produto.exists({ _id: produtoId });
@@ -285,9 +294,6 @@ export const validateCart = async (req, res) => {
           invalidItems.push({ ...item.toObject(), reason: "Produto não existe" });
         }
       } else {
-        // If it's a custom ID (e.g. from a mix), we might need more complex logic
-        // For now, let's assume if it's not a valid ObjectId, it might be invalid unless it's a special case
-        // But the cart usually stores ObjectId in 'produto' field.
         invalidItems.push({ ...item.toObject(), reason: "ID inválido" });
       }
     }
