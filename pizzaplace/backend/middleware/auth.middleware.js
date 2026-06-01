@@ -10,7 +10,7 @@ export const protectRoute = async (req, res, next) => {
 
         try {
             const decoded = jwt.verify(tokenAcesso, process.env.ACCESS_TOKEN_SECRET);
-            const user = await User.findById(decoded.userId).select("-password -resetPasswordToken -resetPasswordExpire -__v");
+            const user = await User.findById(decoded.userId).select("-password -resetPasswordToken -resetPasswordExpire -__v -lastLogin -createdAt -updatedAt");
 
             if (!user) {
                 return res.status(401).json({ msg: "Utilizador não encontrado." });
