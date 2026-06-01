@@ -48,6 +48,10 @@ export const signup = async (req, res) => {
         return res.status(400).json({ msg: "Nome, email e password são obrigatórios." });
     }
 
+    if (password.length > 64) {
+        return res.status(400).json({ msg: "A password não pode ter mais de 64 caracteres." });
+    }
+
     try {
         //Verifica se user já existe
         if (await User.findOne({ email })) {
@@ -236,7 +240,9 @@ export const esqueceuPassword = async (req, res) => {
         const resetToken = crypto.randomBytes(20).toString("hex");
         const resetTokenExpiresAt = new Date(Date.now() + 1 * 60 * 60 * 1000); //1h
 
-        user.resetPasswordToken = resetToken;
+        const hashedResetToken = crypto.createHash("sha256").update(resetToken).digest("hex");
+
+        user.resetPasswordToken = hashedResetToken;
         user.resetPasswordExpire = resetTokenExpiresAt;
         await user.save();
 
@@ -263,8 +269,12 @@ export const reporPassword = async (req, res) => {
         const { token } = req.params;
         const { password } = req.body;
 
-        //Procurar user com token válido (token em claro, expiry > now)
-        const user = await User.findOne({ resetPasswordToken: token, resetPasswordExpire: { $gt: new Date() } });
+        const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+        const user = await User.findOne({ 
+            resetPasswordToken: hashedToken, 
+            resetPasswordExpire: { $gt: new Date() } 
+        });
 
         if (!user) {
             return res.status(400).json({ success: false, msg: "Token não válido ou expirado." });
