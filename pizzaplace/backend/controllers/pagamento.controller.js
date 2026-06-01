@@ -24,18 +24,19 @@ function parseCustomId(idStr) {
 
 export const criarSessaoCheckout = async (req, res) => {
   try {
-    const { codigoCupao, tipoEntrega, pedidoLocation } = req.body;
+    const { codigoCupao, tipoEntrega, pedidoLocation, produtos } = req.body;
 
     if (!pedidoLocation) {
       return res.status(400).json({ msg: "A localização/loja é obrigatória." });
     }
 
-    const user = await User.findById(req.user._id);
-    if (!user || !user.itensCarrinho || user.itensCarrinho.length === 0) {
-      return res.status(400).json({ msg: "Carrinho vazio na base de dados." });
+    const itemsParaValidar = produtos && produtos.length > 0 ? produtos : (await User.findById(req.user._id)).itensCarrinho;
+
+    if (!itemsParaValidar || itemsParaValidar.length === 0) {
+      return res.status(400).json({ msg: "Carrinho vazio." });
     }
 
-    const items = await normalizeProdutosForPedido(user.itensCarrinho, true);
+    const items = await normalizeProdutosForPedido(itemsParaValidar, true);
 
     // Calcular Total
     let precoTotal = items.reduce((sum, i) => sum + i.preco * i.quantidade, 0);
@@ -238,14 +239,15 @@ export const sucessoCheckout = async (req, res) => {
 
 export const cashPayment = async (req, res) => {
   try {
-    const { tipoEntrega, pedidoLocation, shippingAddress, paymentMethod } = req.body;
+    const { tipoEntrega, pedidoLocation, shippingAddress, paymentMethod, produtos } = req.body;
 
-    const user = await User.findById(req.user._id);
-    if (!user.itensCarrinho || user.itensCarrinho.length === 0) {
+    const itemsParaValidar = produtos && produtos.length > 0 ? produtos : (await User.findById(req.user._id)).itensCarrinho;
+
+    if (!itemsParaValidar || itemsParaValidar.length === 0) {
       return res.status(400).json({ msg: "Carrinho vazio." });
     }
 
-    const items = await normalizeProdutosForPedido(user.itensCarrinho, true);
+    const items = await normalizeProdutosForPedido(itemsParaValidar, true);
     const total = items.reduce((sum, i) => sum + i.preco * i.quantidade, 0);
 
     const pedido = await Pedido.create({
@@ -302,14 +304,74 @@ async function normalizeProdutosForPedido(rawProdutos = [], strictMode = true) {
     }
 
     if (!mongoose.Types.ObjectId.isValid(produtoField)) {
-      // FIX: Se for um item custom ou mix (que não existe na BD como produto único),
-      // e tivermos os dados no payload (nome, preço, etc), usamos esses dados.
+      //FIX: Se for um item custom ou mix (que não existe na BD como produto único),
+      //e tivermos os dados no payload (nome, preço, etc), usamos esses dados.
       if (produtoField.startsWith("mix-2-") || produtoField.startsWith("custom-")) {
+        let precoCalculado = 0;
+        let nomeProduto = "Produto Personalizado";
+
+        //1. SE FOR METADE/METADE (MIX)
+        if (produtoField.startsWith("mix-2-")) {
+          //Esperamos os IDs das duas pizzas no objeto meta vindo do frontend
+          const id1 = raw.meta?.produto1;
+          const id2 = raw.meta?.produto2;
+
+          if (!mongoose.Types.ObjectId.isValid(id1) || !mongoose.Types.ObjectId.isValid(id2)) {
+            throw { status: 400, message: "Componentes do Mix inválidos." };
+          }
+
+          //Procurar ambas na BD para garantir o preço real
+          const prod1 = await Produto.findById(id1).lean();
+          const prod2 = await Produto.findById(id2).lean();
+
+          if (!prod1 || !prod2) {
+            throw { status: 400, message: "Componentes do Mix não encontrados." };
+          }
+
+          //Lógica: Preço médio entre as duas pizzas
+          precoCalculado = (Number(prod1.preco ?? 0) + Number(prod2.preco ?? 0)) / 2;
+          nomeProduto = `Metade ${prod1.nome} / Metade ${prod2.nome}`;
+        }
+
+        //2. SE FOR PIZZA CUSTOMIZADA
+        else if (produtoField.startsWith("custom-")) {
+          //Esperamos o ID da pizza base (ex: Pizza Margherita) no meta
+          const baseId = raw.meta?.produtoBase;
+          if (!mongoose.Types.ObjectId.isValid(baseId)) {
+            throw { status: 400, message: "Produto base inválido para customização." };
+          }
+
+          const prodBase = await Produto.findById(baseId).lean();
+          if (!prodBase) {
+            throw { status: 400, message: "Produto base não encontrado." };
+          }
+
+          precoCalculado = Number(prodBase.preco ?? 0);
+          nomeProduto = `Personalizada: ${prodBase.nome}`;
+
+          //Procurar os ingredientes extra na BD e somar os preços reais
+          const extras = raw.meta?.ingredientesExtra || []; //Array de IDs de ingredientes
+          if (extras.length > 0) {
+            const validExtras = extras.filter(id => mongoose.Types.ObjectId.isValid(id));
+            const ingredientesDocs = await Ingrediente.find({ _id: { $in: validExtras } }).lean();
+
+            //Sumariza o preço de cada ingrediente extra validado pela BD
+            const precoIngredientes = ingredientesDocs.reduce((sum, ing) => sum + Number(ing.preco || 0), 0);
+            precoCalculado += precoIngredientes;
+          }
+        }
+
+        //Aplicar multiplicador de tamanho se existir (pequena, média, grande)
+        if (tamanho) {
+          const mult = PRICE_MULTIPLIERS[tamanho] ?? 1.0;
+          precoCalculado = precoCalculado * mult;
+        }
+
         normalized.push({
-          produto: new mongoose.Types.ObjectId("000000000000000000000000"), // Dummy ID
+          produto: new mongoose.Types.ObjectId("000000000000000000000000"), //Dummy ID estável
           quantidade,
-          preco: Number(raw.preco || 0),
-          nome: raw.nome || "Produto Personalizado",
+          preco: Number(precoCalculado.toFixed(2)), //VALOR RECONSTRUIDO NO BACKEND
+          nome: nomeProduto,
           imagem: raw.imagem || "",
           tamanho: tamanho || null,
           meta: raw.meta || {}

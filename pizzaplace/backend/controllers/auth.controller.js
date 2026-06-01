@@ -130,7 +130,7 @@ export const verificarEmail = async (req, res) => {
 export const login = async (req, res) => {
     try {
         const { email, password } = req.body;
-        const user = await User.findOne({ email: { $regex: new RegExp(`^${email.trim()}$`, "i") } });
+        const user = await User.findOne({ email: email.trim() }).collation({ locale: "pt", strength: 2 });
 
         if (user && (await user.comparePassword(password))) {
             const { tokenAcesso, tokenRefresh } = gerarTokens(user._id);
@@ -271,9 +271,9 @@ export const reporPassword = async (req, res) => {
 
         const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
 
-        const user = await User.findOne({ 
-            resetPasswordToken: hashedToken, 
-            resetPasswordExpire: { $gt: new Date() } 
+        const user = await User.findOne({
+            resetPasswordToken: hashedToken,
+            resetPasswordExpire: { $gt: new Date() }
         });
 
         if (!user) {
