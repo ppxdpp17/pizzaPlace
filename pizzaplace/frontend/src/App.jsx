@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { useEffect, lazy, Suspense } from "react";
 
 //Páginas
@@ -30,6 +30,11 @@ import LoadingSpinner from "./components/LoadingSpinner.jsx";
 function App() {
   const { user, verificarAutenticacao, checkingAuth } = useUserStore();
   const { getItensCarrinho } = useCarrinhoStore();
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
 
   useEffect(() => {
     verificarAutenticacao();
