@@ -285,7 +285,10 @@ async function normalizeProdutosForPedido(rawProdutos = [], strictMode = true) {
     }
 
     let quantidade = Number(raw.quantidade ?? raw.qty ?? 1);
-    if (isNaN(quantidade) || quantidade < 1) quantidade = 1;
+    if (isNaN(quantidade) || quantidade < 1 || quantidade > 15) {
+      if (strictMode) throw { status: 400, message: "Quantidade inválida. Permitido entre 1 e 15 produtos. Para mais informações, contacte a loja." };
+      quantidade = 1; // Fallback if not strict
+    }
 
     let tamanho;
     if (!mongoose.Types.ObjectId.isValid(produtoField)) {
@@ -336,6 +339,21 @@ async function normalizeProdutosForPedido(rawProdutos = [], strictMode = true) {
 
         //2. SE FOR PIZZA CUSTOMIZADA
         else if (produtoField.startsWith("custom-")) {
+          
+          // Validação de segurança dos campos meta
+          const validMassas = ["classic", "thin", "thick"];
+          const validMolhos = ["tomato", "bbq", "pesto"];
+          
+          if (raw.meta?.massa && !validMassas.includes(raw.meta.massa)) {
+             throw { status: 400, message: "Massa inválida." };
+          }
+          if (raw.meta?.molho && !validMolhos.includes(raw.meta.molho)) {
+             throw { status: 400, message: "Molho inválido." };
+          }
+          if (raw.meta?.nota && typeof raw.meta.nota === 'string' && raw.meta.nota.length > 100) {
+             throw { status: 400, message: "As observações não podem ter mais de 100 caracteres." };
+          }
+
           //A pizza customizada é construída de raiz (Make Your Own Pizza), não tem produtoBase.
           const tamanhosCustom = {
             small: { base: 6, mult: 1 },

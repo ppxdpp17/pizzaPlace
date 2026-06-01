@@ -161,7 +161,12 @@ export default function CustomizarPizza() {
 
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">Observações</label>
-                <textarea value={observacoes} onChange={(e) => setObservacoes(e.target.value)} className="w-full p-3 rounded-lg bg-white text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500 shadow-sm" rows="3" placeholder="Adicione instruções especiais..." />
+                <div className="relative">
+                  <textarea value={observacoes} onChange={(e) => setObservacoes(e.target.value)} className="w-full p-3 pb-8 rounded-lg bg-white text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500 shadow-sm resize-y" rows="3" placeholder="Adicione instruções especiais..." maxLength="100" />
+                  <div className={`absolute bottom-2 right-3 text-xs font-bold ${observacoes.length >= 100 ? 'text-red-600' : 'text-gray-400'}`}>
+                    {observacoes.length}/100
+                  </div>
+                </div>
               </div>
             </div>
 
