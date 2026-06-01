@@ -24,17 +24,18 @@ function parseCustomId(idStr) {
 
 export const criarSessaoCheckout = async (req, res) => {
   try {
-    const { produtos, codigoCupao, tipoEntrega, pedidoLocation } = req.body;
+    const { codigoCupao, tipoEntrega, pedidoLocation } = req.body;
 
-    if (!Array.isArray(produtos) || produtos.length === 0) {
-      return res.status(400).json({ msg: "Carrinho vazio" });
-    }
     if (!pedidoLocation) {
       return res.status(400).json({ msg: "A localização/loja é obrigatória." });
     }
 
-    // 1. Normalizar Produtos (Aqui obtemos Nome e Imagem da BD enquanto o produto existe)
-    const items = await normalizeProdutosForPedido(produtos, true); // true = Strict Mode (erro se não existir)
+    const user = await User.findById(req.user._id);
+    if (!user || !user.itensCarrinho || user.itensCarrinho.length === 0) {
+      return res.status(400).json({ msg: "Carrinho vazio na base de dados." });
+    }
+
+    const items = await normalizeProdutosForPedido(user.itensCarrinho, true);
 
     // Calcular Total
     let precoTotal = items.reduce((sum, i) => sum + i.preco * i.quantidade, 0);
@@ -237,12 +238,14 @@ export const sucessoCheckout = async (req, res) => {
 
 export const cashPayment = async (req, res) => {
   try {
-    const { produtos, tipoEntrega, pedidoLocation, shippingAddress, paymentMethod } = req.body;
+    const { tipoEntrega, pedidoLocation, shippingAddress, paymentMethod } = req.body;
 
-    if (!produtos?.length) return res.status(400).json({ msg: "Carrinho vazio" });
+    const user = await User.findById(req.user._id);
+    if (!user.itensCarrinho || user.itensCarrinho.length === 0) {
+      return res.status(400).json({ msg: "Carrinho vazio." });
+    }
 
-    // Normaliza (Snapshot)
-    const items = await normalizeProdutosForPedido(produtos, true);
+    const items = await normalizeProdutosForPedido(user.itensCarrinho, true);
     const total = items.reduce((sum, i) => sum + i.preco * i.quantidade, 0);
 
     const pedido = await Pedido.create({
