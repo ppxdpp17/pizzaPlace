@@ -309,6 +309,7 @@ async function normalizeProdutosForPedido(rawProdutos = [], strictMode = true) {
       if (produtoField.startsWith("mix-2-") || produtoField.startsWith("custom-")) {
         let precoCalculado = 0;
         let nomeProduto = "Produto Personalizado";
+        let aplicarMultiplicador = true;
 
         //1. SE FOR METADE/METADE (MIX)
         if (produtoField.startsWith("mix-2-")) {
@@ -335,34 +336,28 @@ async function normalizeProdutosForPedido(rawProdutos = [], strictMode = true) {
 
         //2. SE FOR PIZZA CUSTOMIZADA
         else if (produtoField.startsWith("custom-")) {
-          //Esperamos o ID da pizza base (ex: Pizza Margherita) no meta
-          const baseId = raw.meta?.produtoBase;
-          if (!mongoose.Types.ObjectId.isValid(baseId)) {
-            throw { status: 400, message: "Produto base inválido para customização." };
-          }
+          //A pizza customizada é construída de raiz (Make Your Own Pizza), não tem produtoBase.
+          const tamanhosCustom = {
+            small: { base: 6, mult: 1 },
+            medium: { base: 8, mult: 1.3 },
+            large: { base: 10, mult: 1.6 },
+            pequena: { base: 6, mult: 1 },
+            media: { base: 8, mult: 1.3 },
+            grande: { base: 10, mult: 1.6 }
+          };
 
-          const prodBase = await Produto.findById(baseId).lean();
-          if (!prodBase) {
-            throw { status: 400, message: "Produto base não encontrado." };
-          }
+          const t = tamanhosCustom[tamanho] || tamanhosCustom.medium;
+          const numToppings = raw.ingredientes?.length || raw.meta?.ingredientes?.length || 0;
 
-          precoCalculado = Number(prodBase.preco ?? 0);
-          nomeProduto = `Personalizada: ${prodBase.nome}`;
-
-          //Procurar os ingredientes extra na BD e somar os preços reais
-          const extras = raw.meta?.ingredientesExtra || []; //Array de IDs de ingredientes
-          if (extras.length > 0) {
-            const validExtras = extras.filter(id => mongoose.Types.ObjectId.isValid(id));
-            const ingredientesDocs = await Ingrediente.find({ _id: { $in: validExtras } }).lean();
-
-            //Sumariza o preço de cada ingrediente extra validado pela BD
-            const precoIngredientes = ingredientesDocs.reduce((sum, ing) => sum + Number(ing.preco || 0), 0);
-            precoCalculado += precoIngredientes;
-          }
+          //Lógica do frontend: (base * multiplier) + (toppings * 0.75)
+          precoCalculado = (t.base * t.mult) + (numToppings * 0.75);
+          nomeProduto = "Pizza Personalizada";
+          
+          aplicarMultiplicador = false; // O multiplicador já foi aplicado na fórmula base
         }
 
         //Aplicar multiplicador de tamanho se existir (pequena, média, grande)
-        if (tamanho) {
+        if (tamanho && aplicarMultiplicador) {
           const mult = PRICE_MULTIPLIERS[tamanho] ?? 1.0;
           precoCalculado = precoCalculado * mult;
         }
