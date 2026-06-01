@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import path from "path";
 import cors from "cors";
 import mongoSanitize from "express-mongo-sanitize";
+import rateLimit from "express-rate-limit";
 
 //import { startPedidoStatusJob } from "./jobs/pedidoStatus.job.js";
 
@@ -39,6 +40,15 @@ app.use((req, res, next) => {
     next();
 });
 app.use(cookieParser());
+
+const globalLimiter = rateLimit({
+    windowMs: 1 * 60 * 1000, // 1 minuto
+    max: 100, // 100 pedidos por IP por minuto
+    message: { msg: "Demasiados pedidos efetuados. Por favor, tente novamente mais tarde." },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+app.use(globalLimiter);
 
 app.use("/api/auth", authRoutes)    //Rotas de autenticação 
 app.use("/api/produtos", produtosRoutes)    //Rotas de produtos 
