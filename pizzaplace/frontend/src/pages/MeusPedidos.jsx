@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import axios from "../lib/axios";
 import { Package } from "lucide-react";
 import LoadingSpinner from "../components/LoadingSpinner";
+import Pagination from "../components/Pagination";
 
 function ImagemCollage({ imagens = [], altBase = "Produto" }) {
   const count = imagens.length;
@@ -77,15 +78,19 @@ export default function MeusPedidos() {
   const [pedidos, setPedidos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const intervalRef = useRef(null);
 
-  const fetchPedidos = async () => {
+  const fetchPedidos = async (page = currentPage) => {
     try {
       setLoading(true);
       setError(null);
-      const res = await axios.get("/pedidos/me");
+      const res = await axios.get(`/pedidos/me?page=${page}&limit=15`);
       const data = res.data.pedidos ?? res.data;
       setPedidos(data);
+      setTotalPages(res.data.totalPages || 1);
+      setCurrentPage(res.data.currentPage || page);
     } catch (err) {
       console.error("Erro a buscar meus pedidos:", err);
       setError(err.response?.data?.msg || err.message || "Erro ao buscar pedidos");
@@ -95,12 +100,12 @@ export default function MeusPedidos() {
   };
 
   useEffect(() => {
-    fetchPedidos();
+    fetchPedidos(currentPage);
     intervalRef.current = setInterval(() => {
-      fetchPedidos();
+      fetchPedidos(currentPage);
     }, 30000);
     return () => clearInterval(intervalRef.current);
-  }, []);
+  }, [currentPage]);
 
   if (loading) return <LoadingSpinner />;
   if (error) return (
@@ -219,6 +224,8 @@ export default function MeusPedidos() {
               </motion.div>
             );
           })}
+          
+          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
         </div>
       )}
     </div>

@@ -4,6 +4,8 @@ import axios from "../lib/axios";
 
 export const useProductStore = create((set) => ({
   products: [],
+  totalPages: 1,
+  currentPage: 1,
   isLoading: false,
 
   setProducts: (products) => set({ products }),
@@ -22,11 +24,16 @@ export const useProductStore = create((set) => ({
     }
   },
 
-  getTodosProdutos: async () => {
+  getTodosProdutos: async (page = 1, limit = 20) => {
     set({ isLoading: true });
     try {
-      const response = await axios.get("/produtos");
-      set({ products: response.data.produtos, isLoading: false });
+      const response = await axios.get(`/produtos?page=${page}&limit=${limit}`);
+      set({ 
+        products: response.data.produtos, 
+        totalPages: response.data.totalPages || 1,
+        currentPage: response.data.currentPage || 1,
+        isLoading: false 
+      });
     } catch (error) {
       set({ error: "Falha a ir buscar os produtos", isLoading: false });
       toast.error(error.response?.data?.error || "Falha a ir buscar os produtos");
@@ -60,12 +67,17 @@ export const useProductStore = create((set) => ({
     }
   },
 
-  getProdutosCategoria: async (categoria) => {
+  getProdutosCategoria: async (categoria, page = 1, limit = 12) => {
     set({ isLoading: true });
     try {
-      const response = await axios.get(`/produtos/categoria/${categoria}`);
+      const response = await axios.get(`/produtos/categoria/${categoria}?page=${page}&limit=${limit}`);
       const produtos = response.data?.produtos ?? response.data;
-      set({ products: Array.isArray(produtos) ? produtos : [], isLoading: false });
+      set({ 
+        products: Array.isArray(produtos) ? produtos : [], 
+        totalPages: response.data.totalPages || 1,
+        currentPage: response.data.currentPage || 1,
+        isLoading: false 
+      });
     } catch (error) {
       set({ error: "Falha a ir buscar os produtos desta categoria", isLoading: false });
       toast.error(error.response?.data?.msg || "Falha a ir buscar os produtos desta categoria");

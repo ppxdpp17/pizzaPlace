@@ -4,6 +4,7 @@ import axios from "../lib/axios";
 import { useUserStore } from "../stores/useUserStore.js";
 import EstadoDropdown from "./EstadoDropdown.jsx";
 import LoadingSpinner from "./LoadingSpinner";
+import Pagination from "./Pagination";
 
 // Função auxiliar para calcular estado se não vier do backend
 function calcularEstado(createdAt) {
@@ -78,18 +79,22 @@ const Pedidos = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedCity, setSelectedCity] = useState('Todos');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const intervalRef = useRef(null);
 
-  const fetchPedidos = async () => {
+  const fetchPedidos = async (page = currentPage) => {
     try {
       setLoading(true);
       setError(null);
       // Se for Admin busca tudo, se for cliente busca só os seus (/me)
-      const endpoint = isAdmin ? "/pedidos" : "/pedidos/me";
+      const endpoint = isAdmin ? `/pedidos?page=${page}&limit=15` : `/pedidos/me?page=${page}&limit=15`;
       const res = await axios.get(endpoint);
 
       const data = res.data.pedidos ?? res.data;
       setPedidos(data);
+      setTotalPages(res.data.totalPages || 1);
+      setCurrentPage(res.data.currentPage || page);
     } catch (err) {
       console.error("Erro a buscar pedidos:", err);
       setError(err.response?.data?.msg || err.message || "Erro ao buscar pedidos");
@@ -99,11 +104,11 @@ const Pedidos = () => {
   };
 
   useEffect(() => {
-    fetchPedidos();
+    fetchPedidos(currentPage);
     // Atualiza a cada 30 segundos
-    intervalRef.current = setInterval(fetchPedidos, 30000);
+    intervalRef.current = setInterval(() => fetchPedidos(currentPage), 30000);
     return () => clearInterval(intervalRef.current);
-  }, [isAdmin]); // Recarrega se o cargo mudar (login/logout)
+  }, [isAdmin, currentPage]); // Recarrega se o cargo mudar (login/logout) ou a página
 
   if (loading) return <div className="mt-8"><LoadingSpinner embedded={true} /></div>;
   if (error) return (
@@ -322,6 +327,8 @@ const Pedidos = () => {
           </motion.div>
         );
       })}
+
+      <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
     </div>
   );
 };

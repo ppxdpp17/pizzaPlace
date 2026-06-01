@@ -8,10 +8,20 @@ import User from "../models/user.model.js";
 //Obter todos os produtos
 export const getAllProdutos = async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+
     const produtos = await Produto.find({})
       .populate("ingredientes", "nome icone")
+      .skip(skip)
+      .limit(limit)
       .exec();
-    res.json({ produtos });
+    
+    const total = await Produto.countDocuments();
+    const totalPages = Math.ceil(total / limit);
+
+    res.json({ produtos, totalPages, currentPage: page });
   } catch (error) {
     console.log("Erro no controller de produtos", error.message);
     res.status(500).json({ msg: "Erro no servidor", error: error.message });
@@ -208,9 +218,20 @@ export const getProdutosRecomendados = async (req, res) => {
 export const getProdutosPorCategoria = async (req, res) => {
   const { categoria } = req.params;
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 12;
+    const skip = (page - 1) * limit;
+
     //Só produtos disponíveis
-    const produtos = await Produto.find({ categoria, estaDisponivel: true }).populate("ingredientes");
-    res.json({ produtos });
+    const produtos = await Produto.find({ categoria, estaDisponivel: true })
+      .populate("ingredientes")
+      .skip(skip)
+      .limit(limit);
+
+    const total = await Produto.countDocuments({ categoria, estaDisponivel: true });
+    const totalPages = Math.ceil(total / limit);
+
+    res.json({ produtos, totalPages, currentPage: page });
   } catch (error) {
     console.log("Erro no controller de produtos", error.message);
     res.status(500).json({ msg: "Erro no servidor", error: error.message });

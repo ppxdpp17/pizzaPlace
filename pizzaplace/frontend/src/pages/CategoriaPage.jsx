@@ -7,6 +7,7 @@ import { useCarrinhoStore } from "../stores/useCarrinhoStore";
 import { useUserStore } from "../stores/useUserStore";
 import toast from "react-hot-toast";
 import OptionDropdown from "../components/OptionDropdown";
+import Pagination from "../components/Pagination";
 
 const TAMANHOS = [
   { value: "pequena", label: "Pequena" },
@@ -15,7 +16,7 @@ const TAMANHOS = [
 ];
 
 const CategoriaPage = () => {
-  const { getProdutosCategoria, products } = useProductStore();
+  const { getProdutosCategoria, products, currentPage, totalPages } = useProductStore();
   const { categoria } = useParams();
   const navigate = useNavigate();
 
@@ -23,8 +24,12 @@ const CategoriaPage = () => {
   const { user } = useUserStore();
 
   useEffect(() => {
-    getProdutosCategoria(categoria);
+    getProdutosCategoria(categoria, 1, 12);
   }, [getProdutosCategoria, categoria]);
+
+  const handlePageChange = (newPage) => {
+    getProdutosCategoria(categoria, newPage, 12);
+  };
 
   //Modal state e selecções
   const [modalOpen, setModalOpen] = useState(false);
@@ -195,6 +200,8 @@ const CategoriaPage = () => {
             <CartaoProduto key={product._id} product={product} />
           ))}
         </motion.div>
+
+        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
       </div>
 
       {/*Modal Mix 2 Pizzas*/}

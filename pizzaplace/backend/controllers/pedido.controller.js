@@ -2,12 +2,21 @@ import Pedido from "../models/pedidos.model.js";
 
 export const getTodosPedidos = async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 15;
+    const skip = (page - 1) * limit;
+
     const pedidos = await Pedido.find()
       .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
       .populate("user", "name email")
       .populate("produtos.produto", "nome imagem preco");
 
-    return res.status(200).json({ pedidos });
+    const total = await Pedido.countDocuments();
+    const totalPages = Math.ceil(total / limit);
+
+    return res.status(200).json({ pedidos, totalPages, currentPage: page });
   } catch (err) {
     console.error("Erro ao buscar pedidos:", err);
     return res.status(500).json({ msg: "Erro no servidor" });
@@ -17,12 +26,20 @@ export const getTodosPedidos = async (req, res) => {
 export const getPedidosDoUtilizador = async (req, res) => {
   try {
     const userId = req.user._id;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 15;
+    const skip = (page - 1) * limit;
 
     const pedidos = await Pedido.find({ user: userId })
       .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
       .populate("produtos.produto", "nome imagem preco"); 
 
-    return res.status(200).json({ pedidos });
+    const total = await Pedido.countDocuments({ user: userId });
+    const totalPages = Math.ceil(total / limit);
+
+    return res.status(200).json({ pedidos, totalPages, currentPage: page });
 
   } catch (err) {
     console.error("Erro ao buscar pedidos do user:", err);

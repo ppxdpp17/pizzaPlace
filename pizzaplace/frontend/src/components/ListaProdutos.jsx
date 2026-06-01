@@ -2,11 +2,15 @@ import { motion } from "framer-motion";
 import { Trash, CheckCircle, Circle, Edit2 } from "lucide-react";
 import { useProductStore } from "../stores/useProductStore";
 import { useNavigate } from "react-router-dom";
-
+import Pagination from "./Pagination";
 
 const ListaProdutos = () => {
-  const { apagarProduto, disponibilizarProduto, products } = useProductStore();
+  const { apagarProduto, disponibilizarProduto, products, getTodosProdutos, currentPage, totalPages } = useProductStore();
   const navigate = useNavigate();
+
+  const handlePageChange = (newPage) => {
+    getTodosProdutos(newPage, 20);
+  };
 
   return (
     <motion.div
@@ -90,6 +94,9 @@ const ListaProdutos = () => {
             ))}
           </tbody>
         </table>
+      </div>
+      <div className="pb-4">
+        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
       </div>
     </motion.div>
   );
