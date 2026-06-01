@@ -22,6 +22,7 @@ import { useCarrinhoStore } from "./stores/useCarrinhoStore.js";
 
 //Componentes
 import Navbar from "./components/Navbar.jsx";
+import Footer from "./components/Footer.jsx";
 import { Toaster } from "react-hot-toast";
 import { useUserStore } from "./stores/useUserStore.js";
 import LoadingSpinner from "./components/LoadingSpinner.jsx";
@@ -72,6 +73,12 @@ function App() {
           <Route path="/pizza/customizar" element={user ? <CustomizarPizza /> : <Navigate to="/login" />} />
         </Routes>
       </div>
+      
+      {/* Footer must be rendered at the bottom */}
+      <div className="relative z-50">
+        <Footer />
+      </div>
+
       <Toaster />
     </div>
   );
