@@ -80,7 +80,19 @@ export const criarProduto = async (req, res) => {
 
     let respostaCloudinary = null;
     if (imagem) {
-      respostaCloudinary = await cloudinary.uploader.upload(imagem, { folder: "produtos" });
+      // Barreira anti-SSRF e anti-Malware
+      const isDataURL = /^data:image\/(jpeg|jpg|png|webp);base64,/.test(imagem);
+
+      if (!isDataURL) {
+        return res.status(400).json({ msg: "Formato de imagem inválido. Apenas JPG, PNG ou WEBP em Base64 são permitidos." });
+      }
+
+      try {
+        respostaCloudinary = await cloudinary.uploader.upload(imagem, { folder: "produtos" });
+      } catch (cloudErr) {
+        console.error("Falha na submissão para Cloudinary:", cloudErr);
+        return res.status(500).json({ msg: "Falha ao processar a imagem." });
+      }
     }
 
     const produto = await Produto.create({
@@ -250,7 +262,7 @@ export const atualizarProduto = async (req, res) => {
     if (preco !== undefined) produto.preco = preco;
     if (categoria !== undefined) produto.categoria = categoria;
 
-    //Processar ingredientes: aceitar array de ids ou array de objects
+    //Processar ingredientes
     if (ingredientes !== undefined) {
       const ingredientesIds = Array.isArray(ingredientes)
         ? ingredientes.map(i => (typeof i === "string" ? i : (i._id ?? i.id ?? null))).filter(Boolean)
@@ -258,10 +270,16 @@ export const atualizarProduto = async (req, res) => {
       produto.ingredientes = ingredientesIds;
     }
 
-    //Se a imagem recebida for diferente da atual (novo path),
-    //faz upload para Cloudinary e apaga a anterior.
+    //Processar Imagem
     if (imagem !== undefined && imagem !== produto.imagem) {
-      //Apagar imagem antiga
+
+      //1. BARREIRA DE SEGURANÇA: Validar formato antes de fazer qualquer coisa
+      const isDataURL = /^data:image\/(jpeg|jpg|png|webp);base64,/.test(imagem);
+      if (!isDataURL) {
+        return res.status(400).json({ msg: "Formato de imagem inválido. Apenas JPG, PNG ou WEBP em Base64 são permitidos." });
+      }
+
+      //2. Apagar imagem antiga
       if (produto.imagem) {
         try {
           const parts = produto.imagem.split("/");
@@ -273,7 +291,7 @@ export const atualizarProduto = async (req, res) => {
         }
       }
 
-      //Se imagem for dataURL/base64 ou uma URL remota
+      //3. Fazer upload da nova imagem (agora validada)
       try {
         const resposta = await cloudinary.uploader.upload(imagem, { folder: "produtos" });
         produto.imagem = resposta.secure_url;
@@ -285,7 +303,7 @@ export const atualizarProduto = async (req, res) => {
     const atualizado = await produto.save();
     await atualizado.populate("ingredientes", "nome icone");
 
-    //Invalidar cache de produtos disponíveis
+    //Invalidar cache
     try {
       if (redis) await redis.del("produtos_disponiveis");
       await atualizarCacheProdutosDisponiveis();
@@ -295,8 +313,9 @@ export const atualizarProduto = async (req, res) => {
 
     return res.json(atualizado);
   } catch (error) {
-    console.error("Erro ao atualizar produto:", error.message);
-    return res.status(500).json({ msg: "Erro no servidor", error: error.message });
+    //Fuga de informação cortada aqui. O utilizador só recebe uma mensagem genérica.
+    console.error("Erro ao atualizar produto:", error);
+    return res.status(500).json({ msg: "Erro interno no servidor ao atualizar o produto." });
   }
 };
 
