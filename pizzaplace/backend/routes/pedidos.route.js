@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.get("/", protectRoute, adminRoute, getTodosPedidos);
 router.get("/me", protectRoute, getPedidosDoUtilizador);
-router.patch("/:id/estado", protectRoute, updatePedidoEstado);
+router.patch("/:id/estado", protectRoute, adminRoute, updatePedidoEstado);
 
 
 export default router;
