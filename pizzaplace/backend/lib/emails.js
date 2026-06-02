@@ -2,7 +2,7 @@ import { mailTrapClient, sender } from "./mailtrap.js";
 import { VERIFICATION_EMAIL_TEMPLATE, PASSWORD_RESET_REQUEST_TEMPLATE, PASSWORD_RESET_SUCCESS_TEMPLATE } from "./emailTemplates.js";
 
 export const sendVerificationEmail = async (email, verificationToken) => {
-    const recipient = [{email}];
+    const recipient = [{ email }];
 
     try {
         const response = await mailTrapClient.send({
@@ -21,7 +21,7 @@ export const sendVerificationEmail = async (email, verificationToken) => {
 }
 
 export const enviarEmailWelcome = async (email, nome) => {
-    const recipient = [{email}];
+    const recipient = [{ email }];
 
     try {
         const response = await mailTrapClient.send({
@@ -29,7 +29,7 @@ export const enviarEmailWelcome = async (email, nome) => {
             to: recipient,
             template_uuid: "ecf1b1e4-e6eb-43cf-9b41-f8059b9b56b5",
             template_variables: {
-                "company_info_name": "Big Boss'",
+                "company_info_name": "Big Bob's",
                 "name": nome,
                 "company_info_address": "Rua Dr. Manuel Cardona,2 B",
                 "company_info_city": "Vila Real",
@@ -46,7 +46,7 @@ export const enviarEmailWelcome = async (email, nome) => {
 }
 
 export const enviarPasswordResetEmail = async (email, resetURL) => {
-    const recipient = [{email}];
+    const recipient = [{ email }];
 
     try {
         const response = await mailTrapClient.send({
@@ -67,7 +67,7 @@ export const enviarPasswordResetEmail = async (email, resetURL) => {
 
 
 export const enviarEmailResetSucesso = async (email) => {
-    const recipient = [{email}];
+    const recipient = [{ email }];
 
     try {
         const response = await mailTrapClient.send({

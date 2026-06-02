@@ -19,7 +19,7 @@ export const VERIFICATION_EMAIL_TEMPLATE = `
     <p>Insira este código na página de verificação para completar o seu registo.</p>
     <p>Por razões de segurança, este código expirará em 15 minutos.</p>
     <p>No caso de não ter criado nenhuma conta, por favor ignore este email.</p>
-    <p>Com os Melhores Cumprimentos,<br>A equipa Big Boss'</p>
+    <p>Com os Melhores Cumprimentos,<br>A equipa Big Bob's</p>
   </div>
   <div style="text-align: center; margin-top: 20px; color: #888; font-size: 0.8em;">
     <p>Isto é uma mensagem gerada automaticamente, por favor não responda a este email.</p>
@@ -56,7 +56,7 @@ export const PASSWORD_RESET_SUCCESS_TEMPLATE = `
       <li>Evite utilizar a mesma password em diferentes sites</li>
     </ul>
     <p>Obrigado por nos ajudar a manter a segurança da sua conta.</p>
-    <p>Com os melhores cumprimentos,<br>A Equipa Big Boss</p>
+    <p>Com os melhores cumprimentos,<br>A Equipa Big Bob's</p>
   </div>
   <div style="text-align: center; margin-top: 20px; color: #888; font-size: 0.8em;">
     <p>Isto é uma mensagem gerada automaticamente, por favor não responda a este email.</p>
@@ -85,7 +85,7 @@ export const PASSWORD_RESET_REQUEST_TEMPLATE = `
       <a href="{resetURL}" style="background-color: #dc2626; color: white; padding: 12px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">Repôr Password</a>
     </div>
     <p>Por razões de segurança, este botão irá expirar em 1 hora.</p>
-    <p>Com os melhores cumprimentos,<br>A Equipa Big Boss</p>
+    <p>Com os melhores cumprimentos,<br>A Equipa Big Bob's</p>
   </div>
   <div style="text-align: center; margin-top: 20px; color: #888; font-size: 0.8em;">
     <p>Isto é uma mensagem gerada automaticamente, por favor não responda a este email.</p>
