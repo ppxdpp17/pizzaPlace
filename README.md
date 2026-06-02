@@ -5,7 +5,7 @@ Este projeto consiste numa aplicação web completa de encomendas de comida (foc
 ## 🚀 Funcionalidades Principais
 
 ### 🧑‍💻 Cliente (Utilizador)
-- **Autenticação Segura:** Registo, Login, Verificação de Email e Recuperação de Palavra-Passe (tokens com hash SHA-256).
+- **Autenticação Segura:** Registo, Login, Verificação de Email e Recuperação de Palavra-Passe (de forma segura utilizando tokens).
 - **Menu Dinâmico:** Visualização paginada de produtos separados por categorias (Pizzas, Bebidas, Entradas & Sobremesas).
 - **Personalização Avançada:** 
   - Criação de "Pizza Personalizada" de raiz (escolha de tamanho, massa, molho e toppings extra).
@@ -16,7 +16,7 @@ Este projeto consiste numa aplicação web completa de encomendas de comida (foc
 
 ### 🛡️ Administração (Dashboard)
 - **Gestão de Produtos e Ingredientes:** Criar, editar, apagar produtos e gerir o stock de ingredientes (usados nas pizzas customizadas).
-- **Gestão de Pedidos:** Acompanhamento em tempo real dos pedidos recebidos com alteração de estados (A Cozinhar, A Entregar, Entregue, Cancelado).
+- **Gestão de Pedidos:** Acompanhamento em tempo real dos pedidos recebidos com alteração de estados (A Cozinhar, A Entregar, Entregue).
 - **Analytics:** Gráficos interativos (via Recharts) para monitorizar receitas, vendas e clientes ativos.
 
 ## 🛠️ Tecnologias e Segurança
