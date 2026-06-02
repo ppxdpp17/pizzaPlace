@@ -1,82 +1,98 @@
-# 🛍️ Projeto Ecommerce MERN
+# 🍕 Big Bob's / Pizza Mais - Sistema de Gestão e Encomendas
 
-Este projeto consiste numa aplicação de e-commerce desenvolvida com o stack MERN (MongoDB, Express, React, Node.js). Esta permite que os utilizadores navegarem por páginas que contenham produtos, adicioná-los ao carrinho, fazerem compras (incluíndo pagamento). Para além disto, permite aos administradores gerir produtos e ver análises estatísticas das vendas.
+Este projeto consiste numa aplicação web completa de encomendas de comida (focada em Pizzas), desenvolvida com o stack MERN (MongoDB, Express, React, Node.js). A plataforma permite aos clientes explorar o menu, criar pizzas personalizadas, encomendar metade/metade, aplicar cupões e realizar o pagamento (online ou no local). Os administradores têm acesso a uma dashboard completa para gerir produtos, ingredientes, estados dos pedidos e visualizar estatísticas de vendas.
 
 ## 🚀 Funcionalidades Principais
 
-### Cliente (Utilizador)
-- Registo e login com autenticação JWT
-- Visualização de produtos por categoria
-- Adição ao carrinho 
-- Compra de produtos presentes no carrinho
-- Aplicação de cupões de desconto
+### 🧑‍💻 Cliente (Utilizador)
+- **Autenticação Segura:** Registo, Login, Verificação de Email e Recuperação de Palavra-Passe (tokens com hash SHA-256).
+- **Menu Dinâmico:** Visualização paginada de produtos separados por categorias (Pizzas, Bebidas, Entradas & Sobremesas).
+- **Personalização Avançada:** 
+  - Criação de "Pizza Personalizada" de raiz (escolha de tamanho, massa, molho e toppings extra).
+  - Opção "Mix 2 Pizzas" (Metade/Metade) para combinar dois sabores na mesma pizza.
+- **Carrinho Inteligente:** Gestão local e sincronizada com a base de dados, com limite de segurança (máximo de 15 quantidades por produto).
+- **Checkout e Pagamentos:** Suporte para encomendas de Takeaway e Entrega ao Domicílio. Pagamentos via Stripe (Online) ou Dinheiro/Multibanco no ato da entrega.
+- **Histórico:** Secção "Os Meus Pedidos" com paginação para acompanhamento do estado das encomendas.
 
-### Admin
-- Painel administrativo protegido
-- Gestão de produtos
-- Acompanhamento de vendas e estatísticas
+### 🛡️ Administração (Dashboard)
+- **Gestão de Produtos e Ingredientes:** Criar, editar, apagar produtos e gerir o stock de ingredientes (usados nas pizzas customizadas).
+- **Gestão de Pedidos:** Acompanhamento em tempo real dos pedidos recebidos com alteração de estados (A Cozinhar, A Entregar, Entregue, Cancelado).
+- **Analytics:** Gráficos interativos (via Recharts) para monitorizar receitas, vendas e clientes ativos.
 
-## 🛠️ Tecnologias Usadas
+## 🛠️ Tecnologias e Segurança
+
 ### Frontend
-- React (com Hooks)
-- TailwindCSS para estilização
-- Axios para chamadas HTTP
-- React Router DOM para navegação
-- Framer Motion para animações
-- Recharts para visualização de dados (gráficos)
+- **Framework:** React (com Hooks) + Vite
+- **Estilização:** TailwindCSS + Framer Motion (para animações suaves)
+- **Gestão de Estado:** Zustand
+- **Navegação:** React Router DOM
+- **Comunicação:** Axios
 
-### Backend
-- Node.js + Express
-- MongoDB com Mongoose
-- JWT para autenticação
-- Bcrypt para hash de palavras-passe
-- Middleware para proteção de rotas
+### Backend & Segurança
+- **Servidor e Base de Dados:** Node.js + Express + MongoDB (Mongoose)
+- **Autenticação:** JWT (Access e Refresh Tokens em HTTP-only Cookies) e Bcrypt para hashing.
+- **Serviço de Emails:** Integração com Nodemailer / Mailtrap para e-mails de boas-vindas e reset de password.
+- **Segurança Avançada:** 
+  - Rate Limiter Global (100 req/min) e Rate Limiter restrito no Login (5 req/15min).
+  - Sanitização de Inputs (`express-mongo-sanitize`).
+  - Proteção de Memória via paginação no MongoDB (`.skip()` e `.limit()`).
+  - Validação estrita de preços e campos calculados diretamente no Backend durante o checkout (evitando manipulação de dados).
 
 ## ⚙️ Como Executar Localmente
-### 1.Clonar o repositório
-```
+
+### 1. Clonar o repositório
+```bash
 git clone https://github.com/ppxdpp17/pizzaPlace.git
 cd pizzaPlace
 ```
 
 ### 2. Instalar dependências
-```
+O projeto está dividido em duas pastas principais:
+```bash
+# Instalar dependências do Backend
 cd backend
 npm install
+
+# Instalar dependências do Frontend
 cd ../frontend
 npm install
 ```
 
-### 3. Criar arquivo .env no backend com o seguinte conteudo
-```
+### 3. Variáveis de Ambiente (.env)
+Cria um ficheiro `.env` na raiz da pasta `backend/` com as tuas credenciais:
+```env
 PORT=5000
 MONGO_URI=your_mongo_uri
+CLIENT_URL=http://localhost:5173
+NODE_ENV=development
 
-UPSTASH_REDIS_URL=your_redis_url
-ACCESS_TOKEN_SECRET=your_access_token_secret
-REFRESH_TOKEN_SECRET=your_refresh_token_secret
+# Autenticação
+ACCESS_TOKEN_SECRET=your_access_secret
+REFRESH_TOKEN_SECRET=your_refresh_secret
 
+# Upload de Imagens
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
 
+# Pagamentos
 STRIPE_SECRET_KEY=your_stripe_secret_key
-CLIENT_URL=http://localhost:5173
-NODE_ENV=development
+
+# Serviço de Emails (Mailtrap)
+MAILTRAP_TOKEN=your_mailtrap_token
+MAILTRAP_ENDPOINT=https://send.api.mailtrap.io/
 ```
 
-### 4. Executar os servidores em dois terminais separados
-```
+### 4. Executar os servidores
+Abre dois terminais distintos:
+```bash
+# Terminal 1 - Backend
 cd backend
 npm run dev
-```
-```
+
+# Terminal 2 - Frontend
 cd frontend
 npm run dev
 ```
 
-## Extras
-- Integração com pagamento utilizando Stripe
-- Carregamento de imagem com Cloudinary
-- Filtros avançados por categoria/preço
-- Pesquisa de produtos
+Acede à aplicação através de `http://localhost:5173`.
