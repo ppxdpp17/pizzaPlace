@@ -120,7 +120,7 @@ export default function CustomizarPizza() {
   if (loading) return <div className="p-8 text-center text-gray-500 font-medium">A Carregar...</div>;
 
   return (
-    <div className="min-h-screen bg-gray-50 bg-cover bg-center bg-no-repeat bg-fixed py-12" style={{ backgroundImage: "url('/piuzz.png')" }}>
+    <div className="min-h-screen bg-gray-50 bg-cover bg-center bg-no-repeat bg-fixed pb-12 pt-32 -mt-20" style={{ backgroundImage: "url('/piuzz.png')" }}>
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }} className="flex items-center justify-center px-4">
         <div className="w-full max-w-6xl bg-white/95 backdrop-blur-sm border border-gray-200 rounded-2xl shadow-xl p-6" style={{ minHeight: 640 }}>
           <motion.h1 className="text-center text-4xl sm:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600 mb-8 pb-3 border-b border-gray-100" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>

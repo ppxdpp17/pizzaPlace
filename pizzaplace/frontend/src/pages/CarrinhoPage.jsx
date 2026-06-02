@@ -11,7 +11,7 @@ const CarrinhoPage = () => {
   const { carrinho } = useCarrinhoStore();
 
   return (
-    <div className="py-8 md:py-16 min-h-screen bg-cover bg-center bg-no-repeat bg-fixed bg-gray-50" style={{ backgroundImage: "url('/piuzz.png')" }}>
+    <div className="pb-8 pt-28 md:pb-16 md:pt-36 min-h-screen bg-cover bg-center bg-no-repeat bg-fixed bg-gray-50 -mt-20" style={{ backgroundImage: "url('/piuzz.png')" }}>
       <div className="mx-auto max-w-screen-xl px-4 2xl:px-0">
         <div className="mt-6 sm:mt-8 md:gap-6 lg:flex lg:items-start xl:gap-8">
           <motion.div className="mx-auto w-full flex-none lg:max-w-2xl xl:max-w-4xl"

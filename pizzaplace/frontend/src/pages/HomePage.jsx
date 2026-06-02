@@ -20,7 +20,7 @@ const HomePage = () => {
 
     return (
       <div
-        className="relative min-h-screen overflow-hidden bg-cover bg-center bg-no-repeat"
+        className="relative min-h-screen overflow-hidden bg-cover bg-center bg-no-repeat -mt-20 pt-20"
         style={{ backgroundImage: "url('/piuzz.png')" }}
       >
         <div className="absolute inset-0 bg-white/30 backdrop-blur-[1px] z-0 pointer-events-none"></div>
