@@ -1,8 +1,8 @@
-# 🍕 Big Bob's / Pizza Mais — Food Ordering & Management Platform
+# 🍕 Food Ordering & Management Platform
 
-A full-stack e-commerce and restaurant management platform built with the **MERN** stack (MongoDB, Express.js, React, Node.js), **Redis**, and **TailwindCSS**. 
+A full-stack restaurant management platform built with the **MERN** stack (MongoDB, Express.js, React, Node.js), **Redis**, and **TailwindCSS**. 
 
-Big Bob's offers an end-to-end solution for online food ordering—featuring an interactive custom pizza builder, half-and-half flavor combinations, coupon discounts, Stripe payments, and order tracking—paired with an administrative dashboard for product CRUD operations, inventory management, order state updates, and real-time sales analytics.
+This website offers an end-to-end solution for online food ordering—featuring an interactive custom pizza builder, half-and-half flavor combinations, coupon discounts, Stripe payments, and order tracking—paired with an administrative dashboard for product CRUD operations, inventory management, order state updates, and real-time sales analytics.
 
 ---
 
@@ -16,7 +16,7 @@ Big Bob's offers an end-to-end solution for online food ordering—featuring an 
 
 ### 🧑‍💻 Customer Experience
 - **Secure Authentication:** Register, Login, Email Verification, and Password Reset workflows via secure token authentication.
-- **Dynamic Menu & Categorization:** Paginated menu organized by categories (Pizzas, Drinks, Starters, & Desserts).
+- **Dynamic Menu & Categorization:** Paginated menu organized by categories (Pizzas, Drinks, Starters & Desserts).
 - **Advanced Pizza Customization:**
   - **Custom Pizza Builder:** Select size, crust type, sauce, and extra custom toppings.
   - **Half & Half ("Mix 2 Pizzas"):** Combine two distinct pizza flavors into a single pizza.
