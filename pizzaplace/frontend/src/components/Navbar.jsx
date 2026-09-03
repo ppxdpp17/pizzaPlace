@@ -30,7 +30,7 @@ const Navbar = () => {
         <div className="container mx-auto px-4 py-3">
           <div className="flex flex-wrap justify-between items-center">
             <Link to="/" className="text-2xl font-bold text-red-600 flex items-center space-x-2">
-              <img src="/Logo-Final.png" alt="Big Bob's Logo" className="h-10 w-auto" />
+              <img src="/logo.png" alt="Big Boss Logo" className="h-10 w-auto" />
             </Link>
             <nav className="flex flex-wrap items-center gap-4 w-full sm:w-auto mt-3 sm:mt-0">
               <Link to={"/"} className="hidden sm:inline text-gray-700 hover:text-red-600 transition duration-300 ease-in-out">

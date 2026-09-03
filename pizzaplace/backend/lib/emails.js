@@ -29,7 +29,7 @@ export const enviarEmailWelcome = async (email, nome) => {
             to: recipient,
             template_uuid: "ecf1b1e4-e6eb-43cf-9b41-f8059b9b56b5",
             template_variables: {
-                "company_info_name": "Big Bob's",
+                "company_info_name": "Big Boss",
                 "name": nome,
                 "company_info_address": "Rua Dr. Manuel Cardona,2 B",
                 "company_info_city": "Vila Real",

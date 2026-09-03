@@ -43,7 +43,7 @@ const PaginaEsqueceuPassword = () => {
       >
         <div className="p-8">
           <div className="flex justify-center mb-6">
-            <img src="/Logo-Final.png" alt="Big Bob's Logo" className="h-20 w-auto rounded-full shadow-md" />
+            <img src="/logo.png" alt="Big Boss Logo" className="h-20 w-auto rounded-full shadow-md" />
           </div>
           <h2 className="text-3xl font-bold mb-6 text-center text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-700 pb-1">
             Recuperar Password
